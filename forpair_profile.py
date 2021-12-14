@@ -22,11 +22,9 @@ G    = G.value;   # Gravitational constant (m3.kg-1.s-2)
 pc   = pc.value # 1 pc (m)
 Msun = M_sun.value # Solar mass (kg)
 
-ncat = 'w3'
 
-
-w3_sources = fits.open('../CFTHLens_cat/CFHTLens_W3.fits')[1].data
-w1_sources = fits.open('../CFTHLens_cat/CFHTLens_W1.fits')[1].data
+w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
+w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
 
 
 def partial_profile(RA0,DEC0,Z,field,
@@ -176,19 +174,18 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         
         #reading cats
         
-        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate_photo_z_2nd_run_mag_i').T
-        field = np.ones(len(L3[1]))*3
-        L3 = np.vstack((L3,field))
+        cat = fits.open('/mnt/projects/lensing/redMaPPer/redmapper_dr8_public_v6.3_catalog.fits')[1].data
         
-        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate_photo_z_2nd_run_mag_i').T
-        field = np.ones(len(L1[1]))*3
-        L1 = np.vstack((L1,field))
+        mw1 = (cat.RA < 39)*(cat.RA > 30.)*(cat.DEC < -3.5)*(cat.DEC > -11.5)
+        mw3 = (cat.RA < 208)*(cat.RA > 221)*(cat.DEC < 58)*(cat.DEC > 51)
+    
         
-        L = np.vstack((L1.T,L3.T)).T
+        RA  = np.append(cat.RA[mw1],cat.RA[mw3])
+        DEC = np.append(cat.DEC[mw1],cat.DEC[mw3])
+        z   = np.append(cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw3])
+        field = np.append(np.ones(mw1.sum())*1.,np.ones(mw3.sum())*3.)
         
-        RA  = L[1]
-        DEC = L[2]
-        z   = L[3]
+        L = np.array([field,RA,DEC,z,field])
 
         mz    = (z >= z_min)*(z < z_max)
         mlenses = mz
@@ -288,13 +285,11 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
         roc_mpc  = roc*((pc*1.0e6)**3.0)
         
-        try:
-                nfw        = NFW_stack_fit(R,DSigma_T,eDSigma_T,zmean,roc)
-        except:
-                nfw          = [0.01,0.,100.,[0.,0.],[0.,0.],-999.,0.]
 
-        M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
-        e_M200_NFW =((800.0*np.pi*roc_mpc*(nfw[0]**2))/(Msun))*nfw[1]
+        nfw        = Delta_Sigma_fit(R,DSigma_T,eDSigma_T,zmean,cosmo)
+
+        M200_NFW   = nfw.M200
+        e_M200_NFW = nfw.error_M200
         le_M200    = (np.log(10.)/M200_NFW)*e_M200_NFW
  
         # WRITING OUTPUT FITS FILE
@@ -315,7 +310,7 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         h.append(('z_max',np.round(z_max,4)))
         h.append(('lM200_NFW',np.round(np.log10(M200_NFW),4)))
         h.append(('elM200_NFW',np.round(le_M200,4)))
-        h.append(('CHI2_NFW',np.round(nfw[2],4)))
+        h.append(('CHI2_NFW',np.round(nfw.chi2,4)))
         h.append(('z_mean',np.round(zmean,4)))
 
                 
@@ -324,7 +319,7 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
                 
         tfin = time.time()
         
-        print 'TOTAL TIME ',(tfin-tini)/60.
+        print('TOTAL TIME ',(tfin-tini)/60.)
         
 
 
