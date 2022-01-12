@@ -5,7 +5,6 @@ sys.path.append('/home/eli/lens_codes_v3.7')
 import time
 import numpy as np
 from astropy.io import fits
-from astropy.table import Table
 from astropy.cosmology import LambdaCDM
 from maria_func import *
 from fit_profiles_curvefit import *
@@ -25,8 +24,8 @@ Msun = M_sun.value # Solar mass (kg)
 ncat = 'w3'
 
 
-w3_sources = fits.open('../CFTHLens_cat/CFHTLens_W3.fits')[1].data
-w1_sources = fits.open('../CFTHLens_cat/CFHTLens_W1.fits')[1].data
+w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
+w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
 
 
 def partial_profile(RA0,DEC0,Z,field,
@@ -186,11 +185,8 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         
         L = np.vstack((L1.T,L3.T)).T
         
-        RA  = L[1]
-        DEC = L[2]
-        z   = L[3]
 
-        mz    = (z >= z_min)*(z < z_max)
+        mz    = (L[3] >= z_min)*(L[3] < z_max)
         mlenses = mz
         Nlenses = mlenses.sum()
 
@@ -200,8 +196,18 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         print('Nlenses',Nlenses)
         print('CORRIENDO EN ',ncores,' CORES')
 
-        
+        # par_gal_id,ra_par,dec_par,z_par,ra_1,dec_1,z_1,i_auto_1,mr_1,ra_2,dec_2,z_2,i_auto_2,mr_2
         L = L[:,mlenses]
+
+        mr1 = L[8]
+        mr2 = L[-1]
+        mi1 = L[7]
+        mi2 = L[-2]
+        RA  = L[4]
+        DEC = L[5]
+        RA[mr2 < mr1] = L[9][mr2 < mr1]
+        DEC[mr2 < mr1] = L[10][mr2 < mr1]
+        z   = L[3]
         
         # SPLIT LENSING CAT
         
@@ -288,13 +294,10 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
         roc_mpc  = roc*((pc*1.0e6)**3.0)
         
-        try:
-                nfw        = NFW_stack_fit(R,DSigma_T,eDSigma_T,zmean,roc)
-        except:
-                nfw          = [0.01,0.,100.,[0.,0.],[0.,0.],-999.,0.]
+        nfw        = Delta_Sigma_fit(R,DSigma_T,eDSigma_T,zmean,cosmo)
 
-        M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
-        e_M200_NFW =((800.0*np.pi*roc_mpc*(nfw[0]**2))/(Msun))*nfw[1]
+        M200_NFW   = nfw.M200
+        e_M200_NFW = nfw.error_M200
         le_M200    = (np.log(10.)/M200_NFW)*e_M200_NFW
  
         # WRITING OUTPUT FITS FILE
@@ -315,7 +318,7 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         h.append(('z_max',np.round(z_max,4)))
         h.append(('lM200_NFW',np.round(np.log10(M200_NFW),4)))
         h.append(('elM200_NFW',np.round(le_M200,4)))
-        h.append(('CHI2_NFW',np.round(nfw[2],4)))
+        h.append(('CHI2_NFW',np.round(nfw.chi2,4)))
         h.append(('z_mean',np.round(zmean,4)))
 
                 
@@ -324,7 +327,7 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
                 
         tfin = time.time()
         
-        print 'TOTAL TIME ',(tfin-tini)/60.
+        print('TOTAL TIME ',(tfin-tini)/60.)
         
 
 
