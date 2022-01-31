@@ -28,10 +28,10 @@ cmodel = 'diemer19'
 
 
 '''
-folder = '/home/eli/Documentos/Astronomia/proyectos/PARES-PAU/profiles/'
-cont = False
-file_name = 'profile_w1w3.fits'
-ncores = 3
+# folder = '/home/eli/Documentos/Astronomia/proyectos/PARES-PAU/profiles/'
+folder = '/home/elizabeth/PARES-PAU/profiles/'
+file_name = 'profile_w1w2w3.fits'
+ncores = 32
 nit = 250
 RIN = 0.
 ROUT =5000.
@@ -44,17 +44,11 @@ parser.add_argument('-ncores', action='store', dest='ncores', default=2)
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
 parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000)
 parser.add_argument('-nit', action='store', dest='nit', default=250)
-parser.add_argument('-continue', action='store', dest='cont', default='False')
 args = parser.parse_args()
 
 
 folder    = args.folder
 file_name = args.file_name
-
-if 'True' in args.cont:
-	cont      = True
-elif 'False' in args.cont:
-	cont      = False
 
 	
 nit       = int(args.nit)
@@ -65,7 +59,7 @@ ROUT      = float(args.ROUT)
 
 
 outfile     = 'fitresults_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+file_name
-backup      = folder+'backup_'+outfile
+
 
 
 print('fitting profiles')
@@ -75,7 +69,6 @@ print('ncores = ',ncores)
 print('RIN ',RIN)
 print('ROUT ',ROUT)
 print('nit', nit)
-print('continue',cont)
 print('outfile',outfile)
 
 profile = fits.open(folder+file_name)
@@ -89,7 +82,7 @@ def log_likelihood(logM, R, DS, eDS):
     
     c200 = concentration.concentration(10**logM, '200c', zmean, model = cmodel)
     
-    DS   = Delta_Sigma_NFW_2h(R,zmean,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h+2h')    
+    ds   = Delta_Sigma_NFW_2h(R,zmean,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h+2h')    
     
     sigma2 = eDS**2
     return -0.5 * np.sum((DS - ds)**2 / sigma2 + np.log(2.*np.pi*sigma2))
@@ -117,20 +110,14 @@ p  = p[maskr]
 
 
 t1 = time.time()
-backend = emcee.backends.HDFBackend(backup)
-if not cont:
-    backend.reset(nwalkers, ndim)
 
 
 pool = Pool(processes=(ncores))    
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
                                 args=(p.Rp,p.DSigma_T,p.error_DSigma_T),
-                                backend=backend,pool = pool)
+                                pool = pool)
 				
-if cont:                                
-    sampler.run_mcmc(None, nit, progress=True)
-else:
-    sampler.run_mcmc(pos, nit, progress=True)
+sampler.run_mcmc(pos, nit, progress=True)
 pool.terminate()
     
     
