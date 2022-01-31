@@ -90,14 +90,14 @@ def log_likelihood(logM, R, DS, eDS):
     c200 = concentration.concentration(10**logM, '200c', zmean, model = cmodel)
     b = bias.haloBias(10**logM, model = 'tinker10', z = zmean, mdef = '200c')
     
-    outer_term = profile_outer.OuterTermCorrelationFunction(z = 0.0, bias = b)
+    outer_term = profile_outer.OuterTermCorrelationFunction(z = zmean, bias = b)
     pNFW = profile_nfw.NFWProfile(M = 10**logM, mdef = '200c', z = zmean, c = c200, outer_terms = [outer_term])    
     
     # Outer term integrated up to 50Mpc (Luo et al. 2017, Niemic et al 2017)
     ds_in  = pNFW.deltaSigmaInner(R*1.e3)
     ds_out = pNFW.deltaSigmaOuter(R*1.e3, interpolate=False, interpolate_surface_density=False, accuracy=0.01, max_r_integrate=50e3)
     
-    ds = (ds_in - ds_out)/(1.e3**2)
+    ds = (ds_in + ds_out)/(1.e3**2)
     
     sigma2 = eDS**2
     return -0.5 * np.sum((DS - ds)**2 / sigma2 + np.log(2.*np.pi*sigma2))

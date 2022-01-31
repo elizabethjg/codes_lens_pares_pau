@@ -26,6 +26,7 @@ ncat = 'w3'
 
 w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
 w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
+w2_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
 
 
 def partial_profile(RA0,DEC0,Z,field,
@@ -175,15 +176,19 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         
         #reading cats
         
-        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate_photo_z_2nd_run_mag_i').T
+        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate_photo_z_2nd_run_mag_i_mask').T
+        field = np.ones(len(L1[1]))*3
+        L1 = np.vstack((L1,field))
+
+        L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate_photo_z_2nd_run_mag_i_mask').T
+        field = np.ones(len(L1[1]))*2
+        L2 = np.vstack((L2,field))
+
+        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate_photo_z_2nd_run_mag_i_mask').T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
-        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate_photo_z_2nd_run_mag_i').T
-        field = np.ones(len(L1[1]))*3
-        L1 = np.vstack((L1,field))
-        
-        L = np.vstack((L1.T,L3.T)).T
+        L = np.vstack((L1.T,L2.T,L3.T)).T
         
 
         mz    = (L[3] >= z_min)*(L[3] < z_max)
@@ -340,7 +345,7 @@ if __name__ == '__main__':
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
         parser.add_argument('-RIN', action='store', dest='RIN', default=300.)
         parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000.)
-        parser.add_argument('-nbins', action='store', dest='nbins', default=15)
+        parser.add_argument('-nbins', action='store', dest='nbins', default=10)
         parser.add_argument('-ncores', action='store', dest='ncores', default=10)
         parser.add_argument('-h_cosmo', action='store', dest='h_cosmo', default=1.)
         args = parser.parse_args()
