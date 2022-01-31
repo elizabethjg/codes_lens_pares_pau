@@ -88,16 +88,8 @@ zmean   = h['Z_MEAN']
 def log_likelihood(logM, R, DS, eDS):
     
     c200 = concentration.concentration(10**logM, '200c', zmean, model = cmodel)
-    b = bias.haloBias(10**logM, model = 'tinker10', z = zmean, mdef = '200c')
     
-    outer_term = profile_outer.OuterTermCorrelationFunction(z = zmean, bias = b)
-    pNFW = profile_nfw.NFWProfile(M = 10**logM, mdef = '200c', z = zmean, c = c200, outer_terms = [outer_term])    
-    
-    # Outer term integrated up to 50Mpc (Luo et al. 2017, Niemic et al 2017)
-    ds_in  = pNFW.deltaSigmaInner(R*1.e3)
-    ds_out = pNFW.deltaSigmaOuter(R*1.e3, interpolate=False, interpolate_surface_density=False, accuracy=0.01, max_r_integrate=50e3)
-    
-    ds = (ds_in + ds_out)/(1.e3**2)
+    DS   = Delta_Sigma_NFW_2h(R,zmean,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h+2h')    
     
     sigma2 = eDS**2
     return -0.5 * np.sum((DS - ds)**2 / sigma2 + np.log(2.*np.pi*sigma2))
@@ -163,8 +155,8 @@ h = fits.Header()
 h.append(('c200',np.round(c200,4)))
 
 h.append(('lM200',np.round(logM[1],4)))
-h.append(('elM200M',np.round(np.diff(logM)[0],4)))
-h.append(('elM200m',np.round(np.diff(logM)[1],4)))
+h.append(('elM200_min',np.round(np.diff(logM)[0],4)))
+h.append(('elM200_max',np.round(np.diff(logM)[1],4)))
 primary_hdu = fits.PrimaryHDU(header=h)
 
 hdul = fits.HDUList([primary_hdu, tbhdu])

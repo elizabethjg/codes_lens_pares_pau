@@ -176,15 +176,15 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         
         #reading cats
         
-        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate_photo_z_2nd_run_mag_i_mask').T
-        field = np.ones(len(L1[1]))*3
-        L1 = np.vstack((L1,field))
-
-        L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate_photo_z_2nd_run_mag_i_mask').T
-        field = np.ones(len(L1[1]))*2
-        L2 = np.vstack((L2,field))
-
-        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate_photo_z_2nd_run_mag_i_mask').T
+        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate_zspec_mask').T
+        field = np.ones(len(L1[1]))*3                             
+        L1 = np.vstack((L1,field))                                
+                                                                  
+        L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate_zspec_mask').T
+        field = np.ones(len(L2[1]))*2                             
+        L2 = np.vstack((L2,field))                                
+                                                                  
+        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate_zspec_mask').T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
@@ -325,6 +325,7 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         h.append(('elM200_NFW',np.round(le_M200,4)))
         h.append(('CHI2_NFW',np.round(nfw.chi2,4)))
         h.append(('z_mean',np.round(zmean,4)))
+        h.append(('hcosmo',np.round(hcosmo,4)))
 
                 
         
