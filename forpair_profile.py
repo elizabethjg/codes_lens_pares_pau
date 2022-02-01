@@ -52,7 +52,7 @@ def partial_profile(RA0,DEC0,Z,field,
         
         mask_region = (S.RAJ2000 < (RA0+delta))&(S.RAJ2000 > (RA0-delta))&(S.DECJ2000 > (DEC0-delta))&(S.DECJ2000 < (DEC0+delta))
                
-        mask = mask_region*(S.Z_B > (Z + 0.1))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)#*(S.Z_B < 1.2)
+        mask = mask_region*(S.Z_B > (Z + 0.1))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)*(S.Z_B < 1.2)
         
         catdata = S[mask]
 
@@ -343,7 +343,7 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser()
         parser.add_argument('-sample', action='store', dest='sample',default='pru')
         parser.add_argument('-z_min', action='store', dest='z_min', default=0.0)
-        parser.add_argument('-z_max', action='store', dest='z_max', default=0.5)
+        parser.add_argument('-z_max', action='store', dest='z_max', default=1.0)
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
         parser.add_argument('-RIN', action='store', dest='RIN', default=100.)
         parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000.)
