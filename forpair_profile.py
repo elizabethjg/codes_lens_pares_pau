@@ -47,7 +47,9 @@ def partial_profile(RA0,DEC0,Z,field,
         dl  = cosmo.angular_diameter_distance(Z).value
         KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
         
-        delta = ROUT/(3600*KPCSCALE)
+        
+        bines = np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1)
+        delta = (2*ROUT - bines[-2])/(3600*KPCSCALE)
 
         
         mask_region = (S.RAJ2000 < (RA0+delta))&(S.RAJ2000 > (RA0-delta))&(S.DECJ2000 > (DEC0-delta))&(S.DECJ2000 < (DEC0+delta))
@@ -96,7 +98,7 @@ def partial_profile(RA0,DEC0,Z,field,
         Ntot = len(catdata)
         # del(catdata)    
         
-        bines = np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1)
+        
         dig = np.digitize(r,bines)
         
         DSIGMAwsum_T = []
