@@ -320,6 +320,8 @@ def main(sample,pcat,
         
         h = tbhdu.header
         h.append(('N_LENSES',np.int(Nlenses)))
+        h.append(('RIN',np.round(RIN,4)))
+        h.append(('ROUT',np.round(ROUT,4)))
         h.append(('z_min',np.round(z_min,4)))
         h.append(('z_max',np.round(z_max,4)))
         h.append(('lM200_NFW',np.round(np.log10(M200_NFW),4)))

@@ -142,3 +142,19 @@ def plt_profile_fit_2h(samp):
     ax[1].set_ylim(-22,22)
     
     f.savefig(folder+'plots/profile_'+samp+'_2h.png',bbox_inches='tight')
+
+
+def dilution(samp):
+    
+
+    p_name = 'profile_'+samp+'.fits'
+    profile = fits.open(folder+p_name)
+
+    print(p_name)
+    
+    # '''
+    h   = profile[1].header
+    p   = profile[1].data
+
+    bines = np.logspace(np.log10(100.),np.log10(5000.),num=15)
+    area = np.pi*np.diff(bines**2)
