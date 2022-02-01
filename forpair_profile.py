@@ -52,7 +52,7 @@ def partial_profile(RA0,DEC0,Z,field,
         
         mask_region = (S.RAJ2000 < (RA0+delta))&(S.RAJ2000 > (RA0-delta))&(S.DECJ2000 > (DEC0-delta))&(S.DECJ2000 < (DEC0+delta))
                
-        mask = mask_region*(S.Z_B > (Z + 0.1))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)
+        mask = mask_region*(S.Z_B > (Z + 0.1))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)*(S.Z_B > 1.2)
         
         catdata = S[mask]
 
@@ -140,7 +140,8 @@ def partial_profile_unpack(minput):
 	return partial_profile(*minput)
         
 
-def main(sample='pru',z_min = 0.0, z_max = 0.6,
+def main(sample='pru',pcat,
+                z_min = 0.0, z_max = 0.6,
                 odds_min=0.5, RIN = 100., ROUT =5000.,
                 ndots= 15,ncores=10,hcosmo=1.):
 
@@ -176,15 +177,15 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         
         #reading cats
         
-        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate_zspec_mask').T
+        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L1[1]))*3                             
         L1 = np.vstack((L1,field))                                
                                                                   
-        L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate_zspec_mask').T
+        L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L2[1]))*2                             
         L2 = np.vstack((L2,field))                                
                                                                   
-        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate_zspec_mask').T
+        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
@@ -329,7 +330,7 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
 
                 
         
-        tbhdu.writeto('../profiles/profile_'+sample+'.fits',overwrite=True)
+        tbhdu.writeto('../profiles/profile_'+sample+pcat'.fits',overwrite=True)
                 
         tfin = time.time()
         
@@ -344,11 +345,12 @@ if __name__ == '__main__':
         parser.add_argument('-z_min', action='store', dest='z_min', default=0.0)
         parser.add_argument('-z_max', action='store', dest='z_max', default=0.5)
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
-        parser.add_argument('-RIN', action='store', dest='RIN', default=300.)
+        parser.add_argument('-RIN', action='store', dest='RIN', default=100.)
         parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000.)
         parser.add_argument('-nbins', action='store', dest='nbins', default=10)
         parser.add_argument('-ncores', action='store', dest='ncores', default=10)
         parser.add_argument('-h_cosmo', action='store', dest='h_cosmo', default=1.)
+        parser.add_argument('-pcat', action='store', dest='pcat', default='_photo_z_2nd_run_mag_i_mask')
         args = parser.parse_args()
         
         sample     = args.sample
@@ -361,5 +363,5 @@ if __name__ == '__main__':
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
         
-        main(sample,z_min,z_max,ODDS_min,RIN,ROUT,nbins,ncores,h)
+        main(sample,args.pcat,z_min,z_max,ODDS_min,RIN,ROUT,nbins,ncores,h)
 
