@@ -166,4 +166,5 @@ def dilution(samp):
     fcl = ((d - d[-1])*area)/ngal
     
     plt.plot(p.Rp,1./(1-fcl))
+    plt.plot(p.Rp,1./(1-fcl),'o')
 
