@@ -72,7 +72,7 @@ def plt_profile_wofit(samp):
     f.savefig(folder+'plots/profile_'+samp+'.png',bbox_inches='tight')
     
 
-def plt_profile_fit_2h(samp):
+def plt_profile_fit_2h(samp,RIN,ROUT):
     
 
     p_name = 'profile_'+samp+'.fits'
@@ -98,7 +98,7 @@ def plt_profile_fit_2h(samp):
     
     
     # FIT MONOPOLE
-    fitpar = fits.open( 'fitresults_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+p_name)[0].header
+    fitpar = fits.open(folder+'fitresults_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+p_name)[0].header
     
     rplot = np.logspace(np.log10(0.1),np.log10(5.0),20)
     
@@ -165,5 +165,5 @@ def dilution(samp):
 
     fcl = ((d - d[-1])*area)/ngal
     
-    plt.plot(p.Rp,1./(1-fcl),label = 'Mbin'+str(j+1))
+    plt.plot(p.Rp,1./(1-fcl))
 

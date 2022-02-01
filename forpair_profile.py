@@ -21,9 +21,6 @@ G    = G.value;   # Gravitational constant (m3.kg-1.s-2)
 pc   = pc.value # 1 pc (m)
 Msun = M_sun.value # Solar mass (kg)
 
-ncat = 'w3'
-
-
 w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
 w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
 w2_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
@@ -49,10 +46,10 @@ def partial_profile(RA0,DEC0,Z,field,
         
         
         bines = np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1)
-        delta = (2*ROUT - bines[-2])/(3600*KPCSCALE)
+        delta = (ROUT/(3600*KPCSCALE)) + 0.05
 
         
-        mask_region = (S.RAJ2000 < (RA0+delta))&(S.RAJ2000 > (RA0-delta))&(S.DECJ2000 > (DEC0-delta))&(S.DECJ2000 < (DEC0+delta))
+        mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
                
         mask = mask_region*(S.Z_B > (Z + 0.1))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)*(S.Z_B < 1.2)
         
