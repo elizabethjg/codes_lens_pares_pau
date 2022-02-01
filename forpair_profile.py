@@ -141,9 +141,9 @@ def partial_profile_unpack(minput):
         
 
 def main(sample='pru',pcat,
-                z_min = 0.0, z_max = 0.6,
-                odds_min=0.5, RIN = 100., ROUT =5000.,
-                ndots= 15,ncores=10,hcosmo=1.):
+        z_min = 0.0, z_max = 0.6,
+        odds_min=0.5, RIN = 100., ROUT =5000.,
+        ndots= 15,ncores=10,hcosmo=1.):
 
         '''
         
