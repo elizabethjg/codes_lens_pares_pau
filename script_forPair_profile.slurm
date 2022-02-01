@@ -19,17 +19,7 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 conda activate myenv
 
-srun forpair_profile.py -ncores 56 -sample 'all_100_5000' -nbins 15 -RIN 100 -ROUT 5000
-srun forpair_profile.py -ncores 56 -sample 'all_100_5000' -nbins 15 -RIN 100 -ROUT 5000 -pcat '_zspec_mask'
-srun forpair_profile.py -ncores 56 -sample 'all_200_5000' -nbins 10 -RIN 200 -ROUT 5000
-srun forpair_profile.py -ncores 56 -sample 'all_200_5000' -nbins 10 -RIN 200 -ROUT 5000 -pcat '_zspec_mask'
-
-##srun python -u forGroup_qprofile.py -sample 'HM_Hz' -lM_min 14.0 -lM_max 14.5 -z_min 0.3 -z_max 0.35 -ncores 56 -domap 'True' -nbins 10000 -ROUT 5000
-##srun python -u forGroup_qprofile.py -sample 'HM_Lz' -lM_min 14.0 -lM_max 14.5 -z_min 0.1 -z_max 0.2  -ncores 56 -domap 'True' -nbins 10000 -ROUT 5000
-##srun python -u forGroup_qprofile.py -sample 'HM_Hz' -lM_min 14.0 -lM_max 14.5 -z_min 0.3 -z_max 0.35 -ncores 56 -relax 'True' -domap 'True' -nbins 10000 -ROUT 5000
-##srun python -u forGroup_qprofile.py -sample 'HM_Lz' -lM_min 14.0 -lM_max 14.5 -z_min 0.1 -z_max 0.2  -ncores 56 -relax 'True' -domap 'True' -nbins 10000 -ROUT 5000
-##
-##srun python -u forGroup_qprofile.py -sample 'LM_Hz' -lM_min 13.5 -lM_max 14. -z_min 0.3 -z_max 0.35 -ncores 56 -domap 'True' -nbins 10000 -ROUT 5000
-##srun python -u forGroup_qprofile.py -sample 'LM_Lz' -lM_min 13.5 -lM_max 14. -z_min 0.1 -z_max 0.2  -ncores 56 -domap 'True' -nbins 10000 -ROUT 5000
-##srun python -u forGroup_qprofile.py -sample 'LM_Hz' -lM_min 13.5 -lM_max 14. -z_min 0.3 -z_max 0.35 -ncores 56 -relax 'True' -domap 'True' -nbins 10000 -ROUT 5000
-##srun python -u forGroup_qprofile.py -sample 'LM_Lz' -lM_min 13.5 -lM_max 14. -z_min 0.1 -z_max 0.2  -ncores 56 -relax 'True' -domap 'True' -nbins 10000 -ROUT 5000
+srun python -u forpair_profile.py -ncores 56 -sample 'all_100_5000' -nbins 15 -RIN 100 -ROUT 5000
+srun python -u forpair_profile.py -ncores 56 -sample 'all_100_5000' -nbins 15 -RIN 100 -ROUT 5000 -pcat '_zspec_mask'
+srun python -u forpair_profile.py -ncores 56 -sample 'all_200_5000' -nbins 10 -RIN 200 -ROUT 5000
+srun python -u forpair_profile.py -ncores 56 -sample 'all_200_5000' -nbins 10 -RIN 200 -ROUT 5000 -pcat '_zspec_mask'
