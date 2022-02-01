@@ -134,8 +134,10 @@ def partial_profile(RA0,DEC0,Z,field,
                     delta = (ROUT/(3600*KPCSCALE))
                     mask_region = (abs(catdata.RAJ2000 -RA0) > delta)&(abs(catdata.DECJ2000 - DEC0) > delta)
                     print('delta ',delta)
-                    print(3600.*abs(catdata.RAJ2000 -RA0)[mask_region])
-                    print(3600.*abs(catdata.DECJ2000 - DEC0)[mask_region])
+                    print(max(abs(catdata.RAJ2000 -RA0)[mask_region]))
+                    print(max(abs(catdata.DECJ2000 - DEC0)[mask_region]))
+                    print(max(abs(catdata.RAJ2000 -RA0)[mask_region])*(3600*KPCSCALE))
+                    print(max(abs(catdata.DECJ2000 - DEC0)[mask_region])*(3600*KPCSCALE))
         
         output = {'DSIGMAwsum_T':DSIGMAwsum_T,'DSIGMAwsum_X':DSIGMAwsum_X,
                    'WEIGHTsum':WEIGHTsum, 'Mwsum':Mwsum, 
