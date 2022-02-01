@@ -178,7 +178,7 @@ def main(sample,pcat,
         #reading cats
         
         L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
-        field = np.ones(len(L1[1]))*3                             
+        field = np.ones(len(L1[1]))*1                             
         L1 = np.vstack((L1,field))                                
                                                                   
         L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T

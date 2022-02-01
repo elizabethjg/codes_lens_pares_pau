@@ -156,5 +156,14 @@ def dilution(samp):
     h   = profile[1].header
     p   = profile[1].data
 
-    bines = np.logspace(np.log10(100.),np.log10(5000.),num=15)
+    bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
     area = np.pi*np.diff(bines**2)
+    
+    ngal = p.NGAL_w
+
+    d = ngal/area
+
+    fcl = ((d - d[-1])*area)/ngal
+    
+    plt.plot(p.Rp,1./(1-fcl),label = 'Mbin'+str(j+1))
+
