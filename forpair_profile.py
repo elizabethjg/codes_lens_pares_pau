@@ -128,6 +128,13 @@ def partial_profile(RA0,DEC0,Z,field,
                         BOOTwsum_T[:,nbin] = np.sum(np.array(et[mbin]*peso[mbin])[INDEX],axis=1)
                         BOOTwsum_X[:,nbin] = np.sum(np.array(ex[mbin]*peso[mbin])[INDEX],axis=1)
                         BOOTwsum[:,nbin]   = np.sum(np.array(peso[mbin])[INDEX],axis=1)
+                        
+                if nbin == ndots:
+                    
+                    delta = (ROUT/(3600*KPCSCALE))
+                    mask_region = (abs(catdata.RAJ2000 -RA0) > delta)&(abs(catdata.DECJ2000 - DEC0) > delta)
+                    print(3600.*abs(catdata.RAJ2000 -RA0)[mask_region])
+                    print(3600.*abs(catdata.DECJ2000 - DEC0)[mask_region])
         
         output = {'DSIGMAwsum_T':DSIGMAwsum_T,'DSIGMAwsum_X':DSIGMAwsum_X,
                    'WEIGHTsum':WEIGHTsum, 'Mwsum':Mwsum, 
