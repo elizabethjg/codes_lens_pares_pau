@@ -35,8 +35,6 @@ def partial_profile(RA0,DEC0,Z,field,
             S = w2_sources
         if field == 3:
             S = w3_sources
-        if field == 4:
-            S = w4_sources
 
         cosmo = LambdaCDM(H0=100*h, Om0=0.3, Ode0=0.7)
         ndots = int(ndots)
