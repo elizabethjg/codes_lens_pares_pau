@@ -46,7 +46,7 @@ def partial_profile(RA0,DEC0,Z,field,
         
         
         bines = np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1)
-        delta = (ROUT/(3600*KPCSCALE)) + 0.05
+        delta = (ROUT/(3600*KPCSCALE)) + 0.1
 
         
         mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
