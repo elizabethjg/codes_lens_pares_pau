@@ -47,7 +47,7 @@ def partial_profile(RA0,DEC0,Z,field,
         
         bines = np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1)
         # delta = (ROUT/(3600*KPCSCALE)) + 0.1
-        delta = (2.*ROUT-bines[-3])/(3600*KPCSCALE)
+        delta = (2.*ROUT)/(3600*KPCSCALE)
 
         
         mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
@@ -129,15 +129,15 @@ def partial_profile(RA0,DEC0,Z,field,
                         BOOTwsum_X[:,nbin] = np.sum(np.array(ex[mbin]*peso[mbin])[INDEX],axis=1)
                         BOOTwsum[:,nbin]   = np.sum(np.array(peso[mbin])[INDEX],axis=1)
                         
-                if nbin == ndots-1:
+                # if nbin == ndots-1:
                     
-                    delta = (ROUT/(3600*KPCSCALE))
-                    mask_region = (abs(catdata.RAJ2000 -RA0) > delta)&(abs(catdata.DECJ2000 - DEC0) > delta)
-                    print('delta ',delta)
-                    print(max(abs(catdata.RAJ2000 -RA0)[mask_region]))
-                    print(max(abs(catdata.DECJ2000 - DEC0)[mask_region]))
-                    print(max(abs(catdata.RAJ2000 -RA0)[mask_region])*(3600*KPCSCALE))
-                    print(max(abs(catdata.DECJ2000 - DEC0)[mask_region])*(3600*KPCSCALE))
+                    # delta = (ROUT/(3600*KPCSCALE))
+                    # mask_region = (abs(catdata.RAJ2000 -RA0) > delta)&(abs(catdata.DECJ2000 - DEC0) > delta)
+                    # print('delta ',delta)
+                    # print(max(abs(catdata.RAJ2000 -RA0)[mask_region]))
+                    # print(max(abs(catdata.DECJ2000 - DEC0)[mask_region]))
+                    # print(max(abs(catdata.RAJ2000 -RA0)[mask_region])*(3600*KPCSCALE))
+                    # print(max(abs(catdata.DECJ2000 - DEC0)[mask_region])*(3600*KPCSCALE))
         
         output = {'DSIGMAwsum_T':DSIGMAwsum_T,'DSIGMAwsum_X':DSIGMAwsum_X,
                    'WEIGHTsum':WEIGHTsum, 'Mwsum':Mwsum, 
