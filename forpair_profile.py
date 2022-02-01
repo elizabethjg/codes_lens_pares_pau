@@ -330,7 +330,7 @@ def main(sample,pcat,
 
                 
         
-        tbhdu.writeto('../profiles/profile_'+sample+pcat'.fits',overwrite=True)
+        tbhdu.writeto('../profiles/profile_'+sample+pcat+'.fits',overwrite=True)
                 
         tfin = time.time()
         
