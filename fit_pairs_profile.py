@@ -43,7 +43,7 @@ parser.add_argument('-file', action='store', dest='file_name', default='profile.
 parser.add_argument('-ncores', action='store', dest='ncores', default=2)
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
 parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000)
-parser.add_argument('-nit', action='store', dest='nit', default=250)
+parser.add_argument('-nit', action='store', dest='nit', default=400)
 args = parser.parse_args()
 
 
@@ -77,6 +77,22 @@ p       = profile[1].data
 zmean   = h['Z_MEAN'] 
 
 
+### compute dilution
+bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
+area = np.pi*np.diff(bines**2)
+
+ngal = p.NGAL_w
+
+d = ngal/area
+
+fcl = ((d - np.mean(d[-2:]))*area)/ngal
+
+bcorr = 1./(1-fcl)
+p.DSigma_T = bcorr*p.DSigma_T
+p.DSigma_X = bcorr*p.DSigma_X
+p.error_DSigma_T = bcorr*p.error_DSigma_T
+p.error_DSigma_X = bcorr*p.error_DSigma_X
+
 
 def log_likelihood(logM, R, DS, eDS):
     
@@ -98,7 +114,7 @@ def log_probability(logM, R, DS, eDS):
 
 # initializing
 
-pos = np.array([np.random.uniform(11.5,13.5,15)]).T
+pos = np.array([np.random.uniform(11.5,13.5,20)]).T
 
 nwalkers, ndim = pos.shape
 
@@ -133,7 +149,7 @@ table = [fits.Column(name='logM', format='E', array=mcmc_out)]
 
 tbhdu = fits.BinTableHDU.from_columns(fits.ColDefs(table))
 
-logM    = np.percentile(mcmc_out[1500:], [16, 50, 84])
+logM    = np.percentile(mcmc_out[2500:], [16, 50, 84])
 c200 = concentration.concentration(10**logM[1], '200c', zmean, model = cmodel)
 
 
