@@ -106,6 +106,23 @@ def plt_profile_fit_2h(samp,RIN,ROUT):
     p = profile[1].data
     '''
 
+    ### compute dilution
+    bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
+    area = np.pi*np.diff(bines**2)
+    
+    ngal = p.NGAL_w
+    
+    d = ngal/area
+    
+    fcl = ((d - np.mean(d[-2:]))*area)/ngal
+    
+    bcorr = 1./(1-fcl)
+
+    p.DSigma_T = bcorr*p.DSigma_T
+    p.DSigma_X = bcorr*p.DSigma_X
+    p.error_DSigma_T = bcorr*p.error_DSigma_T
+    p.error_DSigma_X = bcorr*p.error_DSigma_X
+
     
     zmean = h['z_mean']    
     
@@ -113,7 +130,9 @@ def plt_profile_fit_2h(samp,RIN,ROUT):
     
     
     # FIT MONOPOLE
-    fitpar = fits.open(folder+'fitresults_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+p_name)[0].header
+    fitted = fits.open(folder+'fitresults_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+p_name)
+    fitpar = fitted[0].header
+    lgM   = fitted[1].data.logM
     
     rplot = np.logspace(np.log10(h['RIN']/1000.),np.log10(h['ROUT']/1000.),20)
     
@@ -155,6 +174,11 @@ def plt_profile_fit_2h(samp,RIN,ROUT):
     ax[1].set_ylim(-7,7)
     
     f.savefig(folder+'plots/profile_'+samp+'_2h.png',bbox_inches='tight')
+    
+    plt.figure()
+    plt.plot(lgM,alpha=0.5)
+    plt.axvline(2500)
+    plt.savefig(folder+'plots/fit_'+samp+'_'+str(RIN)+'_'+str(ROUT)+'.png',bbox_inches='tight')
 
 
 def dilution(samp):
