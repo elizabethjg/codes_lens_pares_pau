@@ -21,10 +21,17 @@ G    = G.value;   # Gravitational constant (m3.kg-1.s-2)
 pc   = pc.value # 1 pc (m)
 Msun = M_sun.value # Solar mass (kg)
 
-w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
-w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
-w2_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
+w3 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
+w1 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
+w2 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
 
+m1 = (w1.ODDS >= 0.5)*(w1.Z_B > 0.2)*(w1.Z_B < 1.2)*(w1.weight > 0)*(w1.fitclass == 0)*(w1.MASK <= 1)
+m2 = (w2.ODDS >= 0.5)*(w2.Z_B > 0.2)*(w2.Z_B < 1.2)*(w2.weight > 0)*(w2.fitclass == 0)*(w2.MASK <= 1)
+m3 = (w3.ODDS >= 0.5)*(w3.Z_B > 0.2)*(w3.Z_B < 1.2)*(w3.weight > 0)*(w3.fitclass == 0)*(w3.MASK <= 1)
+
+w1_sources = w1[m1]
+w2_sources = w2[m2]
+w3_sources = w3[m3]
 
 def partial_profile(RA0,DEC0,Z,field,
                     RIN,ROUT,ndots,h,nboot=100):
