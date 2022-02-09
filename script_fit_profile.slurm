@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=prof
+#SBATCH --job-name=fitpairs
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=30
 #SBATCH --time=3-00:00:00
