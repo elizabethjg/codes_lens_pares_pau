@@ -57,7 +57,7 @@ def partial_profile(RA0,DEC0,Z,field,
         
         mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
                
-        mask = mask_region*(S.Z_B > (Z + 0.2))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)*(S.Z_B < 1.2)
+        mask = mask_region*(S.Z_B > (Z + 0.3))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)*(S.Z_B < 1.2)
         
         catdata = S[mask]
 
@@ -157,6 +157,7 @@ def partial_profile_unpack(minput):
 
 def main(sample,pcat,
         z_min = 0.0, z_max = 0.6,
+        Lratio_min = 0.0, Lratio_max = 1.,
         odds_min=0.5, RIN = 100., ROUT =5000.,
         ndots= 15,ncores=10,hcosmo=1.):
 
@@ -180,6 +181,7 @@ def main(sample,pcat,
         
         print('Selecting pairs with:')
         print(z_min,' <= z < ',z_max)
+        print(Lratio_min,' <= L2/L1 < ',Lratio_max)
         print('Background galaxies with:')
         print('ODDS > ',odds_min)
         print('Profile has ',ndots,'bins')
@@ -205,10 +207,11 @@ def main(sample,pcat,
         L3 = np.vstack((L3,field))
         
         L = np.vstack((L1.T,L2.T,L3.T)).T
-        
+        Lratio = 10.**(-0.4*(L[-2]-L[8]))
 
-        mz    = (L[3] >= z_min)*(L[3] < z_max)
-        mlenses = mz
+        mz      = (L[3] >= z_min)*(L[3] < z_max)
+        mratio  = (Lratio >= Lratio_min)*(L[3] < Lratio_max)
+        mlenses = mz*mratio
         Nlenses = mlenses.sum()
 
         if Nlenses < ncores:
@@ -221,13 +224,11 @@ def main(sample,pcat,
         L = L[:,mlenses]
 
         mr1 = L[8]
-        mr2 = L[-1]
+        mr2 = L[-2]
         mi1 = L[7]
-        mi2 = L[-2]
+        mi2 = L[-3]
         RA  = L[4]
         DEC = L[5]
-        RA[mr2 < mr1] = L[9][mr2 < mr1]
-        DEC[mr2 < mr1] = L[10][mr2 < mr1]
         z   = L[3]
         
         # SPLIT LENSING CAT
@@ -361,6 +362,8 @@ if __name__ == '__main__':
         parser.add_argument('-sample', action='store', dest='sample',default='pru')
         parser.add_argument('-z_min', action='store', dest='z_min', default=0.0)
         parser.add_argument('-z_max', action='store', dest='z_max', default=1.0)
+        parser.add_argument('-Lratio_min', action='store', dest='Lratio_min', default=0.0)
+        parser.add_argument('-Lratio_max', action='store', dest='Lratio_max', default=1.0)
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
         parser.add_argument('-RIN', action='store', dest='RIN', default=100.)
         parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000.)
@@ -373,6 +376,8 @@ if __name__ == '__main__':
         sample     = args.sample
         z_min      = float(args.z_min) 
         z_max      = float(args.z_max) 
+        Lratio_min = float(args.Lratio_min) 
+        Lratio_max = float(args.Lratio_max) 
         ODDS_min   = float(args.ODDS_min)
         RIN        = float(args.RIN)
         ROUT       = float(args.ROUT)
@@ -380,5 +385,5 @@ if __name__ == '__main__':
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
         
-        main(sample,args.pcat,z_min,z_max,ODDS_min,RIN,ROUT,nbins,ncores,h)
+        main(sample,args.pcat,z_min,z_max,Lratio_min,Lratio_max,ODDS_min,RIN,ROUT,nbins,ncores,h)
 

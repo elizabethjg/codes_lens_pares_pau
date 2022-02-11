@@ -19,5 +19,9 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 conda activate myenv
 
-srun python -u forpair_profile.py -ncores 56 -sample 'newall_100_10000_zback' -nbins 20 -RIN 100 -ROUT 10000
-srun python -u forpair_profile.py -ncores 56 -sample 'newall_100_10000_zback' -nbins 20 -RIN 100 -ROUT 10000 -pcat '_zspec_mask'
+srun python -u forpair_profile.py -ncores 56 -sample 'all' -nbins 20 -RIN 100 -ROUT 10000
+srun python -u forpair_profile.py -ncores 56 -sample 'zL' -nbins 20 -RIN 100 -ROUT 10000 -z_min 0. -z_max 0.4
+srun python -u forpair_profile.py -ncores 56 -sample 'zH' -nbins 20 -RIN 100 -ROUT 10000 -z_min 0.4 
+srun python -u forpair_profile.py -ncores 56 -sample 'LratioL' -nbins 20 -RIN 100 -ROUT 10000 -Lratio_min 0. -Lratio_max 0.5
+srun python -u forpair_profile.py -ncores 56 -sample 'LratioH' -nbins 20 -RIN 100 -ROUT 10000 -Lratio_min 0.5 
+
