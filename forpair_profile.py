@@ -57,7 +57,8 @@ def partial_profile(RA0,DEC0,Z,field,
         
         mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
                
-        mask = mask_region*(S.Z_B > (Z + 0.3))*(S.ODDS >= 0.5)*(S.Z_B > 0.2)*(S.Z_B < 1.2)
+        # mask = mask_region*(S.Z_B > (Z + 0.3))
+        mask = mask_region*(abs(S.Z_B - Z) < 0.3)
         
         catdata = S[mask]
 
@@ -193,7 +194,7 @@ def main(sample,pcat,
         R = (bines[:-1] + np.diff(bines)*0.5)*1.e-3
         
         #reading cats
-        # '''
+        
         L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L1[1]))*1                             
         L1 = np.vstack((L1,field))                                
@@ -201,13 +202,13 @@ def main(sample,pcat,
         L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L2[1]))*2                             
         L2 = np.vstack((L2,field))                                
-        # '''                                                          
+                                          
         L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
-        L = np.vstack((L1.T,L2.T)).T
-        # L = L3
+        # L = np.vstack((L1.T,L2.T,L3.T)).T
+        L = L3
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
 
         mz      = (L[3] >= z_min)*(L[3] < z_max)
