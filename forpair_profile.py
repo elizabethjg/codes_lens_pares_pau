@@ -64,8 +64,8 @@ def partial_profile(RA0,DEC0,Z,field,
 
         z1 = Z
         z2 = catdata.Z_B
-        z1[Z > catdata.Z_B] = catdata.Z_B
-        z2[Z > catdata.Z_B] = Z
+        z1[Z > catdata.Z_B] = catdata.Z_B[Z > catdata.Z_B]
+        z2[Z > catdata.Z_B] = Z[Z > catdata.Z_B]
         
 
         ds  = cosmo.angular_diameter_distance(catdata.Z_B).value
