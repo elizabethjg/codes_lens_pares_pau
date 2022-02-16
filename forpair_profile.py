@@ -62,11 +62,14 @@ def partial_profile(RA0,DEC0,Z,field,
         
         catdata = S[mask]
 
-        mzal = Z > catdata.Z_B
+        z1 = Z
+        z2 = catdata.Z_B
+        z1[Z > catdata.Z_B] = catdata.Z_B
+        z2[Z > catdata.Z_B] = Z
+        
 
         ds  = cosmo.angular_diameter_distance(catdata.Z_B).value
-        dls = cosmo.angular_diameter_distance_z1z2(Z, catdata.Z_B).value
-        dls[mzal] = cosmo.angular_diameter_distance_z1z2(catdata.Z_B[mzal],Z[mzal]).value
+        dls = cosmo.angular_diameter_distance_z1z2(z1, z2).value
                 
         BETA_array = dls/ds
         
