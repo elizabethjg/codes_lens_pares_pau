@@ -195,11 +195,11 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         mw4 = (cat.RA < 336)*(cat.RA > 329)*(cat.DEC < 4.7)*(cat.DEC > -1.1)
     
         
-        RA  = np.append(cat.RA[mw1],cat.RA[mw2],cat.RA[mw3],cat.RA[mw4])
-        DEC = np.append(cat.DEC[mw1],cat.DEC[mw2],cat.DEC[mw3],cat.DEC[mw4])
-        z   = np.append(cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4])
-        LAMBDA = np.append(cat.LAMBDA[mw1],cat.LAMBDA[mw2],cat.LAMBDA[mw3],cat.LAMBDA[mw4])
-        field = np.append(np.ones(mw1.sum())*1.,np.ones(mw1.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw3.sum())*4.)
+        RA  = np.vstack((cat.RA[mw1],cat.RA[mw2],cat.RA[mw3],cat.RA[mw4]))
+        DEC = np.vstack((cat.DEC[mw1],cat.DEC[mw2],cat.DEC[mw3],cat.DEC[mw4]))
+        z   = np.vstack((cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4]))
+        LAMBDA = np.vstack((cat.LAMBDA[mw1],cat.LAMBDA[mw2],cat.LAMBDA[mw3],cat.LAMBDA[mw4]))
+        field = np.vstack((np.ones(mw1.sum())*1.,np.ones(mw1.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw3.sum())*4.))
         
         L = np.array([field,RA,DEC,z,field])
 
