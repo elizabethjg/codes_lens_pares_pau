@@ -138,7 +138,8 @@ def partial_profile_unpack(minput):
 	return partial_profile(*minput)
         
 
-def main(sample='pru',z_min = 0.0, z_max = 0.6,
+def main(sample='pru',z_min = 0.0, z_max = 0.4,
+                lmin = 20., lmax = 150.,
                 odds_min=0.5, RIN = 100., ROUT =5000.,
                 ndots= 15,ncores=10,hcosmo=1.):
 
@@ -178,12 +179,14 @@ def main(sample='pru',z_min = 0.0, z_max = 0.6,
         
         mw1 = (cat.RA < 39)*(cat.RA > 30.)*(cat.DEC < -3.5)*(cat.DEC > -11.5)
         mw3 = (cat.RA < 208)*(cat.RA > 221)*(cat.DEC < 58)*(cat.DEC > 51)
+        mw2 = (cat.RA < 137)*(cat.RA > 132)*(cat.DEC < -0.9)*(cat.DEC > -5.7)
+        mw4 = (cat.RA < 336)*(cat.RA > 329)*(cat.DEC < 4.7)*(cat.DEC > -1.1)
     
         
-        RA  = np.append(cat.RA[mw1],cat.RA[mw3])
-        DEC = np.append(cat.DEC[mw1],cat.DEC[mw3])
-        z   = np.append(cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw3])
-        field = np.append(np.ones(mw1.sum())*1.,np.ones(mw3.sum())*3.)
+        RA  = np.append(cat.RA[mw1],cat.RA[mw2],cat.RA[mw3],cat.RA[mw4])
+        DEC = np.append(cat.DEC[mw1],cat.DEC[mw2],cat.DEC[mw3],cat.DEC[mw4])
+        z   = np.append(cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4])
+        field = np.append(np.ones(mw1.sum())*1.,np.ones(mw1.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw3.sum())*4.)
         
         L = np.array([field,RA,DEC,z,field])
 
