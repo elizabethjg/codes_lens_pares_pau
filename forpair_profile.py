@@ -312,16 +312,16 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         h.append(('N_LENSES',np.int(Nlenses)))
         h.append(('z_min',np.round(z_min,4)))
         h.append(('z_max',np.round(z_max,4)))
-        h.append(('lmin',np.round(z_min,4)))
-        h.append(('lmax',np.round(z_max,4)))
+        h.append(('lmin',np.round(lmin,4)))
+        h.append(('lmax',np.round(lmax,4)))
         h.append(('z_mean',np.round(zmean,4)))
 
                 
-        
-        tbhdu.writeto('../profiles/profile_'+sample+'.fits',overwrite=True)
+        outfile = '../profiles/profile_'+sample+'.fits'
+        tbhdu.writeto(outfile,overwrite=True)
                 
         tfin = time.time()
-        
+        print('File saved... ',outfile)
         print('TOTAL TIME ',(tfin-tini)/60.)
         
 
