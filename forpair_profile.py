@@ -206,7 +206,7 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         mlenses = mz*ml
         
         L = np.array([RA[mlenses],DEC[mlenses],z[mlenses],field[mlenses]])
-
+        z = z[mlenses]
         Nlenses = mlenses.sum()
 
         if Nlenses < ncores:
