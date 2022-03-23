@@ -23,10 +23,20 @@ pc   = pc.value # 1 pc (m)
 Msun = M_sun.value # Solar mass (kg)
 
 
-w4_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W4.fits')[1].data
-w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
-w2_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
-w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
+w4 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W4.fits')[1].data
+w3 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
+w2 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
+w1 = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
+
+m1 = (w1.ODDS >= 0.5)*(w1.Z_B > 0.2)*(w1.Z_B < 1.2)*(w1.weight > 0)*(w1.fitclass == 0)*(w1.MASK <= 1)
+m2 = (w2.ODDS >= 0.5)*(w2.Z_B > 0.2)*(w2.Z_B < 1.2)*(w2.weight > 0)*(w2.fitclass == 0)*(w2.MASK <= 1)
+m3 = (w3.ODDS >= 0.5)*(w3.Z_B > 0.2)*(w3.Z_B < 1.2)*(w3.weight > 0)*(w3.fitclass == 0)*(w3.MASK <= 1)
+m4 = (w4.ODDS >= 0.5)*(w4.Z_B > 0.2)*(w4.Z_B < 1.2)*(w4.weight > 0)*(w4.fitclass == 0)*(w4.MASK <= 1)
+
+w1_sources = w1[m1]
+w2_sources = w2[m2]
+w3_sources = w3[m3]
+w4_sources = w4[m4]
 
 
 def partial_profile(RA0,DEC0,Z,field,
