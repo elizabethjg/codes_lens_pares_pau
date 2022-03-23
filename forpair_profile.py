@@ -193,22 +193,20 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         mw3 = (cat.RA < 221)*(cat.RA > 208)*(cat.DEC < 58)*(cat.DEC > 51)
         mw2 = (cat.RA < 137)*(cat.RA > 132)*(cat.DEC < -0.9)*(cat.DEC > -5.7)
         mw4 = (cat.RA < 336)*(cat.RA > 329)*(cat.DEC < 4.7)*(cat.DEC > -1.1)
-        mw = (mw1 + mw2 + mw3 + mw4)
         
+        RA  = np.concatenate((cat.RA[mw1],cat.RA[mw2],cat.RA[mw3],cat.RA[mw4]))
+        DEC = np.concatenate((cat.DEC[mw1],cat.DEC[mw2],cat.DEC[mw3],cat.DEC[mw4]))
+        z   = np.concatenate((cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4]))
+        LAMBDA = np.concatenate((cat.LAMBDA[mw1],cat.LAMBDA[mw2],cat.LAMBDA[mw3],cat.LAMBDA[mw4]))
+        field = np.concatenate((np.ones(mw1.sum())*1.,np.ones(mw2.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw4.sum())*4.))
         
-        mz  = (cat.Z_LAMBDA >= z_min)*(cat.Z_LAMBDA < z_max)
-        ml  = (cat.LAMBDA >= lmin)*(cat.LAMBDA < lmax)
-        
-        
-        RA  = np.vstack((cat.RA[mw1],cat.RA[mw2],cat.RA[mw3],cat.RA[mw4]))
-        DEC = np.vstack((cat.DEC[mw1],cat.DEC[mw2],cat.DEC[mw3],cat.DEC[mw4]))
-        z   = np.vstack((cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4]))
-        LAMBDA = np.vstack((cat.LAMBDA[mw1],cat.LAMBDA[mw2],cat.LAMBDA[mw3],cat.LAMBDA[mw4]))
-        field = np.concatenate((np.ones(mw1.sum())*1.,np.ones(mw1.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw3.sum())*4.))
-        
-        L = np.array([field,RA,DEC,z,field])
+        mz  = (z >= z_min)*(z < z_max)
+        ml  = (LAMBDA >= lmin)*(LAMBDA < lmax)
 
         mlenses = mz*ml
+        
+        L = np.array([field[mlenses],RA[mlenses],DEC[mlenses],z[mlenses],field[mlenses]])
+
         Nlenses = mlenses.sum()
 
         if Nlenses < ncores:
