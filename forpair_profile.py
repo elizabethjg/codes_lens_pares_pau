@@ -205,7 +205,7 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
 
         mlenses = mz*ml
         
-        L = np.array([field[mlenses],RA[mlenses],DEC[mlenses],z[mlenses],field[mlenses]])
+        L = np.array([RA[mlenses],DEC[mlenses],z[mlenses],field[mlenses]])
 
         Nlenses = mlenses.sum()
 
@@ -215,8 +215,6 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         print('Nlenses',Nlenses)
         print('CORRIENDO EN ',ncores,' CORES')
 
-        
-        L = L[:,mlenses]
         
         # SPLIT LENSING CAT
         
@@ -252,14 +250,14 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
                 h_a  = hcosmo*np.ones(num)
                 
                 if num == 1:
-                        entrada = [Lsplit[l].T[1][0], Lsplit[l].T[2][0],
-                                   Lsplit[l].T[3][0],Lsplit[l].T[-1][0],
+                        entrada = [Lsplit[l].T[0][0], Lsplit[l].T[1][0],
+                                   Lsplit[l].T[2][0],Lsplit[l].T[-1][0],
                                    RIN,ROUT,ndots,hcosmo]
                         
                         salida = [partial_profile_unpack(entrada)]
                 else:          
-                        entrada = np.array([Lsplit[l].T[1], Lsplit[l].T[2],
-                                   Lsplit[l].T[3],Lsplit[l].T[-1],
+                        entrada = np.array([Lsplit[l].T[0], Lsplit[l].T[1],
+                                   Lsplit[l].T[2],Lsplit[l].T[-1],
                                         rin,rout,nd,h_a]).T
                         
                         pool = Pool(processes=(num))
