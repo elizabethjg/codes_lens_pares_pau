@@ -356,5 +356,4 @@ if __name__ == '__main__':
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
         
-	main(sample,z_min,z_max,lmin,lmax,ODDS_min,RIN,ROUT,nbins,ncores,h)
-
+        main(sample,z_min,z_max,lmin,lmax,ODDS_min,RIN,ROUT,nbins,ncores,h)
