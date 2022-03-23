@@ -57,8 +57,8 @@ def partial_profile(RA0,DEC0,Z,field,
         
         mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
                
-        # mask = mask_region*(S.Z_B > (Z + 0.3))
-        mask = mask_region*(abs(S.Z_B - Z) < 0.3)
+        mask = mask_region*(S.Z_B > (Z + 0.3))
+        # mask = mask_region*(abs(S.Z_B - Z) < 0.3)
         
         catdata = S[mask]
 

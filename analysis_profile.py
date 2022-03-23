@@ -135,17 +135,16 @@ def plt_profile_align(samp):
     mass = str(np.round(np.log10(nfw.M200),2))
     cfit = str(np.round((nfw.c200),2))
     
-    f, ax = plt.subplots(2, 1, figsize=(6,6),sharex = True)
+    f, ax = plt.subplots(2, 1, figsize=(6,6),sharex = True,sharey=True)
     f.subplots_adjust(hspace=0)
                     
     ax[0].plot(p.Rp,p.DSigma_T,'C1o')
     ax[0].errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
-    ax[0].plot(nfw.xplot,nfw.yplot,'C3',label='fitted nfw $\log M_{200}=$'+mass+' $c_{200} = $'+cfit)
+    ax[0].plot([0,h['ROUT']/1000.],[0,0],'C3')
     ax[0].fill_between(p.Rp,p.DSigma_T+p.error_DSigma_T,p.DSigma_T-p.error_DSigma_T,color='C1',alpha=0.3)
     ax[0].set_xscale('log')
     # ax[0].set_yscale('log')
     ax[0].set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
-    ax[0].set_ylim(-40,40)
     ax[0].set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
     # ax[0].yaxis.set_ticks([0.1,1,10,100])
     # ax[0].set_yticklabels([0.1,1,10,100])
@@ -157,7 +156,7 @@ def plt_profile_align(samp):
     ax[1].set_ylabel(r'$\Delta\Sigma_{\times} [M_{\odot}pc^{-2} h ]$')
     ax[1].set_xlabel(r'$R [Mpc/h]$')
     ax[1].plot([0,h['ROUT']/1000.],[0,0],'k--')
-    ax[1].set_ylim(-40,40)
+    ax[1].set_ylim(-100,100)
     
     f.savefig(folder+'plots/profile_'+samp+'.png',bbox_inches='tight')
 
