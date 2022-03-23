@@ -23,7 +23,9 @@ pc   = pc.value # 1 pc (m)
 Msun = M_sun.value # Solar mass (kg)
 
 
+w4_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W4.fits')[1].data
 w3_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W3.fits')[1].data
+w2_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W2.fits')[1].data
 w1_sources = fits.open('/mnt/projects/lensing/CFHTLens/CFHTLens_W1.fits')[1].data
 
 
@@ -138,10 +140,10 @@ def partial_profile_unpack(minput):
 	return partial_profile(*minput)
         
 
-def main(sample='pru',z_min = 0.0, z_max = 0.4,
+def main(sample='pru',z_min = 0.1, z_max = 0.4,
                 lmin = 20., lmax = 150.,
-                odds_min=0.5, RIN = 100., ROUT =5000.,
-                ndots= 15,ncores=10,hcosmo=1.):
+                odds_min=0.5, RIN = 300., ROUT =10000.,
+                ndots= 20,ncores=10,hcosmo=1.):
 
         '''
         
@@ -161,8 +163,9 @@ def main(sample='pru',z_min = 0.0, z_max = 0.4,
         cosmo = LambdaCDM(H0=100*hcosmo, Om0=0.3, Ode0=0.7)
         tini = time.time()
         
-        print('Selecting pairs with:')
+        print('Selecting clusters with:')
         print(z_min,' <= z < ',z_max)
+        print(lmin,' <= lambda < ',lmax)
         print('Background galaxies with:')
         print('ODDS > ',odds_min)
         print('Profile has ',ndots,'bins')
@@ -186,12 +189,14 @@ def main(sample='pru',z_min = 0.0, z_max = 0.4,
         RA  = np.append(cat.RA[mw1],cat.RA[mw2],cat.RA[mw3],cat.RA[mw4])
         DEC = np.append(cat.DEC[mw1],cat.DEC[mw2],cat.DEC[mw3],cat.DEC[mw4])
         z   = np.append(cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4])
+        LAMBDA = np.append(cat.LAMBDA[mw1],cat.LAMBDA[mw2],cat.LAMBDA[mw3],cat.LAMBDA[mw4])
         field = np.append(np.ones(mw1.sum())*1.,np.ones(mw1.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw3.sum())*4.)
         
         L = np.array([field,RA,DEC,z,field])
 
         mz    = (z >= z_min)*(z < z_max)
-        mlenses = mz
+        ml = (LAMBDA >= lmin)*(LAMBDA < lmax)
+        mlenses = mz*ml
         Nlenses = mlenses.sum()
 
         if Nlenses < ncores:
@@ -282,18 +287,6 @@ def main(sample='pru',z_min = 0.0, z_max = 0.4,
         
         zmean        = np.average(z,weights=Ntot)
         
-        # FITING AN NFW MODEL
-        
-        H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
-        roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
-        roc_mpc  = roc*((pc*1.0e6)**3.0)
-        
-
-        nfw        = Delta_Sigma_fit(R,DSigma_T,eDSigma_T,zmean,cosmo)
-
-        M200_NFW   = nfw.M200
-        e_M200_NFW = nfw.error_M200
-        le_M200    = (np.log(10.)/M200_NFW)*e_M200_NFW
  
         # WRITING OUTPUT FITS FILE
         
@@ -311,9 +304,8 @@ def main(sample='pru',z_min = 0.0, z_max = 0.4,
         h.append(('N_LENSES',np.int(Nlenses)))
         h.append(('z_min',np.round(z_min,4)))
         h.append(('z_max',np.round(z_max,4)))
-        h.append(('lM200_NFW',np.round(np.log10(M200_NFW),4)))
-        h.append(('elM200_NFW',np.round(le_M200,4)))
-        h.append(('CHI2_NFW',np.round(nfw.chi2,4)))
+        h.append(('lmin',np.round(z_min,4)))
+        h.append(('lmax',np.round(z_max,4)))
         h.append(('z_mean',np.round(zmean,4)))
 
                 
@@ -330,12 +322,14 @@ if __name__ == '__main__':
         
         parser = argparse.ArgumentParser()
         parser.add_argument('-sample', action='store', dest='sample',default='pru')
-        parser.add_argument('-z_min', action='store', dest='z_min', default=0.0)
-        parser.add_argument('-z_max', action='store', dest='z_max', default=0.5)
+        parser.add_argument('-z_min', action='store', dest='z_min', default=0.1)
+        parser.add_argument('-z_max', action='store', dest='z_max', default=0.4)
+        parser.add_argument('-lmin', action='store', dest='lmin', default=20.)
+        parser.add_argument('-lmax', action='store', dest='lmax', default=150.)
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
         parser.add_argument('-RIN', action='store', dest='RIN', default=300.)
-        parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000.)
-        parser.add_argument('-nbins', action='store', dest='nbins', default=15)
+        parser.add_argument('-ROUT', action='store', dest='ROUT', default=10000.)
+        parser.add_argument('-nbins', action='store', dest='nbins', default=20)
         parser.add_argument('-ncores', action='store', dest='ncores', default=10)
         parser.add_argument('-h_cosmo', action='store', dest='h_cosmo', default=1.)
         args = parser.parse_args()
@@ -343,6 +337,8 @@ if __name__ == '__main__':
         sample     = args.sample
         z_min      = float(args.z_min) 
         z_max      = float(args.z_max) 
+        lmin      = float(args.lmin) 
+        lmax      = float(args.lmax) 
         ODDS_min   = float(args.ODDS_min)
         RIN        = float(args.RIN)
         ROUT       = float(args.ROUT)
@@ -350,7 +346,6 @@ if __name__ == '__main__':
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
         
-	main(sample,N_min,N_max,z_min,z_max,
-             conmin,conmax,lMHmin,lMHmax,
+	main(sample,z_min,z_max,lmin,lmax,
              ODDS_min,RIN,ROUT,nbins,ncores,h)
 
