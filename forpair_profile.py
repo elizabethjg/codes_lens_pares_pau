@@ -150,7 +150,7 @@ def partial_profile_unpack(minput):
         
 
 def main(sample='pru',z_min = 0.1, z_max = 0.4,
-                lmin = 20., lmax = 150.,
+                lmin = 20., lmax = 150., pcc_min = 0.,
                 odds_min=0.5, RIN = 300., ROUT =10000.,
                 ndots= 20,ncores=10,hcosmo=1.):
 
@@ -166,7 +166,7 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         ROUT           (float) Outer bin radius of profile
         ndots          (int) Number of bins of the profile
         ncores         (int) to run in parallel, number of cores
-        hcosmo              (float) H0 = 100.*h
+        hcosmo         (float) H0 = 100.*h
         '''
 
         cosmo = LambdaCDM(H0=100*hcosmo, Om0=0.3, Ode0=0.7)
@@ -175,6 +175,7 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         print('Selecting clusters with:')
         print(z_min,' <= z < ',z_max)
         print(lmin,' <= lambda < ',lmax)
+        print('pcc > ',pcc_min)
         print('Background galaxies with:')
         print('ODDS > ',odds_min)
         print('Profile has ',ndots,'bins')
@@ -188,6 +189,7 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         #reading cats
         
         cat = fits.open('/mnt/projects/lensing/redMaPPer/redmapper_dr8_public_v6.3_catalog.fits')[1].data
+        pcc = cat.P_CEN[:,0]
         
         mw1 = (cat.RA < 39)*(cat.RA > 30.)*(cat.DEC < -3.5)*(cat.DEC > -11.5)
         mw3 = (cat.RA < 221)*(cat.RA > 208)*(cat.DEC < 58)*(cat.DEC > 51)
@@ -199,11 +201,13 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         z   = np.concatenate((cat.Z_LAMBDA[mw1],cat.Z_LAMBDA[mw2],cat.Z_LAMBDA[mw3],cat.Z_LAMBDA[mw4]))
         LAMBDA = np.concatenate((cat.LAMBDA[mw1],cat.LAMBDA[mw2],cat.LAMBDA[mw3],cat.LAMBDA[mw4]))
         field = np.concatenate((np.ones(mw1.sum())*1.,np.ones(mw2.sum())*2.,np.ones(mw3.sum())*3.,np.ones(mw4.sum())*4.))
-        
+        pcc  = np.concatenate((pcc[mw1],pcc[mw2],pcc[mw3],pcc[mw4]))
+         
         mz  = (z >= z_min)*(z < z_max)
         ml  = (LAMBDA >= lmin)*(LAMBDA < lmax)
+        mpcc = (pcc > pcc_min)
 
-        mlenses = mz*ml
+        mlenses = mz*ml*mpcc
         
         L = np.array([RA[mlenses],DEC[mlenses],z[mlenses],field[mlenses]])
         z = z[mlenses]
@@ -314,6 +318,7 @@ def main(sample='pru',z_min = 0.1, z_max = 0.4,
         h.append(('z_max',np.round(z_max,4)))
         h.append(('lmin',np.round(lmin,4)))
         h.append(('lmax',np.round(lmax,4)))
+        h.append(('pcc_min',np.round(pcc_min,4)))
         h.append(('z_mean',np.round(zmean,4)))
 
                 
@@ -334,6 +339,7 @@ if __name__ == '__main__':
         parser.add_argument('-z_max', action='store', dest='z_max', default=0.4)
         parser.add_argument('-lmin', action='store', dest='lmin', default=20.)
         parser.add_argument('-lmax', action='store', dest='lmax', default=150.)
+        parser.add_argument('-pcc_min', action='store', dest='pcc_min', default=0.)
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
         parser.add_argument('-RIN', action='store', dest='RIN', default=300.)
         parser.add_argument('-ROUT', action='store', dest='ROUT', default=10000.)
@@ -345,8 +351,9 @@ if __name__ == '__main__':
         sample     = args.sample
         z_min      = float(args.z_min) 
         z_max      = float(args.z_max) 
-        lmin      = float(args.lmin) 
-        lmax      = float(args.lmax) 
+        lmin       = float(args.lmin) 
+        lmax       = float(args.lmax) 
+        pcc_min    = float(args.pcc_min) 
         ODDS_min   = float(args.ODDS_min)
         RIN        = float(args.RIN)
         ROUT       = float(args.ROUT)
@@ -354,4 +361,4 @@ if __name__ == '__main__':
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
         
-        main(sample,z_min,z_max,lmin,lmax,ODDS_min,RIN,ROUT,nbins,ncores,h)
+        main(sample,z_min,z_max,lmin,lmax,pcc_min,ODDS_min,RIN,ROUT,nbins,ncores,h)
