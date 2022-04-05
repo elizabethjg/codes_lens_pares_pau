@@ -167,7 +167,7 @@ def main(sample,pcat,
         z_min = 0.0, z_max = 0.6,
         Lratio_min = 0.0, Lratio_max = 1.,
         odds_min=0.5, RIN = 100., ROUT =5000.,
-        ndots= 15,ncores=10,hcosmo=1.):
+        ndots= 15,ncores=10,hcosmo=1.,fields='all'):
 
         '''
         
@@ -181,7 +181,9 @@ def main(sample,pcat,
         ROUT           (float) Outer bin radius of profile
         ndots          (int) Number of bins of the profile
         ncores         (int) to run in parallel, number of cores
-        hcosmo              (float) H0 = 100.*h
+        hcosmo         (float) H0 = 100.*h
+        fields         (str) fields considered
+                        'all', 'w1w2', 'w3'
         '''
 
         cosmo = LambdaCDM(H0=100*hcosmo, Om0=0.3, Ode0=0.7)
@@ -202,21 +204,31 @@ def main(sample,pcat,
         
         #reading cats
         
-        L1 = np.loadtxt('../pares/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
+        L1 = np.loadtxt('../parespaus/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L1[1]))*1                             
         L1 = np.vstack((L1,field))                                
                                                                   
-        L2 = np.loadtxt('../pares/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
+        L2 = np.loadtxt('../parespaus/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L2[1]))*2                             
         L2 = np.vstack((L2,field))                                
                                           
-        L3 = np.loadtxt('../pares/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+        L3 = np.loadtxt('../parespaus/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
-        # L = np.vstack((L1.T,L2.T,L3.T)).T
-        L = L3
+        
+        if fields == 'all':
+            L = np.vstack((L1.T,L2.T,L3.T)).T
+        elif fields == 'w3':
+            L = L3
+        elif fields == 'w1w2':
+            L = np.vstack((L1.T,L2.T)).T
+        
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
+
+        sample = sample+'_'+fields+'_'
+        outfile = '../profiles_new/profile_'+sample+pcat+'.fits'
+        print('Saving in file ',outfile)
 
         mz      = (L[3] >= z_min)*(L[3] < z_max)
         mratio  = (Lratio >= Lratio_min)*(L[3] < Lratio_max)
@@ -357,7 +369,7 @@ def main(sample,pcat,
 
                 
         
-        tbhdu.writeto('../profiles/profile_'+sample+pcat+'.fits',overwrite=True)
+        tbhdu.writeto(outfile,overwrite=True)
                 
         tfin = time.time()
         
@@ -380,6 +392,7 @@ if __name__ == '__main__':
         parser.add_argument('-ncores', action='store', dest='ncores', default=10)
         parser.add_argument('-h_cosmo', action='store', dest='h_cosmo', default=1.)
         parser.add_argument('-pcat', action='store', dest='pcat', default='_photo_z_2nd_run_mag_i_mask')
+        parser.add_argument('-fields', action='store', dest='fields', default='all')
         args = parser.parse_args()
         
         sample     = args.sample
@@ -393,6 +406,7 @@ if __name__ == '__main__':
         nbins      = int(args.nbins)
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
+        fields     0 args.fields
         
-        main(sample,args.pcat,z_min,z_max,Lratio_min,Lratio_max,ODDS_min,RIN,ROUT,nbins,ncores,h)
+        main(sample,args.pcat,z_min,z_max,Lratio_min,Lratio_max,ODDS_min,RIN,ROUT,nbins,ncores,h,fields)
 
