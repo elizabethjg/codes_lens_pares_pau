@@ -406,7 +406,7 @@ if __name__ == '__main__':
         nbins      = int(args.nbins)
         ncores     = int(args.ncores)
         h          = float(args.h_cosmo)
-        fields     0 args.fields
+        fields     = args.fields
         
         main(sample,args.pcat,z_min,z_max,Lratio_min,Lratio_max,ODDS_min,RIN,ROUT,nbins,ncores,h,fields)
 
