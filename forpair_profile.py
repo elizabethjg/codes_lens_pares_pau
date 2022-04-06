@@ -390,7 +390,7 @@ if __name__ == '__main__':
         parser.add_argument('-nbins', action='store', dest='nbins', default=10)
         parser.add_argument('-ncores', action='store', dest='ncores', default=10)
         parser.add_argument('-h_cosmo', action='store', dest='h_cosmo', default=1.)
-        parser.add_argument('-pcat', action='store', dest='pcat', default='_photo_z_2nd_run_mag_i_mask')
+        parser.add_argument('-pcat', action='store', dest='pcat', default='_photo_z_2nd_run_mag_i')
         parser.add_argument('-fields', action='store', dest='fields', default='all')
         args = parser.parse_args()
         
