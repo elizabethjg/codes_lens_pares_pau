@@ -9,7 +9,7 @@ from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 
-folder = '/home/eli/Documentos/Astronomia/proyectos/PARES-PAU/profiles/'   
+folder = '/home/eli/Documentos/Astronomia/proyectos/PARES-PAU/profiles_new/'   
 # folder = '../profiles/'   
 
 def plt_profile_wofit(samp):
@@ -30,7 +30,8 @@ def plt_profile_wofit(samp):
     h = profile[1].header
     p = profile[1].data
     '''
-
+    print(h['N_LENSES'])
+    
     ### compute dilution
     bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
     area = np.pi*np.diff(bines**2)
