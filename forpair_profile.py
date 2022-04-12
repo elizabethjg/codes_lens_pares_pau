@@ -203,15 +203,15 @@ def main(sample,pcat,
         
         #reading cats
         
-        L1 = np.loadtxt('../parespau/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
+        L1 = np.loadtxt('../parespaus/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L1[1]))*1                             
         L1 = np.vstack((L1,field))                                
                                                                   
-        L2 = np.loadtxt('../parespau/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
+        L2 = np.loadtxt('../parespaus/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L2[1]))*2                             
         L2 = np.vstack((L2,field))                                
                                           
-        L3 = np.loadtxt('../parespau/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+        L3 = np.loadtxt('../parespaus/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
