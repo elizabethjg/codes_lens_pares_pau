@@ -220,6 +220,10 @@ def main(sample,pcat,
             L = np.vstack((L1.T,L2.T,L3.T)).T
         elif fields == 'w3':
             L = L3
+        elif fields == 'w1':
+            L = L1
+        elif fields == 'w2':
+            L = L2
         elif fields == 'w1w2':
             L = np.vstack((L1.T,L2.T)).T
         elif fields == 'w1w3':
