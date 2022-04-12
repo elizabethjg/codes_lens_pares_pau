@@ -20,9 +20,9 @@ G    = G.value;   # Gravitational constant (m3.kg-1.s-2)
 pc   = pc.value # 1 pc (m)
 Msun = M_sun.value # Solar mass (kg)
 
-w3 = fits.open('/home/elizabeth/CFHTLens_W3.fits')[1].data
-w1 = fits.open('/home/elizabeth/CFHTLens_W1.fits')[1].data
-w2 = fits.open('/home/elizabeth/CFHTLens_W2.fits')[1].data
+w3 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W3.fits')[1].data
+w1 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W1.fits')[1].data
+w2 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W2.fits')[1].data
 
 m1 = (w1.ODDS >= 0.5)*(w1.Z_B > 0.2)*(w1.Z_B < 1.2)*(w1.weight > 0)*(w1.fitclass == 0)*(w1.MASK <= 1)
 m2 = (w2.ODDS >= 0.5)*(w2.Z_B > 0.2)*(w2.Z_B < 1.2)*(w2.weight > 0)*(w2.fitclass == 0)*(w2.MASK <= 1)
