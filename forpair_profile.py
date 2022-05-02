@@ -22,7 +22,8 @@ Msun = M_sun.value # Solar mass (kg)
 
 w3 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W3.fits')[1].data
 w1 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W1.fits')[1].data
-w2 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W2.fits')[1].data
+# w2 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W2.fits')[1].data
+w2 = fits.open('/home/elizabeth/KiDS-450/KiDS_DR3.1_G9_ugri_shear.fits')[1].data
 
 m1 = (w1.ODDS >= 0.5)*(w1.Z_B > 0.2)*(w1.Z_B < 1.2)*(w1.weight > 0)*(w1.fitclass == 0)*(w1.MASK <= 1)
 m2 = (w2.ODDS >= 0.5)*(w2.Z_B > 0.2)*(w2.Z_B < 1.2)*(w2.weight > 0)*(w2.fitclass == 0)*(w2.MASK <= 1)
@@ -87,13 +88,16 @@ def partial_profile(RA0,DEC0,Z,field,
         #Correct polar angle for e1, e2
         theta = theta+np.pi/2.
         
-        e1     = catdata.e1
-        e2     = catdata.e2-catdata.c2
+        e1 = catdata.e1
+        try:
+            e2 = catdata.e2-catdata.c2
+        except:
+            e2 = catdata.e2
         
         #get tangential ellipticities 
         et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
         #get cross ellipticities
-        ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
+        ex = (e1*np.sin(2*theta)-e2*np.cos(2*theta))*sigma_c
         
         del(e1)
         del(e2)

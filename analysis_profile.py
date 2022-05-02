@@ -268,7 +268,7 @@ def dilution(samp):
     h   = profile[1].header
     p   = profile[1].data
 
-    bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
+    bines = np.logspace(np.log10(h['RIN']/1000.),np.log10(h['ROUT']/1000.),num=len(p)+1)
     area = np.pi*np.diff(bines**2)
     
     ngal = p.NGAL_w
@@ -277,6 +277,48 @@ def dilution(samp):
 
     fcl = ((d - np.mean(d[-2:]))*area)/ngal
     
-    plt.plot(p.Rp,1./(1-fcl))
-    plt.plot(p.Rp,1./(1-fcl),'o')
+    # plt.plot(p.Rp,1./(1-fcl))
+    # plt.plot(p.Rp,1./(1-fcl),'o')
+    
+    return p.Rp,d,fcl,h['N_LENSES']
+    
+def test():
+    
+    samp1 = 'new_w1__photo_z_2nd_run_mag_i'
+    samp2 = 'new_w2__photo_z_2nd_run_mag_i'
+    samp3 = 'new_w3__photo_z_2nd_run_mag_i'
+    
+    r,d1,fcl1,n1 = dilution(samp1)
+    r,d2,fcl2,n2 = dilution(samp2)
+    r,d3,fcl3,n3 = dilution(samp3)
+    
+    plt.plot(r,d1/n1,label='W1')
+    plt.plot(r,d2/n2,label='W2')
+    plt.plot(r,d3/n3,label='W3')
+    plt.legend()
+    plt.xscale('log')
+    plt.xlabel('R [Mpc]')
+    plt.ylabel('n')
+    
+'''
+plt.figure()    
+plt.plot(w1_sources.RAJ2000,w1_sources.DECJ2000,',')
+plt.plot(L1[4],L1[5],'.')
+plt.xlabel('R.A.')
+plt.xlabel('Dec.')
+plt.savefig('/home/elizabeth/PARES-PAU/W1.png')
 
+plt.figure()
+plt.plot(w2_sources.RAJ2000,w2_sources.DECJ2000,',')
+plt.plot(L2[4],L2[5],'.')
+plt.xlabel('R.A.')
+plt.xlabel('Dec.')
+plt.savefig('/home/elizabeth/PARES-PAU/W2.png')
+
+plt.figure()
+plt.plot(w3_sources.RAJ2000,w3_sources.DECJ2000,',')
+plt.plot(L3[4],L3[5],'.')
+plt.xlabel('R.A.')
+plt.xlabel('Dec.')
+plt.savefig('/home/elizabeth/PARES-PAU/W3.png')
+'''
