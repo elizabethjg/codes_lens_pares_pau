@@ -1,5 +1,4 @@
 import sys
-sys.path.append('/home/eli/lens_codes_v3.7')
 sys.path.append('/home/elizabeth/lens_codes_v3.7')
 import time
 import numpy as np
@@ -22,8 +21,8 @@ Msun = M_sun.value # Solar mass (kg)
 
 w3 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W3.fits')[1].data
 w1 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W1.fits')[1].data
-# w2 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W2.fits')[1].data
-w2 = fits.open('/home/elizabeth/KiDS-450/KiDS_DR3.1_G9_ugri_shear.fits')[1].data
+w2 = fits.open('/home/elizabeth/CFHTLens/CFHTLens_W2.fits')[1].data
+# w2 = fits.open('/home/elizabeth/KiDS-450/KiDS_DR3.1_G9_ugri_shear.fits')[1].data
 
 m1 = (w1.ODDS >= 0.5)*(w1.Z_B > 0.2)*(w1.Z_B < 1.2)*(w1.weight > 0)*(w1.fitclass == 0)*(w1.MASK <= 1)
 m2 = (w2.ODDS >= 0.5)*(w2.Z_B > 0.2)*(w2.Z_B < 1.2)*(w2.weight > 0)*(w2.fitclass == 0)*(w2.MASK <= 1)
