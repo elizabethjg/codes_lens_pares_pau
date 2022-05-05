@@ -9,7 +9,7 @@ from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 
-folder = '/home/eli/Documentos/Astronomia/proyectos/PARES-PAU/profiles_new/'   
+folder = '../profiles_new/'   
 # folder = '../profiles/'   
 
 def plt_profile_wofit(samp):
