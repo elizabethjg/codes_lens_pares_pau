@@ -2,7 +2,6 @@ import sys
 import pylab
 from astropy.io import fits
 from astropy.cosmology import LambdaCDM
-sys.path.append('/home/eli/lens_codes_v3.7')
 sys.path.append('/home/elizabeth/lens_codes_v3.7')
 from models_profiles import *
 from fit_profiles_curvefit import *
