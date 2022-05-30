@@ -12,6 +12,8 @@ from multiprocessing import Pool
 from multiprocessing import Process
 import argparse
 from astropy.constants import G,c,M_sun,pc
+import kmeans_radec
+from kmeans_radec import KMeans, kmeans_sample
 
 #parameters
 cvel = c.value;   # Speed of light (m.s-1)
@@ -163,7 +165,21 @@ def partial_profile(RA0,DEC0,Z,field,
 
 def partial_profile_unpack(minput):
 	return partial_profile(*minput)
+
+def cov_matrix(array):
         
+        K = len(array)
+        Kmean = np.average(array,axis=0)
+        bins = array.shape[1]
+        
+        COV = np.zeros((bins,bins))
+        
+        for k in range(K):
+            dif = (array[k]- Kmean)
+            COV += np.outer(dif,dif)        
+        
+        COV *= (K-1)/K
+        return COV
 
 def main(sample,pcat,
         z_min = 0.0, z_max = 0.6,
@@ -262,20 +278,33 @@ def main(sample,pcat,
         DEC = L[5]
         z   = L[3]
         
+        # Define K masks
+        
+        X = np.array([RA,DEC]).T
+        ncen = 50
+        km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+        kmask = np.zeros((ncen+1,len(X)))
+        kmask[0] = np.ones(len(X)).astype(bool)
+        
+        for j in np.arange(1,ncen+1):
+            kmask[j] = ~(km.labels == j-1)
+        
         # SPLIT LENSING CAT
         
         lbins = int(round(Nlenses/float(ncores), 0))
         slices = ((np.arange(lbins)+1)*ncores).astype(int)
         slices = slices[(slices < Nlenses)]
         Lsplit = np.split(L.T,slices)
+        Ksplit = np.split(kmask.T,slices)
                 
         # WHERE THE SUMS ARE GOING TO BE SAVED
         
-        DSIGMAwsum_T = np.zeros(ndots) 
-        DSIGMAwsum_X = np.zeros(ndots)
-        WEIGHTsum    = np.zeros(ndots)
+        DSIGMAwsum_T = np.zeros((ncen+1,ndots)) 
+        DSIGMAwsum_X = np.zeros((ncen+1,ndots))
+        WEIGHTsum    = np.zeros((ncen+1,ndots))
         NGALsum      = np.zeros(ndots)
-        Mwsum        = np.zeros(ndots)
+        Mwsum        = np.zeros((ncen+1,ndots))
+        
         BOOTwsum_T   = np.zeros((100,ndots))
         BOOTwsum_X   = np.zeros((100,ndots))
         BOOTwsum     = np.zeros((100,ndots))
@@ -309,17 +338,21 @@ def main(sample,pcat,
                         pool = Pool(processes=(num))
                         salida = np.array(pool.map(partial_profile_unpack, entrada))
                         pool.terminate()
-                                
-                for profilesums in salida:
-                        DSIGMAwsum_T += profilesums['DSIGMAwsum_T']
-                        DSIGMAwsum_X += profilesums['DSIGMAwsum_X']
-                        WEIGHTsum    += profilesums['WEIGHTsum']
-                        NGALsum      += profilesums['NGAL']
-                        Mwsum        += profilesums['Mwsum']
-                        BOOTwsum_T   += profilesums['BOOTwsum_T']
-                        BOOTwsum_X   += profilesums['BOOTwsum_X']
-                        BOOTwsum     += profilesums['BOOTwsum']
-                        Ntot         = np.append(Ntot,profilesums['Ntot'])
+                
+                for j in range(len(salida)):
+
+                    km      = np.tile(Ksplit[l][j],(ndots,1)).T
+
+                    DSIGMAwsum_T += np.tile(profilesums['DSIGMAwsum_T'],(ncen+1,1))*km
+                    DSIGMAwsum_X += np.tile(profilesums['DSIGMAwsum_X'],(ncen+1,1))*km
+                    WEIGHTsum    += np.tile(profilesums['WEIGHTsum'],(ncen+1,1))*km
+                    Mwsum        += np.tile(profilesums['Mwsum'],(ncen+1,1))*km
+
+                    NGALsum      += profilesums['NGAL']
+                    BOOTwsum_T   += profilesums['BOOTwsum_T']
+                    BOOTwsum_X   += profilesums['BOOTwsum_X']
+                    BOOTwsum     += profilesums['BOOTwsum']
+                    Ntot         = np.append(Ntot,profilesums['Ntot'])                    
                 
                 t2 = time.time()
                 ts = (t2-t1)/60.
@@ -334,8 +367,12 @@ def main(sample,pcat,
         Mcorr     = Mwsum/WEIGHTsum
         DSigma_T  = (DSIGMAwsum_T/WEIGHTsum)/(1+Mcorr)
         DSigma_X  = (DSIGMAwsum_X/WEIGHTsum)/(1+Mcorr)
-        eDSigma_T =  np.std((BOOTwsum_T/BOOTwsum),axis=0)/(1+Mcorr)
-        eDSigma_X =  np.std((BOOTwsum_X/BOOTwsum),axis=0)/(1+Mcorr)
+        eDSigma_T =  np.std((BOOTwsum_T/BOOTwsum),axis=0)/(1+Mcorr[0])
+        eDSigma_X =  np.std((BOOTwsum_X/BOOTwsum),axis=0)/(1+Mcorr[0])
+        
+        COV_St  = cov_matrix(DSigma_T[1:,:])
+        COV_Sx  = cov_matrix(DSigma_X[1:,:])
+
         
         # AVERAGE LENS PARAMETERS
         
@@ -355,17 +392,18 @@ def main(sample,pcat,
  
         # WRITING OUTPUT FITS FILE
         
+        table_pro  = [fits.Column(name='Rp', format='D', array=R),
+                      fits.Column(name='DSigma_T', format='D', array=DSigma_T[0]),
+                      fits.Column(name='error_DSigma_T', format='D', array=eDSigma_T),
+                      fits.Column(name='DSigma_X', format='D', array=DSigma_X[0]),
+                      fits.Column(name='error_DSigma_X', format='D', array=eDSigma_X),
+                      fits.Column(name='NGAL', format='D', array=NGALsum),
+                      fits.Column(name='NGAL_w', format='D', array=WEIGHTsum[0])]
+
+        table_cov = [fits.Column(name='COV_ST', format='E', array=COV_St.flatten()),
+                     fits.Column(name='COV_SX', format='E', array=COV_Sx.flatten())]
         
-        tbhdu = fits.BinTableHDU.from_columns(
-                [fits.Column(name='Rp', format='D', array=R),
-                fits.Column(name='DSigma_T', format='D', array=DSigma_T),
-                fits.Column(name='error_DSigma_T', format='D', array=eDSigma_T),
-                fits.Column(name='DSigma_X', format='D', array=DSigma_X),
-                fits.Column(name='error_DSigma_X', format='D', array=eDSigma_X),
-                fits.Column(name='NGAL', format='D', array=NGALsum),
-                fits.Column(name='NGAL_w', format='D', array=WEIGHTsum)])
-        
-        h = tbhdu.header
+        h = fits.Header()
         h.append(('N_LENSES',np.int(Nlenses)))
         h.append(('RIN',np.round(RIN,4)))
         h.append(('ROUT',np.round(ROUT,4)))
@@ -377,9 +415,15 @@ def main(sample,pcat,
         h.append(('z_mean',np.round(zmean,4)))
         h.append(('hcosmo',np.round(hcosmo,4)))
 
-                
+        tbhdu_pro = fits.BinTableHDU.from_columns(fits.ColDefs(table_pro))
+        tbhdu_cov = fits.BinTableHDU.from_columns(fits.ColDefs(table_cov))
         
-        tbhdu.writeto(outfile,overwrite=True)
+        
+        primary_hdu = fits.PrimaryHDU(header=h)
+        
+        hdul = fits.HDUList([primary_hdu, tbhdu_pro, tbhdu_cov])
+
+        hdul.writeto(outfile,overwrite=True)
                 
         tfin = time.time()
         
