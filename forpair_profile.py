@@ -340,6 +340,8 @@ def main(sample,pcat,
                         pool.terminate()
                 
                 for j in range(len(salida)):
+                    
+                    profilesums = salida[j]
 
                     km      = np.tile(Ksplit[l][j],(ndots,1)).T
 
