@@ -380,17 +380,6 @@ def main(sample,pcat,
         
         zmean        = np.average(z,weights=Ntot)
         
-        # FITING AN NFW MODEL
-        
-        H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
-        roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
-        roc_mpc  = roc*((pc*1.0e6)**3.0)
-        
-        nfw        = Delta_Sigma_fit(R,DSigma_T,eDSigma_T,zmean,cosmo)
-
-        M200_NFW   = nfw.M200
-        e_M200_NFW = nfw.error_M200
-        le_M200    = (np.log(10.)/M200_NFW)*e_M200_NFW
  
         # WRITING OUTPUT FITS FILE
         
@@ -411,9 +400,6 @@ def main(sample,pcat,
         h.append(('ROUT',np.round(ROUT,4)))
         h.append(('z_min',np.round(z_min,4)))
         h.append(('z_max',np.round(z_max,4)))
-        h.append(('lM200_NFW',np.round(np.log10(M200_NFW),4)))
-        h.append(('elM200_NFW',np.round(le_M200,4)))
-        h.append(('CHI2_NFW',np.round(nfw.chi2,4)))
         h.append(('z_mean',np.round(zmean,4)))
         h.append(('hcosmo',np.round(hcosmo,4)))
 
