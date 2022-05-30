@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=fitpairs
+#SBATCH --job-name=fitzspec
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=30
 #SBATCH --time=3-00:00:00
@@ -20,3 +20,6 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 conda activate myenv
 
 srun ./run_fit.sh
+srun ./run_fit_zspecw3.sh
+##srun ./run_fit_zphot.sh
+##srun ./run_fit_zphotw3.sh
