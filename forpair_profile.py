@@ -34,6 +34,22 @@ w1_sources = w1[m1]
 w2_sources = w2[m2]
 w3_sources = w3[m3]
 
+'''
+sample = 'pru'
+pcat = '_photo_z_2nd_run_mag_i_best'
+z_min = 0.0
+z_max = 0.6
+Lratio_min = 0.0
+Lratio_max = 1.
+RIN = 100.
+ROUT =10000.
+ndots= 15
+ncores=32
+odds_min=0.5
+hcosmo=1.
+fields='all'
+'''
+
 def partial_profile(RA0,DEC0,Z,field,
                     RIN,ROUT,ndots,h,nboot=100):
 
@@ -281,7 +297,7 @@ def main(sample,pcat,
         # Define K masks
         
         X = np.array([RA,DEC]).T
-        ncen = 50
+        ncen = 100
         km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
         kmask = np.zeros((ncen+1,len(X)))
         kmask[0] = np.ones(len(X)).astype(bool)

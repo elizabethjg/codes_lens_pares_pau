@@ -20,8 +20,9 @@ def plt_profile_wofit(samp):
     print(p_name)
     
     # '''
-    h   = profile[1].header
+    h   = profile[0].header
     p   = profile[1].data
+    cov = profile[2].data
     
     cosmo_as = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
     '''
@@ -50,11 +51,13 @@ def plt_profile_wofit(samp):
     
     zmean = h['z_mean']    
     
-    ndots = p.shape[0]
+    CovDST  = cov.COV_ST.reshape(len(p),len(p))
+    CovDSX  = cov.COV_SX.reshape(len(p),len(p))
     
+    mr = (p.Rp > 0.3)*(p.Rp < 2.)
     
     # FIT MONOPOLE
-    nfw     = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
+    nfw     = Delta_Sigma_fit(p.Rp[mr],p.DSigma_T[mr],np.sqrt(np.diag(CovDST))[mr],zmean,cosmo_as)
     
     
     mass = str(np.round(np.log10(nfw.M200),2))
@@ -67,6 +70,7 @@ def plt_profile_wofit(samp):
     ax[0].errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
     ax[0].plot(nfw.xplot,nfw.yplot,'C3',label='fitted nfw $\log M_{200}=$'+mass+' $c_{200} = $'+cfit)
     ax[0].fill_between(p.Rp,p.DSigma_T+p.error_DSigma_T,p.DSigma_T-p.error_DSigma_T,color='C1',alpha=0.3)
+    ax[0].fill_between(p.Rp,p.DSigma_T+np.sqrt(np.diag(CovDST))*bcorr,p.DSigma_T-np.sqrt(np.diag(CovDST))*bcorr,color='C2',alpha=0.3)
     ax[0].set_xscale('log')
     ax[0].set_yscale('log')
     ax[0].set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
@@ -79,6 +83,7 @@ def plt_profile_wofit(samp):
     ax[1].plot(p.Rp,p.DSigma_X,'C7x')
     ax[1].errorbar(p.Rp,p.DSigma_X,yerr=p.error_DSigma_X,ecolor='C7',fmt='None')
     ax[1].fill_between(p.Rp,p.DSigma_X+p.error_DSigma_X,p.DSigma_X-p.error_DSigma_X,color='C7',alpha=0.3)
+    ax[1].fill_between(p.Rp,p.DSigma_X+np.sqrt(np.diag(CovDSX))*bcorr,p.DSigma_X-np.sqrt(np.diag(CovDSX))*bcorr,color='C2',alpha=0.3)
     ax[1].set_ylabel(r'$\Delta\Sigma_{\times} [M_{\odot}pc^{-2} h ]$')
     ax[1].set_xlabel(r'$R [Mpc/h]$')
     ax[1].plot([0,h['ROUT']/1000.],[0,0],'k--')
