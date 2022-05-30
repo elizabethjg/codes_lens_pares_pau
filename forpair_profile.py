@@ -297,7 +297,7 @@ def main(sample,pcat,
         # Define K masks
         
         X = np.array([RA,DEC]).T
-        ncen = 100
+        ncen = 50
         km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
         kmask = np.zeros((ncen+1,len(X)))
         kmask[0] = np.ones(len(X)).astype(bool)
