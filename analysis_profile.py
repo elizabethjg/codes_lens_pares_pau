@@ -87,7 +87,7 @@ def plt_profile_wofit(samp):
     ax[1].set_ylabel(r'$\Delta\Sigma_{\times} [M_{\odot}pc^{-2} h ]$')
     ax[1].set_xlabel(r'$R [Mpc/h]$')
     ax[1].plot([0,h['ROUT']/1000.],[0,0],'k--')
-    ax[1].set_ylim(-7,7)
+    ax[1].set_ylim(-20,20)
     
     f.savefig(folder+'plots/profile_'+samp+'.png',bbox_inches='tight')
     
