@@ -124,11 +124,11 @@ nwalkers, ndim = pos.shape
 # running emcee
 
 maskr   = (p.Rp > (RIN/1000.))*(p.Rp < (ROUT/1000.))
-p  = p[maskr]
 mr = np.meshgrid(maskr,maskr)[1]*np.meshgrid(maskr,maskr)[0]
 
 CovDS  = cov['COV_ST'].reshape(len(p.Rp),len(p.Rp))[mr]
 iCds   =  np.linalg.inv(CovDS)
+p  = p[maskr]
 
 t1 = time.time()
 
