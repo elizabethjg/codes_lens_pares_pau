@@ -297,10 +297,19 @@ def main(sample,pcat,
         # Define K masks
         
         X = np.array([RA,DEC]).T
-        ncen = 50
-        km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
-        kmask = np.zeros((ncen+1,len(X)))
-        kmask[0] = np.ones(len(X)).astype(bool)
+        try:
+            ncen = 50
+            km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+            kmask = np.zeros((ncen+1,len(X)))
+            kmask[0] = np.ones(len(X)).astype(bool)
+            from sys import exit
+            exit()
+        except:
+            print('computing COV with 40 subsamps')
+            ncen = 40
+            km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+            kmask = np.zeros((ncen+1,len(X)))
+            kmask[0] = np.ones(len(X)).astype(bool)
         
         for j in np.arange(1,ncen+1):
             kmask[j] = ~(km.labels == j-1)
