@@ -38,7 +38,7 @@ w3_sources = w3[m3]
 sample = 'pru'
 pcat = '_photo_z_2nd_run_mag_i_best'
 z_min = 0.0
-z_max = 0.6
+z_max = 0.4
 Lratio_min = 0.0
 Lratio_max = 1.
 RIN = 100.
@@ -283,8 +283,22 @@ def main(sample,pcat,
         print('Nlenses',Nlenses)
         print('CORRIENDO EN ',ncores,' CORES')
 
+        # Define K masks
+        
+        X = np.array([L[4],L[5]]).T
+
+        ncen = 100
+        km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+        kmask = np.zeros((ncen+1,len(X)))
+        kmask[0] = np.ones(len(X)).astype(bool)
+        
+        for j in np.arange(1,ncen+1):
+            kmask[j] = ~(km.labels == j-1)
+
+
         # par_gal_id,ra_par,dec_par,z_par,ra_1,dec_1,z_1,i_auto_1,mr_1,ra_2,dec_2,z_2,i_auto_2,mr_2
         L = L[:,mlenses]
+        kmask = kmask[:,mlenses]
 
         mr1 = L[8]
         mr2 = L[-2]
@@ -294,25 +308,6 @@ def main(sample,pcat,
         DEC = L[5]
         z   = L[3]
         
-        # Define K masks
-        
-        X = np.array([RA,DEC]).T
-        try:
-            ncen = 50
-            km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
-            kmask = np.zeros((ncen+1,len(X)))
-            kmask[0] = np.ones(len(X)).astype(bool)
-            from sys import exit
-            exit()
-        except:
-            print('computing COV with 40 subsamps')
-            ncen = 40
-            km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
-            kmask = np.zeros((ncen+1,len(X)))
-            kmask[0] = np.ones(len(X)).astype(bool)
-        
-        for j in np.arange(1,ncen+1):
-            kmask[j] = ~(km.labels == j-1)
         
         # SPLIT LENSING CAT
         
