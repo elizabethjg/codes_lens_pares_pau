@@ -197,6 +197,48 @@ def cov_matrix(array):
         COV *= (K-1)/K
         return COV
 
+def kmask_func(fields):
+
+        pcat = '_zspec'
+
+        L1 = np.loadtxt('../parespaus/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
+        field = np.ones(len(L1[1]))*1                             
+        L1 = np.vstack((L1,field))                                
+                                                                  
+        L2 = np.loadtxt('../parespaus/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
+        field = np.ones(len(L2[1]))*2                             
+        L2 = np.vstack((L2,field))                                
+                                          
+        L3 = np.loadtxt('../parespaus/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+        field = np.ones(len(L3[1]))*3
+        L3 = np.vstack((L3,field))
+        
+        
+        if fields == 'all':
+            L = np.vstack((L1.T,L2.T,L3.T)).T
+        elif fields == 'w3':
+            L = L3
+        elif fields == 'w1':
+            L = L1
+        elif fields == 'w2':
+            L = L2
+        elif fields == 'w1w2':
+            L = np.vstack((L1.T,L2.T)).T
+        elif fields == 'w1w3':
+            L = np.vstack((L1.T,L3.T)).T
+        elif fields == 'w2w3':
+            L = np.vstack((L2.T,L3.T)).T
+        
+        # Define K masks
+        
+        X = np.array([L[4],L[5]]).T
+
+        ncen = 100
+        km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+        
+        return km
+
+
 def main(sample,pcat,
         z_min = 0.0, z_max = 0.6,
         Lratio_min = 0.0, Lratio_max = 1.,
@@ -284,21 +326,19 @@ def main(sample,pcat,
         print('CORRIENDO EN ',ncores,' CORES')
 
         # Define K masks
-        
+        L = L[:,mlenses]        
         X = np.array([L[4],L[5]]).T
 
-        ncen = 100
-        km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+        km = kmask_func(fields)
+        labels = km.find_nearest(X)
         kmask = np.zeros((ncen+1,len(X)))
         kmask[0] = np.ones(len(X)).astype(bool)
         
         for j in np.arange(1,ncen+1):
-            kmask[j] = ~(km.labels == j-1)
+            kmask[j] = ~(labels == j-1)
 
 
         # par_gal_id,ra_par,dec_par,z_par,ra_1,dec_1,z_1,i_auto_1,mr_1,ra_2,dec_2,z_2,i_auto_2,mr_2
-        L = L[:,mlenses]
-        kmask = kmask[:,mlenses]
 
         mr1 = L[8]
         mr2 = L[-2]
