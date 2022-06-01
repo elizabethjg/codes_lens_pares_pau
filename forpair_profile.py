@@ -197,7 +197,7 @@ def cov_matrix(array):
         COV *= (K-1)/K
         return COV
 
-def kmask_func(fields):
+def kmask_func(fields,ncen=100):
 
         pcat = '_zspec'
 
@@ -233,7 +233,6 @@ def kmask_func(fields):
         
         X = np.array([L[4],L[5]]).T
 
-        ncen = 100
         km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
         
         return km
@@ -328,8 +327,9 @@ def main(sample,pcat,
         # Define K masks
         L = L[:,mlenses]        
         X = np.array([L[4],L[5]]).T
-
-        km = kmask_func(fields)
+        
+        ncen = 100
+        km = kmask_func(fields,ncen)
         labels = km.find_nearest(X)
         kmask = np.zeros((ncen+1,len(X)))
         kmask[0] = np.ones(len(X)).astype(bool)
