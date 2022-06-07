@@ -228,36 +228,38 @@ def plt_profile_fit_2h(samp,lsamp,
     
     mass = str(np.round(fitpar['lM200'],2))
     cfit = str(np.round(fitpar['c200'],2))
-                        
-    axDS.plot(p.Rp,p.DSigma_T,'C1o')
-    axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
-    axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}=$'+mass+' $c_{200} = $'+cfit)
-    axDS.plot(rplot,ds1h,'C4')
-    # axDS.plot(rplot,ds2h,'C4--')
-    axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
-    axDS.set_xscale('log')
-    axDS.set_yscale('log')
-    if ylabel:
-        axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
-    axDS.set_xlabel(r'$R [Mpc/h]$')
-    axDS.set_ylim(0.005,100)
-    axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
-    axDS.yaxis.set_ticks([0.01,0.1,1,10,100])
-    axDS.set_yticklabels([0.01,0.1,1,10,100])
-    axDS.axvline(RIN/1000.,color='C7')
-    axDS.axvline(ROUT/1000.,color='C7')    
-    axDS.legend(frameon=False,loc=1)
     
     
-    axC.plot(lgM,label=lsamp,alpha=0.5)
-    axC.axhline(np.median(lgM[2500:]),alpha=0.5)
-    axC.axhline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--')
-    axC.axhline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--')
-    axC.axvline(2500)
-    axC.legend(frameon=False,loc=1)
-    axC.set_xlabel('$N_{it}$')
-    if ylabel:
-        axC.set_ylabel('$\log M_{200}$')
+    if plot:
+        axDS.plot(p.Rp,p.DSigma_T,'C1o')
+        axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
+        axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}=$'+mass+' $c_{200} = $'+cfit)
+        axDS.plot(rplot,ds1h,'C4')
+        # axDS.plot(rplot,ds2h,'C4--')
+        axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
+        axDS.set_xscale('log')
+        axDS.set_yscale('log')
+        if ylabel:
+            axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
+        axDS.set_xlabel(r'$R [Mpc/h]$')
+        axDS.set_ylim(0.005,100)
+        axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
+        axDS.yaxis.set_ticks([0.01,0.1,1,10,100])
+        axDS.set_yticklabels([0.01,0.1,1,10,100])
+        axDS.axvline(RIN/1000.,color='C7')
+        axDS.axvline(ROUT/1000.,color='C7')    
+        axDS.legend(frameon=False,loc=1)
+        
+        
+        axC.plot(lgM,label=lsamp,alpha=0.5)
+        axC.axhline(np.median(lgM[2500:]),alpha=0.5)
+        axC.axhline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--')
+        axC.axhline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--')
+        axC.axvline(2500)
+        axC.legend(frameon=False,loc=1)
+        axC.set_xlabel('$N_{it}$')
+        if ylabel:
+            axC.set_ylabel('$\log M_{200}$')
     
     return np.percentile(lgM[2500:], [16,50,84])
 
