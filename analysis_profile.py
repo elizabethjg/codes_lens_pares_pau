@@ -167,8 +167,9 @@ def plt_profile_align(samp):
 
 
 def plt_profile_fit_2h(samp,lsamp,
-                       axDS,axC,
-                       RIN=300,ROUT=10000):
+                       axDS = plt,axC = plt,
+                       RIN=300,ROUT=10000,
+                       ylabel = True, plot = True):
     
 
     p_name = 'profile_'+samp+'.fits'
@@ -236,11 +237,13 @@ def plt_profile_fit_2h(samp,lsamp,
     axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
     axDS.set_xscale('log')
     axDS.set_yscale('log')
-    axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
-    axDS.set_ylim(0.05,100)
+    if ylabel:
+        axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
+    axDS.set_xlabel(r'$R [Mpc/h]$')
+    axDS.set_ylim(0.005,100)
     axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
-    axDS.yaxis.set_ticks([0.1,1,10,100])
-    axDS.set_yticklabels([0.1,1,10,100])
+    axDS.yaxis.set_ticks([0.01,0.1,1,10,100])
+    axDS.set_yticklabels([0.01,0.1,1,10,100])
     axDS.axvline(RIN/1000.,color='C7')
     axDS.axvline(ROUT/1000.,color='C7')    
     axDS.legend(frameon=False,loc=1)
@@ -252,6 +255,9 @@ def plt_profile_fit_2h(samp,lsamp,
     axC.axhline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--')
     axC.axvline(2500)
     axC.legend(frameon=False,loc=1)
+    axC.set_xlabel('$N_{it}$')
+    if ylabel:
+        axC.set_ylabel('$\log M_{200}$')
     
     return np.percentile(lgM[2500:], [16,50,84])
 
@@ -310,7 +316,9 @@ fC.subplots_adjust(hspace=0,wspace=0)
 axDS = axDS.flatten()
 axC = axC.flatten()
 
-pcat = '_zspec_best'
+pcat = '_zspec'
+pcat = '_photo_z_2nd_run_mag_i'
+pcat = '_photo_z_2nd_run_mag_i_best'
 
 samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
          'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
@@ -324,8 +332,10 @@ lsamp = ['all -','',
          'Hz -','',
          'Lz -','']
 
+ylabel = [True,False]*5
+
 for j in range(len(axDS)):
-    plt_profile_fit_2h(samp[j],lsamp[j],axDS[j],axC[j])
+    plt_profile_fit_2h(samp[j],lsamp[j],axDS[j],axC[j],ylabel=ylabel[j])
 
 
 fDS.savefig('../profile'+pcat+'.png',bbox_inches='tight')
