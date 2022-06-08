@@ -309,39 +309,74 @@ def test():
     plt.ylabel('n')
 
 
-fDS, axDS = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
-fDS.subplots_adjust(hspace=0,wspace=0)
+pcats = ['_zspec',
+        '_zspec_best',
+        '_photo_z_2nd_run_mag_i',
+        '_photo_z_2nd_run_mag_i_best']
 
-fC, axC = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
-fC.subplots_adjust(hspace=0,wspace=0)
+lMfit_all = []
 
-axDS = axDS.flatten()
-axC = axC.flatten()
+for pcat in pcats:
 
-pcat = '_zspec'
-pcat = '_photo_z_2nd_run_mag_i'
-pcat = '_photo_z_2nd_run_mag_i_best'
+    lMfit = []
 
-samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
-         'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
-         'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
-         'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
-         'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat]
-
-lsamp = ['all -','',
-         'HLratio -','',
-         'LLratio -','',
-         'Hz -','',
-         'Lz -','']
-
-ylabel = [True,False]*5
-
-for j in range(len(axDS)):
-    plt_profile_fit_2h(samp[j],lsamp[j],axDS[j],axC[j],ylabel=ylabel[j])
+    # fDS, axDS = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
+    # fDS.subplots_adjust(hspace=0,wspace=0)
+    
+    # fC, axC = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
+    # fC.subplots_adjust(hspace=0,wspace=0)
+    
+    # axDS = axDS.flatten()
+    # axC = axC.flatten()
 
 
-fDS.savefig('../profile'+pcat+'.png',bbox_inches='tight')
-fC.savefig('../chains'+pcat+'.png',bbox_inches='tight')
+
+    samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
+            'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
+            'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
+            'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
+            'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat]
+    
+    lsamp = ['all -','',
+            'HLratio -','',
+            'LLratio -','',
+            'Hz -','',
+            'Lz -','']
+    
+    ylabel = [True,False]*5
+    
+    for j in range(len(axDS)):
+        # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],axDS[j],axC[j],ylabel=ylabel[j])]
+        lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False)]
+    
+    lMfit_all += [lMfit]
+    
+    # fDS.savefig('../profile'+pcat+'.png',bbox_inches='tight')
+    # fC.savefig('../chains'+pcat+'.png',bbox_inches='tight')
+    
+    csamp = ['k','C8','C7','C3','C0']
+    lsamp = ['all','L2/L1 > 0.5','L2/L1 < 0.5','z > 0.4','z < 0.4']
+    
+    
+    plt.figure()
+    plt.title(pcat)
+    for j in np.arange(5):
+        plt.errorbar(lMfit[2*j][1],lMfit[2*j+1][1],
+                         yerr=np.array([np.diff(lMfit[j])]).T,
+                         xerr=np.array([np.diff(lMfit[j+1])]).T,
+                         fmt=csamp[j]+'o',label=lsamp[j])
+    plt.legend(frameon=False,loc=2)
+    plt.plot([11.5,13.3],[11.5,13.3],'C7--')
+    plt.xlabel('$\log M_{200}$')
+    plt.ylabel('$\log M_{200}(W3)$')
+    plt.savefig('../compare_w3'+pcat+'.png',bbox_inches='tight')
+    
+        
+    
+
+
+# COMPARISON W3
+
 
 
 
