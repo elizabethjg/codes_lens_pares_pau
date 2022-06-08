@@ -308,9 +308,10 @@ def main(sample,pcat,
             L = np.vstack((L2.T,L3.T)).T
         
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
-        Msum = -2.5*log10(10.**(-0.4*L[-2])+10.**(-0.4*L[8]))
-        
-        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(cosmo.luminosity_distance(L[3]).value()*1.e-3)+5))
+                
+        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e3)+5))
+        Lum2 = 10**(-0.4*(L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e3)+5))
+        Msum = -2.5*np.log10(Lum1+Lum2)
         
         sample = sample+'_'+fields+'_'
         outfile = '../profiles_new/profile_'+sample+pcat+'.fits'
