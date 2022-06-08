@@ -309,8 +309,8 @@ def main(sample,pcat,
         
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
                 
-        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e3)+5))
-        Lum2 = 10**(-0.4*(L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e3)+5))
+        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5-4.64))
+        Lum2 = 10**(-0.4*(L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5-4.64))
         Msum = -2.5*np.log10(Lum1+Lum2)
         
         sample = sample+'_'+fields+'_'

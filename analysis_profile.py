@@ -221,21 +221,24 @@ def plt_profile_fit_2h(samp,lsamp,
     rplot = np.logspace(np.log10(h['RIN']/1000.),np.log10(h['ROUT']/1000.),20)
     
     nfw  = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
-    # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
-    ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
-    
-    ds = ds1h #+ds2h
     
     mass = str(np.round(fitpar['lM200'],2))
     cfit = str(np.round(fitpar['c200'],2))
     
     
     if plot:
+        
+        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
+        
+        ds = ds1h+ds2h
+        
+        
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}=$'+mass+' $c_{200} = $'+cfit)
         axDS.plot(rplot,ds1h,'C4')
-        # axDS.plot(rplot,ds2h,'C4--')
+        axDS.plot(rplot,ds2h,'C4--')
         axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
@@ -362,8 +365,8 @@ for pcat in pcats:
     plt.title(pcat)
     for j in np.arange(5):
         plt.errorbar(lMfit[2*j][1],lMfit[2*j+1][1],
-                         yerr=np.array([np.diff(lMfit[j])]).T,
-                         xerr=np.array([np.diff(lMfit[j+1])]).T,
+                         yerr=np.array([np.diff(lMfit[2*j])]).T,
+                         xerr=np.array([np.diff(lMfit[2*j+1])]).T,
                          fmt=csamp[j]+'o',label=lsamp[j])
     plt.legend(frameon=False,loc=2)
     plt.plot([11.5,13.3],[11.5,13.3],'C7--')
@@ -371,6 +374,19 @@ for pcat in pcats:
     plt.ylabel('$\log M_{200}(W3)$')
     plt.savefig('../compare_w3'+pcat+'.png',bbox_inches='tight')
     
+
+plt.figure()
+plt.title('spec vs phot')
+for j in np.arange(5):
+    plt.errorbar(lMfit_all[1][2*j][1],lMfit_all[3][2*j][1],
+                     yerr=np.array([np.diff(lMfit_all[1][2*j])]).T,
+                     xerr=np.array([np.diff(lMfit_all[3][2*j])]).T,
+                     fmt=csamp[j]+'o',label=lsamp[j])
+plt.legend(frameon=False,loc=2)
+plt.plot([11.5,13.3],[11.5,13.3],'C7--')
+plt.xlabel('$\log M_{200}(spec)$')
+plt.ylabel('$\log M_{200}(phot)$')
+plt.savefig('../compare_spec_phot.png',bbox_inches='tight')
         
     
 
