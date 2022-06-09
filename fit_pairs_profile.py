@@ -58,7 +58,7 @@ RIN       = float(args.RIN)
 ROUT      = float(args.ROUT)
 
 
-outfile     = 'fitresults_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+file_name
+outfile     = 'fitresults_boost_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+file_name
 
 
 
