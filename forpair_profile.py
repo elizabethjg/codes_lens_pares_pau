@@ -308,10 +308,15 @@ def main(sample,pcat,
             L = np.vstack((L2.T,L3.T)).T
         
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
-                
-        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5-4.64))
-        Lum2 = 10**(-0.4*(L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5-4.64))
+        
+        from astropy.cosmology import WMAP9 as cosmo_lum
+        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5)-4.71)
+        Lum2 = 10**(-0.4*(L[-2]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5)-4.71)
         Msum = -2.5*np.log10(Lum1+Lum2)
+        Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
+        
+        M1 = L[8]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
+        M2 = L[-2]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
         
         sample = sample+'_'+fields+'_'
         outfile = '../profiles_new/profile_'+sample+pcat+'.fits'
