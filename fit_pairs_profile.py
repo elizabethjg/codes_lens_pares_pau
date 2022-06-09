@@ -72,7 +72,7 @@ print('nit', nit)
 print('outfile',outfile)
 
 profile = fits.open(folder+file_name)
-h       = profile[1].header
+h       = profile[0].header
 p       = profile[1].data
 zmean   = h['Z_MEAN'] 
 
