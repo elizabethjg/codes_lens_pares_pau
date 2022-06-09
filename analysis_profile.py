@@ -348,7 +348,7 @@ for pcat in pcats:
     
     ylabel = [True,False]*5
     
-    for j in range(len(axDS)):
+    for j in range(len(samp)):
         # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],axDS[j],axC[j],ylabel=ylabel[j])]
         lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False)]
     
@@ -388,6 +388,18 @@ plt.xlabel('$\log M_{200}(spec)$')
 plt.ylabel('$\log M_{200}(phot)$')
 plt.savefig('../compare_spec_phot.png',bbox_inches='tight')
         
+plt.figure()
+plt.title('spec vs phot - w3')
+for j in np.arange(5):
+    plt.errorbar(lMfit_all[1][2*j+1][1],lMfit_all[3][2*j+1][1],
+                     yerr=np.array([np.diff(lMfit_all[1][2*j+1])]).T,
+                     xerr=np.array([np.diff(lMfit_all[3][2*j+1])]).T,
+                     fmt=csamp[j]+'o',label=lsamp[j])
+plt.legend(frameon=False,loc=2)
+plt.plot([11.5,13.3],[11.5,13.3],'C7--')
+plt.xlabel('$\log M_{200}(spec)$')
+plt.ylabel('$\log M_{200}(phot)$')
+plt.savefig('../compare_spec_phot_w3.png',bbox_inches='tight')
     
 
 
