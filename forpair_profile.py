@@ -241,6 +241,8 @@ def kmask_func(fields,ncen=100):
 def main(sample,pcat,
         z_min = 0.0, z_max = 0.6,
         Lratio_min = 0.0, Lratio_max = 1.,
+        Mtot_min = -24., Mtot_max = -19.0,
+        colorcut = False,
         odds_min=0.5, RIN = 100., ROUT =5000.,
         ndots= 15,ncores=10,hcosmo=1.,fields='all'):
 
@@ -251,6 +253,11 @@ def main(sample,pcat,
         sample         (str) sample name
         z_min          (float) lower limit for z - >=
         z_max          (float) higher limit for z - <
+        Lratio_min     (float) lower limit for L2/L1 - >=
+        Lratio_max     (float) higher limit for L2/l1 - <
+        Mtot_min       (float) lower limit for Mtot- >=
+        Mtot_max       (float) higher limit for Mtot - <
+        colorcut       (str) red or blue
         odds_min       (float) cut in odds
         RIN            (float) Inner bin radius of profile
         ROUT           (float) Outer bin radius of profile
@@ -267,6 +274,7 @@ def main(sample,pcat,
         print('Selecting pairs with:')
         print(z_min,' <= z < ',z_max)
         print(Lratio_min,' <= L2/L1 < ',Lratio_max)
+        print(Mtot_min,' <= M_tot < ',Mtot_max)
         print('Background galaxies with:')
         print('ODDS > ',odds_min)
         print('Profile has ',ndots,'bins')
@@ -309,27 +317,36 @@ def main(sample,pcat,
         
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
         
-        from astropy.cosmology import WMAP9 as cosmo_lum
-        Lum1 = 10**(-0.4*(L[8]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5)-4.71)
-        Lum2 = 10**(-0.4*(L[-2]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5)-4.71)
-        Msum = -2.5*np.log10(Lum1+Lum2)
-        Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
-        
+        from astropy.cosmology import WMAP9 as cosmo_lum       
         M1 = L[8]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
         M2 = L[-2]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
-        
-        sample = sample+'_'+fields+'_'
-        outfile = '../profiles_new/profile_'+sample+pcat+'.fits'
-        print('Saving in file ',outfile)
+        Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
+        M1i = L[7]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
+        M2i = L[-3]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
+        Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
 
         mz      = (L[3] >= z_min)*(L[3] < z_max)
+        mtot    = (Mtot >= Mtot_min)*(Mtot < Mtot_max)
         mratio  = (Lratio >= Lratio_min)*(L[3] < Lratio_max)
-        mlenses = mz*mratio
+        mlenses = mz*mratio*mtot    
+            
+        if colorcut == 'red':
+            print('Selecting red pairs')
+            mcolor = separate_medianas(Mtot,Mtot-Mtoti,plot=False)[-1]
+            mlenses = mlenses*mcolor
+        if colorcut == 'blue':
+            print('Selecting blue pairs')
+            mcolor = ~separate_medianas(Mtot,Mtot-Mtoti,plot=False)[-1]        
+            mlenses = mlenses*mcolor
+
         Nlenses = mlenses.sum()
 
         if Nlenses < ncores:
                 ncores = Nlenses
-        
+
+        sample = sample+'_'+fields+'_'
+        outfile = '../profiles_new/profile_'+sample+pcat+'.fits'
+        print('Saving in file ',outfile)        
         print('Nlenses',Nlenses)
         print('CORRIENDO EN ',ncores,' CORES')
 
@@ -496,6 +513,9 @@ if __name__ == '__main__':
         parser.add_argument('-z_max', action='store', dest='z_max', default=1.0)
         parser.add_argument('-Lratio_min', action='store', dest='Lratio_min', default=0.0)
         parser.add_argument('-Lratio_max', action='store', dest='Lratio_max', default=1.0)
+        parser.add_argument('-Mtot_min', action='store', dest='Mtot_min', default=-24.0)
+        parser.add_argument('-Mtot_max', action='store', dest='Mtot_max', default=-19.0)
+        parser.add_argument('-colorcut', action='store', dest='colorcut', default='False')
         parser.add_argument('-ODDS_min', action='store', dest='ODDS_min', default=0.5)
         parser.add_argument('-RIN', action='store', dest='RIN', default=100.)
         parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000.)
@@ -511,6 +531,9 @@ if __name__ == '__main__':
         z_max      = float(args.z_max) 
         Lratio_min = float(args.Lratio_min) 
         Lratio_max = float(args.Lratio_max) 
+        Mtot_min   = float(args.Mtot_min) 
+        Mtot_max   = float(args.Mtot_max) 
+        colorcut   = args.colorcut
         ODDS_min   = float(args.ODDS_min)
         RIN        = float(args.RIN)
         ROUT       = float(args.ROUT)
@@ -519,5 +542,5 @@ if __name__ == '__main__':
         h          = float(args.h_cosmo)
         fields     = args.fields
         
-        main(sample,args.pcat,z_min,z_max,Lratio_min,Lratio_max,ODDS_min,RIN,ROUT,nbins,ncores,h,fields)
+        main(sample,args.pcat,z_min,z_max,Lratio_min,Lratio_max,Mtot_min,Mtot_max,colorcut,ODDS_min,RIN,ROUT,nbins,ncores,h,fields)
 
