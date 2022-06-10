@@ -14,6 +14,7 @@ import argparse
 from astropy.constants import G,c,M_sun,pc
 import kmeans_radec
 from kmeans_radec import KMeans, kmeans_sample
+from medianas import separate_medianas
 
 #parameters
 cvel = c.value;   # Speed of light (m.s-1)
