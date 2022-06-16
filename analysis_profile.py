@@ -212,6 +212,7 @@ def plt_profile_fit_2h(samp,lsamp,
 
     
     zmean = h['z_mean']    
+    Mmean = h['M_mean']    
     
     ndots = p.shape[0]
     
@@ -267,7 +268,7 @@ def plt_profile_fit_2h(samp,lsamp,
         if ylabel:
             axC.set_ylabel('$\log M_{200}$')
     
-    return np.percentile(lgM[2500:], [16,50,84])
+    return np.append(np.percentile(lgM[2500:], [16,50,84]),Mmean)
 
 
 def dilution(samp):
@@ -342,17 +343,27 @@ for pcat in pcats:
 
 
 
-    samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
-            'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
-            'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
-            'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
-            'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat]
+    # samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
+            # 'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
+            # 'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
+            # 'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
+            # 'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat]
             
     # samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
             # 'wc_Mm_all_'+pcat,'wc_Mm_w3_'+pcat,
             # 'wc_MM_all_'+pcat,'wc_MM_w3_'+pcat,
             # 'wc_red_all_'+pcat,'wc_red_w3_'+pcat,
             # 'wc_blue_all_'+pcat,'wc_blue_w3_'+pcat]
+
+    samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
+            'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
+            'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
+            'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
+            'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat,
+            'wc_MM_all_'+pcat,'wc_MM_w3_'+pcat,
+            'wc_Mm_all_'+pcat,'wc_Mm_w3_'+pcat,
+            'wc_red_all_'+pcat,'wc_red_w3_'+pcat,
+            'wc_blue_all_'+pcat,'wc_blue_w3_'+pcat]
     
     lsamp = ['all -','',
             'HLratio -','',
@@ -379,31 +390,54 @@ for pcat in pcats:
     # fDS.savefig('../profile2'+pcat+ftype+'.png',bbox_inches='tight')
     # fC.savefig('../chains2'+pcat+ftype+'.png',bbox_inches='tight')
     
-    csamp = ['k','C8','C7','C3','C0']
-    # lsamp = ['all','M < -21.0','M > -21.0','red pairs','blue pairs']
-    lsamp = ['all','$L_2/L_1 > 0.5$','$L_2/L_1 < 0.5$','$z > 0.4$','$z < 0.4$']
+    csamp = ['k',
+             'palevioletred','palevioletred',
+             'royalblue','royalblue',
+             'gold','gold',
+             'C9','C9']
+
+    lsamp = ['all',
+             '$L_2/L_1 > 0.5$','$L_2/L_1 < 0.5$',
+             '$z > 0.4$','$z < 0.4$',
+             'M > -21.0','M < -21.0',
+             'red pairs','blue pairs']
+             
+    mark = ['o']+['^','v']*4
     
     
     plt.figure()
     plt.title(pcat)
     for j in np.arange(5):
         plt.errorbar(lMfit[2*j][1],lMfit[2*j+1][1],
-                         yerr=np.array([np.diff(lMfit[2*j])]).T,
-                         xerr=np.array([np.diff(lMfit[2*j+1])]).T,
-                         fmt=csamp[j]+'o',label=lsamp[j])
+                         xerr=np.array([np.diff(lMfit[2*j])]).T,
+                         yerr=np.array([np.diff(lMfit[2*j+1])]).T,
+                         fmt=mark[j],label=lsamp[j])
     plt.legend(frameon=False,loc=2)
     plt.plot([11.5,13.3],[11.5,13.3],'C7--')
     plt.xlabel('$\log M_{200}$')
     plt.ylabel('$\log M_{200}(W3)$')
     plt.savefig('../compare2_w3'+pcat+ftype+'.png',bbox_inches='tight')
+
+    plt.figure()
+    plt.title(pcat)
+    for j in np.arange(5):
+        plt.plot(meanmag,lM200,'k')
+        plt.errorbar(lMfit[2*j][-1],lMfit[2*j][1],
+                         yerr=np.array([np.diff(lMfit[2*j])]).T,
+                         fmt=mark[j],label=lsamp[j])
+    plt.legend(frameon=False,loc=2)
+    plt.plot([11.5,13.3],[11.5,13.3],'C7--')
+    plt.xlabel(r'$\langle M_r \rangle$')
+    plt.ylabel('$\log M_{200}$')
+    plt.savefig('../Mag_lM200_'+pcat+ftype+'.png',bbox_inches='tight')
     
 
 plt.figure()
 plt.title('boost vs CV')
 for j in np.arange(5):
     plt.errorbar(lMfit_all[1][2*j][1],lMfit_all[3][2*j][1],
-                     yerr=np.array([np.diff(lMfit_all[1][2*j])]).T,
-                     xerr=np.array([np.diff(lMfit_all[3][2*j])]).T,
+                     xerr=np.array([np.diff(lMfit_all[1][2*j])]).T,
+                     yerr=np.array([np.diff(lMfit_all[3][2*j])]).T,
                      fmt=csamp[j]+'o',label=lsamp[j])
 plt.legend(frameon=False,loc=2)
 plt.plot([11.5,13.3],[11.5,13.3],'C7--')
@@ -415,8 +449,8 @@ plt.figure()
 plt.title('boost vs CV - w3')
 for j in np.arange(5):
     plt.errorbar(lMfit_all[1][2*j+1][1],lMfit_all[3][2*j+1][1],
-                     yerr=np.array([np.diff(lMfit_all[1][2*j+1])]).T,
-                     xerr=np.array([np.diff(lMfit_all[3][2*j+1])]).T,
+                     xerr=np.array([np.diff(lMfit_all[1][2*j+1])]).T,
+                     yerr=np.array([np.diff(lMfit_all[3][2*j+1])]).T,
                      fmt=csamp[j]+'o',label=lsamp[j])
 plt.legend(frameon=False,loc=2)
 plt.plot([11.5,13.3],[11.5,13.3],'C7--')
