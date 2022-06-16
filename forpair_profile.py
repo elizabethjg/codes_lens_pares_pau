@@ -277,7 +277,7 @@ def main(sample,pcat,
         print(Lratio_min,' <= L2/L1 < ',Lratio_max)
         print(Mtot_min,' <= M_tot < ',Mtot_max)
         print('Background galaxies with:')
-        print('ODDS > ',odds_min)
+        # print('ODDS > ',odds_min)
         print('Profile has ',ndots,'bins')
         print('from ',RIN,'kpc to ',ROUT,'kpc')
         print('h = ',hcosmo)
@@ -341,6 +341,8 @@ def main(sample,pcat,
             mlenses = mlenses*mcolor
 
         Nlenses = mlenses.sum()
+        
+        Mmean = -2.5*np.log10(np.mean(10**(-0.4*Mtot[mlenses])))
 
         if Nlenses < ncores:
                 ncores = Nlenses
@@ -488,6 +490,11 @@ def main(sample,pcat,
         h.append(('z_min',np.round(z_min,4)))
         h.append(('z_max',np.round(z_max,4)))
         h.append(('z_mean',np.round(zmean,4)))
+        h.append(('M_min',np.round(Mtot_min,4)))
+        h.append(('M_max',np.round(Mtot_max,4)))
+        h.append(('M_mean',np.round(Mmean,4)))
+        h.append(('Lratio_min',np.round(Lratio_min,4)))
+        h.append(('Lratio_max',np.round(Lratio_max,4)))
         h.append(('hcosmo',np.round(hcosmo,4)))
 
         tbhdu_pro = fits.BinTableHDU.from_columns(fits.ColDefs(table_pro))
