@@ -423,18 +423,32 @@ for pcat in pcats:
     plt.savefig('../compare2_w3'+pcat+ftype+'.png',bbox_inches='tight')
 
     plt.figure()
-    plt.title(pcat)
+    plt.title('All - '+pcat)
     for j in np.arange(len(csamp)):
-        plt.plot(meanmag,lM200,'k')
+        # plt.plot(meanmag,lM200,'k')
+        plt.plot(meanmag-5.*np.log10(0.69),lM200,'k--')
         plt.errorbar(lMfit[2*j][-1],lMfit[2*j][1],
                          yerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
                          fmt=csamp[j],label=lsamp[j],marker=mark[j])
     plt.legend(frameon=False,loc=3)
-    # plt.plot([11.5,13.3],[11.5,13.3],'C7--')
     plt.xlabel(r'$\langle M_r \rangle$')
     plt.ylabel('$\log M_{200}$')
-    plt.axis([-22.7,-19.8,10.5,13.5])
+    plt.axis([-22.1,-19.3,10.2,13.2])
     plt.savefig('../Mag_lM200_'+pcat+ftype+'.png',bbox_inches='tight')
+
+    plt.figure()
+    plt.title('W3 - '+pcat)
+    for j in np.arange(len(csamp)):
+        # plt.plot(meanmag,lM200,'k')
+        plt.plot(meanmag-5.*np.log10(0.69),lM200,'k--')
+        plt.errorbar(lMfit[2*j][-1],lMfit[2*j+1][1],
+                         yerr=np.array([np.diff(lMfit[2*j+1])[:-1]]).T,
+                         fmt=csamp[j],label=lsamp[j],marker=mark[j])
+    plt.legend(frameon=False,loc=3)
+    plt.xlabel(r'$\langle M_r \rangle$')
+    plt.ylabel('$\log M_{200}$')
+    plt.axis([-22.1,-19.3,10.2,13.2])
+    plt.savefig('../Mag_lM200_w3_'+pcat+ftype+'.png',bbox_inches='tight')
     
 '''
 plt.figure()
