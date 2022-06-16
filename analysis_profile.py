@@ -369,6 +369,10 @@ for pcat in pcats:
             'HLratio -','',
             'LLratio -','',
             'Hz -','',
+            'Lz -','',
+            'HLratio -','',
+            'LLratio -','',
+            'Hz -','',
             'Lz -','']
             
     # lsamp = ['all -','',
@@ -407,12 +411,12 @@ for pcat in pcats:
     
     plt.figure()
     plt.title(pcat)
-    for j in np.arange(5):
+    for j in np.arange(len(csamp)):
         plt.errorbar(lMfit[2*j][1],lMfit[2*j+1][1],
-                         xerr=np.array([np.diff(lMfit[2*j])]).T,
-                         yerr=np.array([np.diff(lMfit[2*j+1])]).T,
-                         fmt=mark[j],label=lsamp[j])
-    plt.legend(frameon=False,loc=2)
+                         xerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
+                         yerr=np.array([np.diff(lMfit[2*j+1])[:-1]]).T,
+                         fmt=csamp[j],label=lsamp[j],marker=mark[j])
+    plt.legend(frameon=False,loc=4)
     plt.plot([11.5,13.3],[11.5,13.3],'C7--')
     plt.xlabel('$\log M_{200}$')
     plt.ylabel('$\log M_{200}(W3)$')
@@ -420,18 +424,19 @@ for pcat in pcats:
 
     plt.figure()
     plt.title(pcat)
-    for j in np.arange(5):
+    for j in np.arange(len(csamp)):
         plt.plot(meanmag,lM200,'k')
         plt.errorbar(lMfit[2*j][-1],lMfit[2*j][1],
-                         yerr=np.array([np.diff(lMfit[2*j])]).T,
-                         fmt=mark[j],label=lsamp[j])
-    plt.legend(frameon=False,loc=2)
-    plt.plot([11.5,13.3],[11.5,13.3],'C7--')
+                         yerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
+                         fmt=csamp[j],label=lsamp[j],marker=mark[j])
+    plt.legend(frameon=False,loc=3)
+    # plt.plot([11.5,13.3],[11.5,13.3],'C7--')
     plt.xlabel(r'$\langle M_r \rangle$')
     plt.ylabel('$\log M_{200}$')
+    plt.axis([-22.7,-19.8,10.5,13.5])
     plt.savefig('../Mag_lM200_'+pcat+ftype+'.png',bbox_inches='tight')
     
-
+'''
 plt.figure()
 plt.title('boost vs CV')
 for j in np.arange(5):
@@ -458,7 +463,7 @@ plt.xlabel('$\log M_{200}(boost)$')
 plt.ylabel('$\log M_{200}(CV)$')
 plt.savefig('../compare_boost_CV_w3.png',bbox_inches='tight')
     
-
+'''
 
 # COMPARISON W3
 
