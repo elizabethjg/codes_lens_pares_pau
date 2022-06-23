@@ -288,15 +288,15 @@ def main(sample,pcat,
         
         #reading cats
         
-        L1 = np.loadtxt('../parespaus/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
+        L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L1[1]))*1                             
         L1 = np.vstack((L1,field))                                
                                                                   
-        L2 = np.loadtxt('../parespaus/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
+        L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L2[1]))*2                             
         L2 = np.vstack((L2,field))                                
                                           
-        L3 = np.loadtxt('../parespaus/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+        L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
         field = np.ones(len(L3[1]))*3
         L3 = np.vstack((L3,field))
         
@@ -318,12 +318,12 @@ def main(sample,pcat,
         
         Lratio = 10.**(-0.4*(L[-2]-L[8]))
         
-        from astropy.cosmology import WMAP9 as cosmo_lum       
-        M1 = L[8]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
-        M2 = L[-2]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
+        # from astropy.cosmology import WMAP9 as cosmo_lum       
+        M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+        M2 = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
         Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
-        M1i = L[7]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
-        M2i = L[-3]-5.*np.log10(np.array(cosmo_lum.luminosity_distance(L[3]))*1.e6)+5
+        M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+        M2i = L[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
         Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
 
         mz      = (L[3] >= z_min)*(L[3] < z_max)
@@ -348,7 +348,7 @@ def main(sample,pcat,
                 ncores = Nlenses
 
         sample = sample+'_'+fields+'_'
-        outfile = '../profiles_new/profile_'+sample+pcat+'.fits'
+        outfile = '../profiles3/profile_'+sample+pcat+'.fits'
         print('Saving in file ',outfile)        
         print('Nlenses',Nlenses)
         print('CORRIENDO EN ',ncores,' CORES')
