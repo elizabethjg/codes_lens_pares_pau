@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=fitpair2
+#SBATCH --job-name=fitpair1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=56
 #SBATCH --time=3-00:00:00
@@ -22,4 +22,4 @@ conda activate myenv
 ##srun ./run_fit.sh
 ##srun ./run_fit_zspecw3.sh
 ##srun ./run_fit_zphot.sh
-srun ./run_fit_zphotw3.sh
+##srun ./run_fit_zphotw3.sh
