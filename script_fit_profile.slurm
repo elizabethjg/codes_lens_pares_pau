@@ -21,5 +21,5 @@ conda activate myenv
 
 ##srun ./run_fit.sh
 ##srun ./run_fit_zspecw3.sh
-##srun ./run_fit_zphot.sh
+srun ./run_fit_zphot.sh
 ##srun ./run_fit_zphotw3.sh
