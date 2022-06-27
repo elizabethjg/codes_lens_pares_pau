@@ -8,16 +8,11 @@ from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 
-folder = '../profiles_new/'   
+folder = '../profiles3/'   
 # folder = '../profiles/'   
--20.03361442, -20.57903032, -21.2230643 , -21.84807599,
-       -22.48726666]
-       
-[11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.67117284]
+meanmag = np.array([-20.03361442, -20.57903032, -21.2230643 , -21.84807599,-22.48726666])
+lM200  = np.array([11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.67117284])
 
-
-meanmag = np.array([-22.5, -21.9, -21.3, -20.7, -20.2])
-lM200   = np.array([12.80888587, 12.24303805, 11.92427929, 11.62324929, 11.44715803])
 
 def plt_profile_wofit(samp):
     
@@ -337,38 +332,38 @@ for pcat in pcats:
 
     lMfit = []
 
-    # fDS, axDS = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
-    # fDS.subplots_adjust(hspace=0,wspace=0)
+    fDS, axDS = plt.subplots(9,2, figsize=(12,14),sharex = True,sharey = True)
+    fDS.subplots_adjust(hspace=0,wspace=0)
     
-    # fC, axC = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
-    # fC.subplots_adjust(hspace=0,wspace=0)
+    fC, axC = plt.subplots(9,2, figsize=(12,14),sharex = True,sharey = True)
+    fC.subplots_adjust(hspace=0,wspace=0)
     
-    # axDS = axDS.flatten()
-    # axC = axC.flatten()
+    axDS = axDS.flatten()
+    axC = axC.flatten()
 
 
 
-    # samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
-            # 'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
-            # 'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
-            # 'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
-            # 'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat]
+    # samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
+            # 'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
+            # 'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
+            # 'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
+            # 'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat]
             
-    # samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
-            # 'wc_Mm_all_'+pcat,'wc_Mm_w3_'+pcat,
-            # 'wc_MM_all_'+pcat,'wc_MM_w3_'+pcat,
-            # 'wc_red_all_'+pcat,'wc_red_w3_'+pcat,
-            # 'wc_blue_all_'+pcat,'wc_blue_w3_'+pcat]
+    # samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
+            # 'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
+            # 'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
+            # 'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
+            # 'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
 
-    samp =  ['wc_all_'+pcat,'wc_w3_'+pcat,
-            'wc_LrM_all_'+pcat,'wc_LrM_w3_'+pcat,
-            'wc_Lrm_all_'+pcat,'wc_Lrm_w3_'+pcat,
-            'wc_zM_all_'+pcat,'wc_zM_w3_'+pcat,
-            'wc_zm_all_'+pcat,'wc_zm_w3_'+pcat,
-            'wc_MM_all_'+pcat,'wc_MM_w3_'+pcat,
-            'wc_Mm_all_'+pcat,'wc_Mm_w3_'+pcat,
-            'wc_red_all_'+pcat,'wc_red_w3_'+pcat,
-            'wc_blue_all_'+pcat,'wc_blue_w3_'+pcat]
+    samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
+            'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
+            'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
+            'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
+            'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat,
+            'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
+            'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
+            'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
+            'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
     
     lsamp = ['all -','',
             'HLratio -','',
@@ -386,18 +381,18 @@ for pcat in pcats:
             # 'red pairs -','',
             # 'blue pairs -','']
     
-    ylabel = [True,False]*5
+    ylabel = [True,False]*len(samp)
     
     for j in range(len(samp)):
-        # lMfit += [plt_profile_fit_2h(samp[j],
-                  # lsamp[j],axDS[j],axC[j],
-                  # fytpe = ftype, ylabel=ylabel[j])]
-        lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
+        lMfit += [plt_profile_fit_2h(samp[j],
+                  lsamp[j],axDS[j],axC[j],
+                  fytpe = ftype, ylabel=ylabel[j])]
+        # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
     
     lMfit_all += [lMfit]
     
-    # fDS.savefig('../profile2'+pcat+ftype+'.png',bbox_inches='tight')
-    # fC.savefig('../chains2'+pcat+ftype+'.png',bbox_inches='tight')
+    fDS.savefig('../profile2'+pcat+ftype+'.png',bbox_inches='tight')
+    fC.savefig('../chains2'+pcat+ftype+'.png',bbox_inches='tight')
     
     csamp = ['k',
              'palevioletred','palevioletred',
