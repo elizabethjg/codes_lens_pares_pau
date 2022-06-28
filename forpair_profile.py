@@ -234,8 +234,11 @@ def kmask_func(fields,ncen=100):
         
         X = np.array([L[4],L[5]]).T
 
-        km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
-        
+        try:
+            km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
+        except:
+            print('WARNING!!! USING 40 CEN FOR COV MATRIX')
+            km = kmeans_sample(X, ncen, maxiter=40, tol=1.0e-5)
         return km
 
 
