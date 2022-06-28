@@ -237,8 +237,8 @@ def kmask_func(fields,ncen=100):
         try:
             km = kmeans_sample(X, ncen, maxiter=100, tol=1.0e-5)
         except:
-            print('WARNING!!! USING 10 CEN FOR COV MATRIX')
-            km = kmeans_sample(X, ncen, maxiter=10, tol=1.0e-5)
+            print('WARNING!!! USING 40 CEN FOR COV MATRIX')
+            km = kmeans_sample(X, 40, maxiter=100, tol=1.0e-5)
         return km
 
 
