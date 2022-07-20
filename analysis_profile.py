@@ -8,12 +8,16 @@ from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 
+cosmo = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
+
 folder = '../profiles3/'   
 # folder = '../profiles/'   
 meanmag = np.array([-20.03361442, -20.57903032, -21.2230643 , -21.84807599,-22.48726666])
 lM200  = np.array([11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.67117284])
 
 def color_plot():
+    
+    from medianas import separate_medianas
     
     pcat = '_photo_z_2nd_run_mag_i'
     
@@ -30,6 +34,18 @@ def color_plot():
     L3 = np.vstack((L3,field))
     
     L = np.vstack((L1.T,L2.T,L3.T)).T
+    
+    M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
+    M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
+    
+    label_x = '$M_{r_{par}}$'
+    label_y = '$M_{i_{par}}$'
+    
+    separate_medianas(Mtot,Mtot-Mtoti,label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
 
 
 def plt_profile_wofit(samp):
