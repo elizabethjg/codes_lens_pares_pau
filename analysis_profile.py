@@ -7,6 +7,10 @@ from models_profiles import *
 from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+matplotlib.rcParams.update({'font.size': 12})
 
 cosmo = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
 
@@ -260,8 +264,8 @@ def plt_profile_fit_2h(samp,lsamp,
     
     nfw  = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
     
-    mass = str(np.round(fitpar['lM200'],2))
-    cfit = str(np.round(fitpar['c200'],2))
+    mass = '$'+str(np.round(fitpar['lM200'],2))+'$'
+    cfit = '$'+str(np.round(fitpar['c200'],2))+'$'
     
     
     if plot:
@@ -274,20 +278,20 @@ def plt_profile_fit_2h(samp,lsamp,
         
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
-        axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}=$'+mass+' $c_{200} = $'+cfit)
+        axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}= $'+mass+' $c_{200} = $'+cfit)
         axDS.plot(rplot,ds1h,'C4')
         # axDS.plot(rplot,ds2h,'C4--')
-        axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
+        # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
         if ylabel:
             axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
         axDS.set_xlabel(r'$R [Mpc/h]$')
-        axDS.set_ylim(0.005,100)
+        axDS.set_ylim(0.08,200)
         axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
-        axDS.yaxis.set_ticks([0.01,0.1,1,10,100])
-        axDS.set_yticklabels([0.01,0.1,1,10,100])
-        axDS.axvline(RIN/1000.,color='C7')
+        axDS.yaxis.set_ticks([0.1,1,10,100])
+        axDS.set_yticklabels([0.1,1,10,100])
+        axDS.axvline(RIN/1000.,color='C7',alpha=0.5)
         axDS.axvline(ROUT/1000.,color='C7')    
         axDS.legend(frameon=False,loc=1)
         
@@ -357,186 +361,135 @@ def test():
 
 ftype = '_boost'
 
-pcats = ['_photo_z_2nd_run_mag_i',
-         '_photo_z_2nd_run_mag_i_best']
+pcat = '_photo_z_2nd_run_mag_i'
+best = '_photo_z_2nd_run_mag_i_best'
 
-lMfit_all = []
 
-for pcat in pcats:
+lMfit = []
 
-    lMfit = []
+fDS, axDS = plt.subplots(9,2, figsize=(10,18),sharex = True,sharey = True)
+fDS.subplots_adjust(hspace=0,wspace=0)
 
-    fDS, axDS = plt.subplots(9,2, figsize=(12,14),sharex = True,sharey = True)
-    fDS.subplots_adjust(hspace=0,wspace=0)
-    
-    fC, axC = plt.subplots(9,2, figsize=(12,14),sharex = True,sharey = True)
-    fC.subplots_adjust(hspace=0,wspace=0)
-    
-    axDS = axDS.flatten()
-    axC = axC.flatten()
+fC, axC = plt.subplots(9,2, figsize=(12,14),sharex = True,sharey = True)
+fC.subplots_adjust(hspace=0,wspace=0)
+
+axDS = axDS.flatten()
+axC = axC.flatten()
 
 
 
-    # samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
-            # 'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
-            # 'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
-            # 'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
-            # 'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat]
-            
-    # samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
-            # 'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
-            # 'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
-            # 'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
-            # 'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
-
-    samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
-            'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
-            'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
-            'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
-            'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat,
-            'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
-            'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
-            'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
-            'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
-    
-    lsamp = ['all -','',
-            'HLratio -','',
-            'LLratio -','',
-            'Hz -','',
-            'Lz -','',
-            'HLratio -','',
-            'LLratio -','',
-            'Hz -','',
-            'Lz -','']
-            
-    # lsamp = ['all -','',
-            # 'M < -21.0 -','',
-            # 'M > -21.0 -','',
-            # 'red pairs -','',
-            # 'blue pairs -','']
-    
-    ylabel = [True,False]*len(samp)
-    
-    for j in range(len(samp)):
-        lMfit += [plt_profile_fit_2h(samp[j],
-                  lsamp[j],axDS[j],axC[j],
-                  fytpe = ftype, ylabel=ylabel[j])]
-        # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
-    
-    lMfit_all += [lMfit]
-    
-    fDS.savefig('../profile2'+pcat+ftype+'.png',bbox_inches='tight')
-    fC.savefig('../chains2'+pcat+ftype+'.png',bbox_inches='tight')
-    
-    csamp = ['k',
-             'palevioletred','palevioletred',
-             'royalblue','royalblue',
-             'gold','gold',
-             'C9','C9']
-
-    lsamp = ['all',
-             '$L_2/L_1 > 0.5$','$L_2/L_1 < 0.5$',
-             '$z > 0.4$','$z < 0.4$',
-             'M > -21.0','M < -21.0',
-             'red pairs','blue pairs']
-             
-    mark = ['o']+['^','v']*4
-    
-    
-    plt.figure()
-    plt.title(pcat)
-    for j in np.arange(len(csamp)):
-        plt.errorbar(lMfit[2*j][1],lMfit[2*j+1][1],
-                         xerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
-                         yerr=np.array([np.diff(lMfit[2*j+1])[:-1]]).T,
-                         fmt=csamp[j],label=lsamp[j],marker=mark[j])
-    plt.legend(frameon=False,loc=4)
-    plt.plot([11.5,13.3],[11.5,13.3],'C7--')
-    plt.xlabel('$\log M_{200}$')
-    plt.ylabel('$\log M_{200}(W3)$')
-    plt.savefig('../compare2_w3'+pcat+ftype+'.png',bbox_inches='tight')
-
-    plt.figure()
-    plt.title('All - '+pcat)
-    for j in np.arange(len(csamp)):
-        # plt.plot(meanmag,lM200,'k')
-        plt.plot(meanmag-5.*np.log10(0.69),lM200,'k--')
-        plt.errorbar(lMfit[2*j][-1],lMfit[2*j][1],
-                         yerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
-                         fmt=csamp[j],label=lsamp[j],marker=mark[j])
-    plt.legend(frameon=False,loc=3)
-    plt.xlabel(r'$\langle M_r \rangle$')
-    plt.ylabel('$\log M_{200}$')
-    plt.axis([-22.1,-19.3,10.2,13.2])
-    plt.savefig('../Mag_lM200_'+pcat+ftype+'.png',bbox_inches='tight')
-
-    plt.figure()
-    plt.title('W3 - '+pcat)
-    for j in np.arange(len(csamp)):
-        # plt.plot(meanmag,lM200,'k')
-        plt.plot(meanmag-5.*np.log10(0.69),lM200,'k--')
-        plt.errorbar(lMfit[2*j][-1],lMfit[2*j+1][1],
-                         yerr=np.array([np.diff(lMfit[2*j+1])[:-1]]).T,
-                         fmt=csamp[j],label=lsamp[j],marker=mark[j])
-    plt.legend(frameon=False,loc=3)
-    plt.xlabel(r'$\langle M_r \rangle$')
-    plt.ylabel('$\log M_{200}$')
-    plt.axis([-22.1,-19.3,10.2,13.2])
-    plt.savefig('../Mag_lM200_w3_'+pcat+ftype+'.png',bbox_inches='tight')
-    
-'''
-plt.figure()
-plt.title('boost vs CV')
-for j in np.arange(5):
-    plt.errorbar(lMfit_all[1][2*j][1],lMfit_all[3][2*j][1],
-                     xerr=np.array([np.diff(lMfit_all[1][2*j])]).T,
-                     yerr=np.array([np.diff(lMfit_all[3][2*j])]).T,
-                     fmt=csamp[j]+'o',label=lsamp[j])
-plt.legend(frameon=False,loc=2)
-plt.plot([11.5,13.3],[11.5,13.3],'C7--')
-plt.xlabel('$\log M_{200}(boost)$')
-plt.ylabel('$\log M_{200}(CV)$')
-plt.savefig('../compare_boost_CV.png',bbox_inches='tight')
+# samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
+        # 'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
+        # 'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
+        # 'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
+        # 'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat]
         
+# samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
+        # 'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
+        # 'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
+        # 'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
+        # 'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
+
+# samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
+        # 'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
+        # 'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
+        # 'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
+        # 'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat,
+        # 'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
+        # 'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
+        # 'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
+        # 'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
+        
+samp =  ['mh_all_'+pcat,'mh_all_'+best,
+        'mh_LrM_all_'+pcat,'mh_LrM_all_'+best,
+        'mh_Lrm_all_'+pcat,'mh_Lrm_all_'+best,
+        'mh_zM_all_'+pcat,'mh_zM_all_'+best,
+        'mh_zm_all_'+pcat,'mh_zm_all_'+best,
+        'mh_MM_all_'+pcat,'mh_MM_all_'+best,
+        'mh_Mm_all_'+pcat,'mh_Mm_all_'+best,
+        'mh_red_all_'+pcat,'mh_red_all_'+best,
+        'mh_blue_all_'+pcat,'mh_blue_all_'+best]
+
+lsamp = ['$all$ - ','$all$ - ',
+         '$L_2/L_1 > 0.8$ - ','$L_2/L_1 > 0.8$ - ',
+         '$L_2/L_1 < 0.8$ - ','$L_2/L_1 < 0.8$ - ',
+         '$z > 0.4$ - ','$z > 0.4$ - ',
+         '$z < 0.4$ - ','$z < 0.4$ - ',
+         '$M_{r_{par}} > -21.0$ -','$M_{r_{par}} > -21.0$ -',
+         '$M_{r_{par}} < -21.0$ - ','$M_{r_{par}} < -21.0$ - ',
+         r'$red\,\,pairs$ - ',r'$red\,\,pairs$ - ',
+         r'$blue\,\,pairs$ - ',r'$blue\,\,pairs$ - ']
+        
+# lsamp = ['all -','',
+        # 'M < -21.0 -','',
+        # 'M > -21.0 -','',
+        # 'red pairs -','',
+        # 'blue pairs -','']
+
+ylabel = [True,False]*len(samp)
+
+for j in range(len(samp)):
+    lMfit += [plt_profile_fit_2h(samp[j],
+              lsamp[j],axDS[j],axC[j],
+              fytpe = ftype, ylabel=ylabel[j])]
+    # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
+
+
+
+fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
+fC.savefig('../final_plots/chains2'+pcat+ftype+'.png',bbox_inches='tight')
+
+'''
+
+csamp = ['k',
+         'palevioletred','palevioletred',
+         'royalblue','royalblue',
+         'gold','gold',
+         'C9','C9']
+
+         
+mark = ['o']+['^','v']*4
+
+
 plt.figure()
-plt.title('boost vs CV - w3')
-for j in np.arange(5):
-    plt.errorbar(lMfit_all[1][2*j+1][1],lMfit_all[3][2*j+1][1],
-                     xerr=np.array([np.diff(lMfit_all[1][2*j+1])]).T,
-                     yerr=np.array([np.diff(lMfit_all[3][2*j+1])]).T,
-                     fmt=csamp[j]+'o',label=lsamp[j])
-plt.legend(frameon=False,loc=2)
+plt.title(pcat)
+for j in np.arange(len(csamp)):
+    plt.errorbar(lMfit[2*j][1],lMfit[2*j+1][1],
+                     xerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
+                     yerr=np.array([np.diff(lMfit[2*j+1])[:-1]]).T,
+                     fmt=csamp[j],label=lsamp[j],marker=mark[j])
+plt.legend(frameon=False,loc=4)
 plt.plot([11.5,13.3],[11.5,13.3],'C7--')
-plt.xlabel('$\log M_{200}(boost)$')
-plt.ylabel('$\log M_{200}(CV)$')
-plt.savefig('../compare_boost_CV_w3.png',bbox_inches='tight')
+plt.xlabel('$\log M_{200}$')
+plt.ylabel('$\log M_{200}(W3)$')
+plt.savefig('../compare2_w3'+pcat+ftype+'.png',bbox_inches='tight')
+
+plt.figure()
+plt.title('All - '+pcat)
+for j in np.arange(len(csamp)):
+    # plt.plot(meanmag,lM200,'k')
+    plt.plot(meanmag-5.*np.log10(0.69),lM200,'k--')
+    plt.errorbar(lMfit[2*j][-1],lMfit[2*j][1],
+                     yerr=np.array([np.diff(lMfit[2*j])[:-1]]).T,
+                     fmt=csamp[j],label=lsamp[j],marker=mark[j])
+plt.legend(frameon=False,loc=3)
+plt.xlabel(r'$\langle M_r \rangle$')
+plt.ylabel('$\log M_{200}$')
+plt.axis([-22.1,-19.3,10.2,13.2])
+plt.savefig('../Mag_lM200_'+pcat+ftype+'.png',bbox_inches='tight')
+
+plt.figure()
+plt.title('W3 - '+pcat)
+for j in np.arange(len(csamp)):
+    # plt.plot(meanmag,lM200,'k')
+    plt.plot(meanmag-5.*np.log10(0.69),lM200,'k--')
+    plt.errorbar(lMfit[2*j][-1],lMfit[2*j+1][1],
+                     yerr=np.array([np.diff(lMfit[2*j+1])[:-1]]).T,
+                     fmt=csamp[j],label=lsamp[j],marker=mark[j])
+plt.legend(frameon=False,loc=3)
+plt.xlabel(r'$\langle M_r \rangle$')
+plt.ylabel('$\log M_{200}$')
+plt.axis([-22.1,-19.3,10.2,13.2])
+plt.savefig('../Mag_lM200_w3_'+pcat+ftype+'.png',bbox_inches='tight')
     
-'''
-
-# COMPARISON W3
-
-
-
-
-'''
-plt.figure()    
-plt.plot(w1_sources.RAJ2000,w1_sources.DECJ2000,',')
-plt.plot(L1[4],L1[5],'.')
-plt.xlabel('R.A.')
-plt.xlabel('Dec.')
-plt.savefig('/home/elizabeth/PARES-PAU/W1.png')
-
-plt.figure()
-plt.plot(w2_sources.RAJ2000,w2_sources.DECJ2000,',')
-plt.plot(L2[4],L2[5],'.')
-plt.xlabel('R.A.')
-plt.xlabel('Dec.')
-plt.savefig('/home/elizabeth/PARES-PAU/W2.png')
-
-plt.figure()
-plt.plot(w3_sources.RAJ2000,w3_sources.DECJ2000,',')
-plt.plot(L3[4],L3[5],'.')
-plt.xlabel('R.A.')
-plt.xlabel('Dec.')
-plt.savefig('/home/elizabeth/PARES-PAU/W3.png')
 '''
