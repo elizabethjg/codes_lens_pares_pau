@@ -270,28 +270,27 @@ def plt_profile_fit_2h(samp,lsamp,
     
     if plot:
         
-        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
         
-        ds = ds1h#+ds2h
-        
+        ds = ds1h+ds2h
         
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}= $'+mass+' $c_{200} = $'+cfit)
         axDS.plot(rplot,ds1h,'C4')
-        # axDS.plot(rplot,ds2h,'C4--')
+        axDS.plot(rplot,ds2h,'C4--')
         # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
         if ylabel:
             axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
         axDS.set_xlabel(r'$R [Mpc/h]$')
-        axDS.set_ylim(0.08,200)
+        axDS.set_ylim(0.095,200)
         axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
         axDS.yaxis.set_ticks([0.1,1,10,100])
         axDS.set_yticklabels([0.1,1,10,100])
-        axDS.axvline(RIN/1000.,color='C7',alpha=0.5)
+        axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
         axDS.axvline(ROUT/1000.,color='C7')    
         axDS.legend(frameon=False,loc=1)
         
