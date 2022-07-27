@@ -10,7 +10,7 @@ from models_profiles import *
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
-matplotlib.rcParams.update({'font.size': 12})
+matplotlib.rcParams.update({'font.size': 14})
 
 cosmo = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
 
@@ -264,8 +264,10 @@ def plt_profile_fit_2h(samp,lsamp,
     
     nfw  = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
     
-    mass = '$'+str(np.round(fitpar['lM200'],2))+'$'
-    cfit = '$'+str(np.round(fitpar['c200'],2))+'$'
+    fmass = np.percentile(lgM[2500:], [16,50,84])
+    
+    mass = str(np.round(fmass[1],1))+'^{+'+str(np.round(np.diff(fmass)[1],1))+'}'+'_{-'+str(np.round(np.diff(fmass)[0],1))+'}'
+    cfit = str(np.round(fitpar['c200'],1))+'$'
     
     
     if plot:
@@ -275,9 +277,10 @@ def plt_profile_fit_2h(samp,lsamp,
         
         ds = ds1h+ds2h
         
+        axDS.plot(0,0,'w.',label=lsamp)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
-        axDS.plot(rplot,ds,'C3',label=lsamp+' $\log M_{200}= $'+mass+' $c_{200} = $'+cfit)
+        axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
         axDS.plot(rplot,ds1h,'C4')
         axDS.plot(rplot,ds2h,'C4--')
         # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
@@ -286,13 +289,13 @@ def plt_profile_fit_2h(samp,lsamp,
         if ylabel:
             axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
         axDS.set_xlabel(r'$R [Mpc/h]$')
-        axDS.set_ylim(0.095,200)
+        axDS.set_ylim(0.095,500)
         axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
         axDS.yaxis.set_ticks([0.1,1,10,100])
         axDS.set_yticklabels([0.1,1,10,100])
         axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
         axDS.axvline(ROUT/1000.,color='C7')    
-        axDS.legend(frameon=False,loc=1)
+        axDS.legend(frameon=False,loc=1,fontsize=12)
         
         
         axC.plot(lgM,label=lsamp,alpha=0.5)
@@ -305,7 +308,7 @@ def plt_profile_fit_2h(samp,lsamp,
         if ylabel:
             axC.set_ylabel('$\log M_{200}$')
     
-    return np.append(np.percentile(lgM[2500:], [16,50,84]),Mmean)
+    return np.append(fmass,Mmean)
 
 
 def dilution(samp):
@@ -317,7 +320,7 @@ def dilution(samp):
     print(p_name)
     
     # '''
-    h   = profile[1].header
+    h   = profile[0].header
     p   = profile[1].data
 
     bines = np.logspace(np.log10(h['RIN']/1000.),np.log10(h['ROUT']/1000.),num=len(p)+1)
@@ -334,23 +337,20 @@ def dilution(samp):
     
     return p.Rp,d,fcl,h['N_LENSES']
     
-def test():
+def fcl_plot(samples,lsamps,csamps,marker,ax=plot):
     
-    samp1 = 'new_w1__photo_z_2nd_run_mag_i'
-    samp2 = 'new_w2__photo_z_2nd_run_mag_i'
-    samp3 = 'new_w3__photo_z_2nd_run_mag_i'
+    for j in range(len(samples)):
     
-    r,d1,fcl1,n1 = dilution(samp1)
-    r,d2,fcl2,n2 = dilution(samp2)
-    r,d3,fcl3,n3 = dilution(samp3)
+        samp = samples[j]
+      
+        r,d,fcl,n = dilution(samp)
     
-    plt.plot(r,d1/n1,label='W1')
-    plt.plot(r,d2/n2,label='W2')
-    plt.plot(r,d3/n3,label='W3')
-    plt.legend()
-    plt.xscale('log')
-    plt.xlabel('R [Mpc]')
-    plt.ylabel('n')
+        ax.plot(r,1./(1-fcl),marker[j],color=csamps[j],label=lsamps[j],markersize=6)
+        ax.plot(r,1./(1-fcl),csamps[j],alpha=0.5)
+
+    ax.set_xscale('log')
+    ax.set_xlabel('$R [Mpc/h]$')
+    ax.set_ylabel('$(1-f_{s})^{-1}$')
 
 
 # pcats = ['_zspec',
@@ -358,98 +358,188 @@ def test():
         # '_photo_z_2nd_run_mag_i',
         # '_photo_z_2nd_run_mag_i_best']
 
-ftype = '_boost'
+def make_plot_profile():
 
-pcat = '_photo_z_2nd_run_mag_i'
-best = '_photo_z_2nd_run_mag_i_best'
-
-
-lMfit = []
-
-fDS, axDS = plt.subplots(9,2, figsize=(10,18),sharex = True,sharey = True)
-fDS.subplots_adjust(hspace=0,wspace=0)
-
-fC, axC = plt.subplots(9,2, figsize=(12,14),sharex = True,sharey = True)
-fC.subplots_adjust(hspace=0,wspace=0)
-
-axDS = axDS.flatten()
-axC = axC.flatten()
-
-
-
-# samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
-        # 'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
-        # 'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
-        # 'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
-        # 'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat]
-        
-# samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
-        # 'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
-        # 'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
-        # 'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
-        # 'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
-
-# samp =  ['mh_all_'+pcat,'mh_w3_'+pcat,
-        # 'mh_LrM_all_'+pcat,'mh_LrM_w3_'+pcat,
-        # 'mh_Lrm_all_'+pcat,'mh_Lrm_w3_'+pcat,
-        # 'mh_zM_all_'+pcat,'mh_zM_w3_'+pcat,
-        # 'mh_zm_all_'+pcat,'mh_zm_w3_'+pcat,
-        # 'mh_MM_all_'+pcat,'mh_MM_w3_'+pcat,
-        # 'mh_Mm_all_'+pcat,'mh_Mm_w3_'+pcat,
-        # 'mh_red_all_'+pcat,'mh_red_w3_'+pcat,
-        # 'mh_blue_all_'+pcat,'mh_blue_w3_'+pcat]
-        
-samp =  ['mh_all_'+pcat,'mh_all_'+best,
-        'mh_LrM_all_'+pcat,'mh_LrM_all_'+best,
-        'mh_Lrm_all_'+pcat,'mh_Lrm_all_'+best,
-        'mh_zM_all_'+pcat,'mh_zM_all_'+best,
-        'mh_zm_all_'+pcat,'mh_zm_all_'+best,
-        'mh_MM_all_'+pcat,'mh_MM_all_'+best,
-        'mh_Mm_all_'+pcat,'mh_Mm_all_'+best,
-        'mh_red_all_'+pcat,'mh_red_all_'+best,
-        'mh_blue_all_'+pcat,'mh_blue_all_'+best]
-
-lsamp = ['$all$ - ','$all$ - ',
-         '$L_2/L_1 > 0.8$ - ','$L_2/L_1 > 0.8$ - ',
-         '$L_2/L_1 < 0.8$ - ','$L_2/L_1 < 0.8$ - ',
-         '$z > 0.4$ - ','$z > 0.4$ - ',
-         '$z < 0.4$ - ','$z < 0.4$ - ',
-         '$M_{r_{par}} > -21.0$ -','$M_{r_{par}} > -21.0$ -',
-         '$M_{r_{par}} < -21.0$ - ','$M_{r_{par}} < -21.0$ - ',
-         r'$red\,\,pairs$ - ',r'$red\,\,pairs$ - ',
-         r'$blue\,\,pairs$ - ',r'$blue\,\,pairs$ - ']
-        
-# lsamp = ['all -','',
-        # 'M < -21.0 -','',
-        # 'M > -21.0 -','',
-        # 'red pairs -','',
-        # 'blue pairs -','']
-
-ylabel = [True,False]*len(samp)
-
-for j in range(len(samp)):
-    lMfit += [plt_profile_fit_2h(samp[j],
-              lsamp[j],axDS[j],axC[j],
-              fytpe = ftype, ylabel=ylabel[j])]
-    # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
+    ftype = '_boost'
+    
+    pcat = '_photo_z_2nd_run_mag_i'
+    best = '_photo_z_2nd_run_mag_i_best'
+    
+    
+    lMfit = []
+    
+    fDS, axDS = plt.subplots(5,4, figsize=(14,17),sharex = True,sharey = True)
+    fDS.subplots_adjust(hspace=0,wspace=0)
+    
+    fC, axC = plt.subplots(5,4, figsize=(12,14),sharex = True,sharey = True)
+    fC.subplots_adjust(hspace=0,wspace=0)
+    
+    axDS[0,2].axis('off')
+    axDS[0,3].axis('off')
+    
+    axDS = axDS.flatten()
+    axC = axC.flatten()
+    
+    axDS = np.append(axDS[:2],axDS[4:])
+    
+    
+            
+    samp =  ['mh_all_'+pcat,'mh_all_'+best,
+            'mh_Mm_all_'+pcat,'mh_Mm_all_'+best,
+            'mh_MM_all_'+pcat,'mh_MM_all_'+best,
+            'mh_zm_all_'+pcat,'mh_zm_all_'+best,
+            'mh_zM_all_'+pcat,'mh_zM_all_'+best,
+            'mh_Lrm_all_'+pcat,'mh_Lrm_all_'+best,
+            'mh_LrM_all_'+pcat,'mh_LrM_all_'+best,
+            'mh_red_all_'+pcat,'mh_red_all_'+best,
+            'mh_blue_all_'+pcat,'mh_blue_all_'+best]
+    
+    lsamp = ['Total sample - all pairs','Gold sample - all pairs',
+            'Total sample - $M_{r_{par}} < -21.0$','Gold sample - $M_{r_{par}} < -21.0$',
+            'Total sample - $M_{r_{par}} \geq -21.0$','Gold sample - $M_{r_{par}} \geq -21.0$',
+            'Total sample - $z < 0.4$','Gold sample - $z < 0.4$ ',
+            'Total sample - $z \geq 0.4$','Gold sample - $z \geq 0.4$',
+            'Total sample - $L_2/L_1 < 0.8$','Gold sample - $L_2/L_1 < 0.8$',
+            'Total sample - $L_2/L_1 \geq 0.8$','Gold sample - $L_2/L_1 \geq 0.8$ ',
+            r'Total sample - $red\,\,pairs$',r'Gold sample - $red\,\,pairs$',
+            r'Total sample - $blue\,\,pairs$',r'Gold sample - $blue\,\,pairs$']
+            
+    
+    ylabel = [True,False]+[True,False,False,False]*4
+    
+    for j in range(len(samp)):
+        lMfit += [plt_profile_fit_2h(samp[j],
+                lsamp[j],axDS[j],axC[j],
+                fytpe = ftype, ylabel=ylabel[j])]
+        # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
+    
+    
+    
+    fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
+    fC.savefig('../final_plots/chains2'+pcat+ftype+'.png',bbox_inches='tight')
 
 
+def make_fcl_plot():
 
-fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
-fC.savefig('../final_plots/chains2'+pcat+ftype+'.png',bbox_inches='tight')
+    samples =  ['mh_all_'+pcat,'mh_Mm_all_'+pcat,
+            'mh_MM_all_'+pcat,'mh_zm_all_'+pcat,
+            'mh_zM_all_'+pcat,'mh_Lrm_all_'+pcat,
+            'mh_LrM_all_'+pcat,
+            'mh_blue_all_'+pcat,'mh_red_all_'+pcat,]
 
-'''
+    samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
+            'mh_MM_all_'+best,'mh_zm_all_'+best,
+            'mh_zM_all_'+best,'mh_Lrm_all_'+best,
+            'mh_LrM_all_'+best,
+            'mh_blue_all_'+best,'mh_red_all_'+best]
+    
+    
+    csamp = ['k',
+            'gold','gold',
+            'royalblue','royalblue',
+            'C9','C9',
+            'palevioletred','palevioletred',]
+    
+    lsamp = ['all pairs',
+            '$M_{r_{par}} < -21.0$',
+            '$M_{r_{par}} \geq -21.0$',
+            '$z < 0.4$',
+            '$z \geq 0.4$',
+            '$L_2/L_1 < 0.8$',
+            '$L_2/L_1 \geq 0.8$',
+            r'$blue\,\,pairs$',
+            r'$red\,\,pairs$']
 
-csamp = ['k',
-         'palevioletred','palevioletred',
-         'royalblue','royalblue',
-         'gold','gold',
-         'C9','C9']
+    mark = ['o']+['v','^']*4
+
+    mark = ['o']+['v','^']*4
+
+    f, ax = plt.subplots(2,1, figsize=(6,8),sharex = True,sharey = True)
+    f.subplots_adjust(hspace=0,wspace=0)
+    
+    ax[0].text(0.13,1.27,'Total sample') 
+    ax[1].text(0.13,1.27,'Gold sample') 
+    ax[1].legend(frameon=False,loc=1)
+    fcl_plot(samples,lsamp,csamp,mark,ax=ax[0])
+    fcl_plot(samples_gold,lsamp,csamp,mark,ax=ax[1])
+    
+    ax[0].legend(frameon=False,ncol=2,loc=1,fontsize=11)
+    ax[0].set_ylim([0.97,1.3])
+    
+    f.savefig('../final_plots/contamination.pdf',bbox_inches='tight')
+
+def make_mag_mass_plot():
+
+    samples =  ['mh_all_'+pcat,'mh_Mm_all_'+pcat,
+            'mh_MM_all_'+pcat,'mh_zm_all_'+pcat,
+            'mh_zM_all_'+pcat,'mh_Lrm_all_'+pcat,
+            'mh_LrM_all_'+pcat,
+            'mh_blue_all_'+pcat,'mh_red_all_'+pcat,]
+
+    samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
+            'mh_MM_all_'+best,'mh_zm_all_'+best,
+            'mh_zM_all_'+best,'mh_Lrm_all_'+best,
+            'mh_LrM_all_'+best,
+            'mh_blue_all_'+best,'mh_red_all_'+best]
+    
+    
+    csamp = ['k',
+            'gold','gold',
+            'royalblue','royalblue',
+            'C9','C9',
+            'palevioletred','palevioletred',]
+    
+    lsamp = ['all pairs',
+            '$M_{r_{par}} < -21.0$',
+            '$M_{r_{par}} \geq -21.0$',
+            '$z < 0.4$',
+            '$z \geq 0.4$',
+            '$L_2/L_1 < 0.8$',
+            '$L_2/L_1 \geq 0.8$',
+            r'$blue\,\,pairs$',
+            r'$red\,\,pairs$']
+
+    mark = ['o']+['v','^']*4
+    
+    
+    lMfit = []
+    lMfit_gold = []
+    
+    for j in range(len(samples)):
+        lMfit += [plt_profile_fit_2h(samples[j],lsamp[j],plot=False,fytpe = ftype)]
+        lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
+
+
+    f, ax = plt.subplots(1,2, figsize=(12,4),sharex = True,sharey = True)
+    f.subplots_adjust(hspace=0,wspace=0)
+
+    ax[0].text(-20.6,13,'Total sample') 
+    ax[1].text(-20.6,13,'Gold sample') 
+    
+    
+    for j in np.arange(len(csamp)):
+        ax[0].plot(meanmag,lM200,'k')
+        ax[1].plot(meanmag,lM200,'k')
+        ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
+                        yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                        fmt=csamp[j],label=lsamp[j],marker=mark[j])
+        ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
+                        yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                        fmt=csamp[j],label=lsamp[j],marker=mark[j])
+                     
+    ax[0].legend(frameon=False,loc=3,ncol=3,fontsize=11)
+    ax[1].set_xlabel(r'$\langle M_r \rangle$')
+    ax[0].set_xlabel(r'$\langle M_r \rangle$')
+    ax[0].set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
+    
+    ax[0].axis([-21.7,-20.1,10.2,13.2])
+    f.savefig('../final_plots/mass_mag.pdf',bbox_inches='tight')
+
 
          
-mark = ['o']+['^','v']*4
 
 
+'''
 plt.figure()
 plt.title(pcat)
 for j in np.arange(len(csamp)):
