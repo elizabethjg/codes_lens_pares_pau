@@ -85,7 +85,7 @@ ngal = p.NGAL_w
 
 d = ngal/area
 
-fcl = ((d - np.mean(d[-2:]))*area)/ngal
+fcl = ((d - np.mean(d[-3:-1]))*area)/ngal
 
 bcorr = 1./(1-fcl)
 p.DSigma_T = bcorr*p.DSigma_T

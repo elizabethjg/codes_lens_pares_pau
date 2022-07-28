@@ -19,12 +19,14 @@ folder = '../profiles3/'
 meanmag = np.array([-20.03361442, -20.57903032, -21.2230643 , -21.84807599,-22.48726666])
 lM200  = np.array([11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.67117284])
 
+pcat = '_photo_z_2nd_run_mag_i'
+best = '_photo_z_2nd_run_mag_i_best'
+
+
 def color_plot():
     
     from medianas import separate_medianas
     
-    # pcat = '_photo_z_2nd_run_mag_i'
-    pcat = '_photo_z_2nd_run_mag_i_best'
     
     L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
     field = np.ones(len(L1[1]))*1                             
@@ -331,7 +333,7 @@ def dilution(samp):
 
     d = ngal/area
 
-    fcl = ((d - np.mean(d[-2:]))*area)/ngal
+    fcl = ((d - np.mean(d[-3:-1]))*area)/ngal
     
     # plt.plot(p.Rp,1./(1-fcl))
     # plt.plot(p.Rp,1./(1-fcl),'o')
@@ -450,8 +452,6 @@ def make_fcl_plot():
             '$L_2/L_1 \geq 0.8$',
             r'$blue\,\,pairs$',
             r'$red\,\,pairs$']
-
-    mark = ['o']+['v','^']*4
 
     mark = ['o']+['v','^']*4
 
