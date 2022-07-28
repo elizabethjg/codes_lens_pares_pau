@@ -23,7 +23,8 @@ def color_plot():
     
     from medianas import separate_medianas
     
-    pcat = '_photo_z_2nd_run_mag_i'
+    # pcat = '_photo_z_2nd_run_mag_i'
+    pcat = '_photo_z_2nd_run_mag_i_best'
     
     L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
     field = np.ones(len(L1[1]))*1                             
