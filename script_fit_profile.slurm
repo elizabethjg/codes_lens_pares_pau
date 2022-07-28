@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=fitpair1
+#SBATCH --job-name=all
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=56
 #SBATCH --time=3-00:00:00
