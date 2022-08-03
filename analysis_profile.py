@@ -21,22 +21,22 @@ lM200  = np.array([11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.671172
 
 pcat = '_photo_z_2nd_run_mag_i'
 best = '_photo_z_2nd_run_mag_i_best'
-
+ftype = '_boost'
 
 def color_plot():
     
     from medianas import separate_medianas
     
     
-    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
+    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+best).T
     field = np.ones(len(L1[1]))*1                             
     L1 = np.vstack((L1,field))                                
                                                             
-    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
+    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+best).T
     field = np.ones(len(L2[1]))*2                             
     L2 = np.vstack((L2,field))                                
                                     
-    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+best).T
     field = np.ones(len(L3[1]))*3
     L3 = np.vstack((L3,field))
     
@@ -275,17 +275,17 @@ def plt_profile_fit_2h(samp,lsamp,
     
     if plot:
         
-        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
         
-        ds = ds1h+ds2h
+        ds = ds1h#+ds2h
         
         axDS.plot(0,0,'w.',label=lsamp)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
         axDS.plot(rplot,ds1h,'C4')
-        axDS.plot(rplot,ds2h,'C4--')
+        # axDS.plot(rplot,ds2h,'C4--')
         # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
@@ -301,11 +301,10 @@ def plt_profile_fit_2h(samp,lsamp,
         axDS.legend(frameon=False,loc=1,fontsize=12)
         
         
-        axC.plot(lgM,label=lsamp,alpha=0.5)
-        axC.axhline(np.median(lgM[2500:]),alpha=0.5)
-        axC.axhline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--')
-        axC.axhline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--')
-        axC.axvline(2500)
+        axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),label=lsamp,histtype='step')
+        axC.axvline(np.median(lgM[2500:]),alpha=0.5)
+        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--')
+        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--')
         axC.legend(frameon=False,loc=1)
         axC.set_xlabel('$N_{it}$')
         if ylabel:
@@ -363,7 +362,7 @@ def fcl_plot(samples,lsamps,csamps,marker,ax=plot):
 
 def make_plot_profile():
 
-    ftype = '_boost'
+    
     
     pcat = '_photo_z_2nd_run_mag_i'
     best = '_photo_z_2nd_run_mag_i_best'
@@ -422,6 +421,54 @@ def make_plot_profile():
     fC.savefig('../final_plots/chains2'+pcat+ftype+'.png',bbox_inches='tight')
 
 
+def make_plot_profile2():
+
+    
+    
+    pcat = '_photo_z_2nd_run_mag_i'
+    best = '_photo_z_2nd_run_mag_i_best'
+    
+    
+    lMfit = []
+    
+    fDS, axDS = plt.subplots(5,2, figsize=(14,17),sharex = True,sharey = True)
+    fDS.subplots_adjust(hspace=0,wspace=0)
+    
+    fC, axC = plt.subplots(5,2, figsize=(12,14),sharex = True,sharey = True)
+    fC.subplots_adjust(hspace=0,wspace=0)
+    
+    
+    axDS = axDS.flatten()
+    axC = axC.flatten()
+        
+    
+            
+    samp =  ['mh_all_'+pcat,'mh_all_'+best,
+            'mh_M1_all_'+pcat,'mh_M1_all_'+best,
+            'mh_M2_all_'+pcat,'mh_M2_all_'+best,
+            'mh_M3_all_'+pcat,'mh_M3_all_'+best,
+            'mh_M4_all_'+pcat,'mh_M4_all_'+best]
+    
+    lsamp = ['Total sample - all pairs','Gold sample - all pairs',
+            'Total sample - $M_1$', 'Gold sample - $M_1$',
+            'Total sample - $M_2$', 'Gold sample - $M_2$',
+            'Total sample - $M_3$', 'Gold sample - $M_3$',
+            'Total sample - $M_4$', 'Gold sample - $M_4$']
+            
+    
+    ylabel = [True,False]*5
+    
+    for j in range(len(samp)):
+        lMfit += [plt_profile_fit_2h(samp[j],
+                lsamp[j],axDS[j],axC[j],
+                fytpe = ftype, ylabel=ylabel[j])]
+        # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
+    
+    
+    
+    fDS.savefig('../final_plots/profile_Mbins.pdf',bbox_inches='tight')
+    fC.savefig('../final_plots/chains2'+pcat+ftype+'_Mbins.png',bbox_inches='tight')
+
 def make_fcl_plot():
 
     samples =  ['mh_all_'+pcat,'mh_Mm_all_'+pcat,
@@ -475,20 +522,25 @@ def make_mag_mass_plot():
             'mh_MM_all_'+pcat,'mh_zm_all_'+pcat,
             'mh_zM_all_'+pcat,'mh_Lrm_all_'+pcat,
             'mh_LrM_all_'+pcat,
-            'mh_blue_all_'+pcat,'mh_red_all_'+pcat,]
+            'mh_blue_all_'+pcat,'mh_red_all_'+pcat,
+            'mh_M1_all_'+pcat,'mh_M2_all_'+pcat,
+            'mh_M3_all_'+pcat,'mh_M4_all_'+pcat]
 
     samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
             'mh_MM_all_'+best,'mh_zm_all_'+best,
             'mh_zM_all_'+best,'mh_Lrm_all_'+best,
             'mh_LrM_all_'+best,
-            'mh_blue_all_'+best,'mh_red_all_'+best]
+            'mh_blue_all_'+best,'mh_red_all_'+best,
+            'mh_M1_all_'+best,'mh_M2_all_'+best,
+            'mh_M3_all_'+best,'mh_M4_all_'+best]
     
     
     csamp = ['k',
             'gold','gold',
             'royalblue','royalblue',
             'C9','C9',
-            'palevioletred','palevioletred',]
+            'palevioletred','palevioletred',
+            'C3','C3','C3','C3']
     
     lsamp = ['all pairs',
             '$M_{r_{par}} < -21.0$',
@@ -498,9 +550,10 @@ def make_mag_mass_plot():
             '$L_2/L_1 < 0.8$',
             '$L_2/L_1 \geq 0.8$',
             r'$blue\,\,pairs$',
-            r'$red\,\,pairs$']
+            r'$red\,\,pairs$',
+            '$M1$','$M1$','$M1$','$M1$']
 
-    mark = ['o']+['v','^']*4
+    mark = ['o']+['v','^']*4+['o']*4
     
     
     lMfit = []
