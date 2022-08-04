@@ -523,16 +523,16 @@ def make_mag_mass_plot():
             'mh_zM_all_'+pcat,'mh_Lrm_all_'+pcat,
             'mh_LrM_all_'+pcat,
             'mh_blue_all_'+pcat,'mh_red_all_'+pcat,
-            'mh_M1_all_'+pcat,'mh_M2_all_'+pcat,
-            'mh_M3_all_'+pcat,'mh_M4_all_'+pcat]
+            'mh_M_1_all_'+pcat,'mh_M_2_all_'+pcat,
+            'mh_M_3_all_'+pcat,'mh_M4_all_'+pcat]
 
     samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
             'mh_MM_all_'+best,'mh_zm_all_'+best,
             'mh_zM_all_'+best,'mh_Lrm_all_'+best,
             'mh_LrM_all_'+best,
             'mh_blue_all_'+best,'mh_red_all_'+best,
-            'mh_M1_all_'+best,'mh_M2_all_'+best,
-            'mh_M3_all_'+best,'mh_M4_all_'+best]
+            'mh_M_1_all_'+best,'mh_M_2_all_'+best,
+            'mh_M_3_all_'+best,'mh_M4_all_'+best]
     
     
     csamp = ['k',
