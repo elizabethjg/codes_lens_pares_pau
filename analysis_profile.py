@@ -444,16 +444,16 @@ def make_plot_profile2():
     
             
     samp =  ['mh_all_'+pcat,'mh_all_'+best,
-            'mh_M1_all_'+pcat,'mh_M1_all_'+best,
-            'mh_M2_all_'+pcat,'mh_M2_all_'+best,
-            'mh_M3_all_'+pcat,'mh_M3_all_'+best,
-            'mh_M4_all_'+pcat,'mh_M4_all_'+best]
+            'mh_M_1_all_'+pcat,'mh_M_1_all_'+best,
+            'mh_M_2_all_'+pcat,'mh_M_2_all_'+best,
+            'mh_M_3_all_'+pcat,'mh_M_3_all_'+best]
+            # 'mh_M_4_all_'+pcat,'mh_M_4_all_'+best]
     
     lsamp = ['Total sample - all pairs','Gold sample - all pairs',
             'Total sample - $M_1$', 'Gold sample - $M_1$',
             'Total sample - $M_2$', 'Gold sample - $M_2$',
-            'Total sample - $M_3$', 'Gold sample - $M_3$',
-            'Total sample - $M_4$', 'Gold sample - $M_4$']
+            'Total sample - $M_3$', 'Gold sample - $M_3$']
+            # 'Total sample - $M_4$', 'Gold sample - $M_4$']
             
     
     ylabel = [True,False]*5
