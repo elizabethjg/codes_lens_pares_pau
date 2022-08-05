@@ -28,32 +28,63 @@ def color_plot():
     from medianas import separate_medianas
     
     
-    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+best).T
-    field = np.ones(len(L1[1]))*1                             
-    L1 = np.vstack((L1,field))                                
-                                                            
-    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+best).T
-    field = np.ones(len(L2[1]))*2                             
-    L2 = np.vstack((L2,field))                                
-                                    
-    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+best).T
-    field = np.ones(len(L3[1]))*3
-    L3 = np.vstack((L3,field))
+    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
+    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T                                    
+    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
     
     L = np.vstack((L1.T,L2.T,L3.T)).T
     
     M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-    M2 = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
     M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-    M2i = L[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
     
-    label_x = '$M_{r_{par}}$'
-    label_y = '$M_{i_{par}}$'
     
-    separate_medianas(Mtot,Mtot-Mtoti,label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
+    color = Mtot-Mtoti
 
+    L1b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+best).T                                                            
+    L2b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+best).T                                    
+    L3b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+best).T
+    
+    Lb = np.vstack((L1b.T,L2b.T,L3b.T)).T
+    
+    M1b = Lb[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2b = Lb[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    Mtotb = -2.5*np.log10(10**(-0.4*M1b)+10**(-0.4*M2b))
+    M1ib = Lb[7]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2ib = Lb[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    Mtotib = -2.5*np.log10(10**(-0.4*M1ib)+10**(-0.4*M2ib))
+    
+    colorb = Mtotb-Mtotib
+
+    label_x = '$M^{pair}_{r}$'
+    label_y = '$M^{pair}_{r} - M^{pair}_{i}$'
+    
+    separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
+    separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
+
+    Lratio = 10.**(-0.4*(L[-1]-L[8]))
+    Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
+    
+    f, ax = plt.subplots(1,2, figsize=(12,4))
+    # f.subplots_adjust(hspace=0,wspace=0)
+    
+    ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[0].hist(Mtotb,20,color='C1',label='Gold',lw=2,histtype='step',density=True)
+    ax[0].set_xlabel('$M^{pair}_{r}$')
+    ax[0].set_ylabel('$n$')
+    ax[1].set_ylabel('$n$')
+    
+    ax[0].legend(frameon=False,loc=2)
+
+
+    ax[1].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[1].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[1].set_xlabel('$L_2/L_1$')
+    
+    f.savefig('../final_plots/Mdist.pdf')
 
 def plt_profile_wofit(samp):
     
@@ -397,8 +428,8 @@ def make_plot_profile():
             'mh_blue_all_'+pcat,'mh_blue_all_'+best]
     
     lsamp = ['Total sample - all pairs','Gold sample - all pairs',
-            'Total sample - $M_{r_{par}} < -21.0$','Gold sample - $M_{r_{par}} < -21.0$',
-            'Total sample - $M_{r_{par}} \geq -21.0$','Gold sample - $M_{r_{par}} \geq -21.0$',
+            'Total sample - $M^{pair}_r < -21.0$','Gold sample - $M^{pair}_r < -21.0$',
+            'Total sample - $M^{pair}_r \geq -21.0$','Gold sample - $M^{pair}_r \geq -21.0$',
             'Total sample - $z < 0.4$','Gold sample - $z < 0.4$ ',
             'Total sample - $z \geq 0.4$','Gold sample - $z \geq 0.4$',
             'Total sample - $L_2/L_1 < 0.8$','Gold sample - $L_2/L_1 < 0.8$',
@@ -491,8 +522,8 @@ def make_fcl_plot():
             'palevioletred','palevioletred',]
     
     lsamp = ['all pairs',
-            '$M_{r_{par}} < -21.0$',
-            '$M_{r_{par}} \geq -21.0$',
+            '$M^{pair}_r < -21.0$',
+            '$M^{pair}_r \geq -21.0$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.8$',
@@ -543,8 +574,8 @@ def make_mag_mass_plot():
             'C3','C3','C3','C3']
     
     lsamp = ['all pairs',
-            '$M_{r_{par}} < -21.0$',
-            '$M_{r_{par}} \geq -21.0$',
+            '$M^{pair}_r < -21.0$',
+            '$M^{pair}_r \geq -21.0$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.8$',
