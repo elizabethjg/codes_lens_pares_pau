@@ -84,7 +84,7 @@ def color_plot():
     ax[1].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[1].set_xlabel('$L_2/L_1$')
     
-    f.savefig('../final_plots/Mdist.pdf')
+    f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
 
 def plt_profile_wofit(samp):
     
@@ -306,17 +306,17 @@ def plt_profile_fit_2h(samp,lsamp,
     
     if plot:
         
-        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
         
-        ds = ds1h#+ds2h
+        ds = ds1h+ds2h
         
         axDS.plot(0,0,'w.',label=lsamp)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
         axDS.plot(rplot,ds1h,'C4')
-        # axDS.plot(rplot,ds2h,'C4--')
+        axDS.plot(rplot,ds2h,'C4--')
         # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
@@ -377,8 +377,10 @@ def fcl_plot(samples,lsamps,csamps,marker,ax=plot):
         samp = samples[j]
       
         r,d,fcl,n = dilution(samp)
-    
-        ax.plot(r,1./(1-fcl),marker[j],color=csamps[j],label=lsamps[j],markersize=6)
+        if j == 0:
+            ax.plot(r,1./(1-fcl),marker[j],color=csamps[j],label=lsamps[j],markersize=10)
+        else:
+            ax.plot(r,1./(1-fcl),marker[j],color=csamps[j],label=lsamps[j],markersize=6)
         ax.plot(r,1./(1-fcl),csamps[j],alpha=0.5)
 
     ax.set_xscale('log')
@@ -549,31 +551,29 @@ def make_fcl_plot():
 
 def make_mag_mass_plot():
 
-    samples =  ['mh_all_'+pcat,'mh_Mm_all_'+pcat,
-            'mh_MM_all_'+pcat,'mh_zm_all_'+pcat,
-            'mh_zM_all_'+pcat,'mh_Lrm_all_'+pcat,
-            'mh_LrM_all_'+pcat,
-            'mh_blue_all_'+pcat,'mh_red_all_'+pcat,
-            'mh_M_1_all_'+pcat,'mh_M_2_all_'+pcat,
-            'mh_M_3_all_'+pcat,'mh_M4_all_'+pcat]
+    samples =  ['mh_all_'+pcat,'mh_M_1_all_'+pcat,
+            'mh_M_2_all_'+pcat,'mh_M_3_all_'+pcat,
+            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
+            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
+            'mh_Lrm_all_'+pcat,'mh_LrM_all_'+pcat,
+            'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
 
-    samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
-            'mh_MM_all_'+best,'mh_zm_all_'+best,
-            'mh_zM_all_'+best,'mh_Lrm_all_'+best,
-            'mh_LrM_all_'+best,
-            'mh_blue_all_'+best,'mh_red_all_'+best,
-            'mh_M_1_all_'+best,'mh_M_2_all_'+best,
-            'mh_M_3_all_'+best,'mh_M4_all_'+best]
+    samples_gold =  ['mh_all_'+best,'mh_M_1_all_'+best,
+            'mh_M_2_all_'+best,'mh_M_3_all_'+best,
+            'mh_Mm_all_'+best,'mh_MM_all_'+best,
+            'mh_zm_all_'+best,'mh_zM_all_'+best,
+            'mh_Lrm_all_'+best,'mh_LrM_all_'+best,
+            'mh_blue_all_'+best,'mh_red_all_'+best]
     
     
-    csamp = ['k',
+    csamp = ['k','C3','C3','C3',
             'gold','gold',
             'royalblue','royalblue',
             'C9','C9',
-            'palevioletred','palevioletred',
-            'C3','C3','C3','C3']
+            'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
+            '$M_1$','$M_2$','$M_3$',
             '$M^{pair}_r < -21.0$',
             '$M^{pair}_r \geq -21.0$',
             '$z < 0.4$',
@@ -581,11 +581,9 @@ def make_mag_mass_plot():
             '$L_2/L_1 < 0.8$',
             '$L_2/L_1 \geq 0.8$',
             r'$blue\,\,pairs$',
-            r'$red\,\,pairs$',
-            '$M1$','$M1$','$M1$','$M1$']
+            r'$red\,\,pairs$']
 
-    mark = ['o']+['v','^']*4+['o']*4
-    
+    mark = ['o','^','o','v'] + ['v','^']*4
     
     lMfit = []
     lMfit_gold = []
@@ -605,14 +603,23 @@ def make_mag_mass_plot():
     for j in np.arange(len(csamp)):
         ax[0].plot(meanmag,lM200,'k')
         ax[1].plot(meanmag,lM200,'k')
-        ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
-                        yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
-                        fmt=csamp[j],label=lsamp[j],marker=mark[j])
-        ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
-                        yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
-                        fmt=csamp[j],label=lsamp[j],marker=mark[j])
+        if j == 0:
+        
+            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],markersize=10,
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],markersize=10,
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+        else:
+            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
                      
-    ax[0].legend(frameon=False,loc=3,ncol=3,fontsize=11)
+    ax[1].legend(frameon=False,loc=3,ncol=3,fontsize=11)
     ax[1].set_xlabel(r'$\langle M_r \rangle$')
     ax[0].set_xlabel(r'$\langle M_r \rangle$')
     ax[0].set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
