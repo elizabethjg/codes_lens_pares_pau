@@ -68,21 +68,24 @@ def color_plot():
     Lratio = 10.**(-0.4*(L[-1]-L[8]))
     Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
     
-    f, ax = plt.subplots(1,2, figsize=(12,4))
+    f, ax = plt.subplots(1,3, figsize=(14,3))
     # f.subplots_adjust(hspace=0,wspace=0)
     
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[0].hist(Mtotb,20,color='C1',label='Gold',lw=2,histtype='step',density=True)
+    ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[0].set_xlabel('$M^{pair}_{r}$')
     ax[0].set_ylabel('$n$')
     ax[1].set_ylabel('$n$')
+    ax[2].set_ylabel('$n$')
     
-    ax[0].legend(frameon=False,loc=2)
-
-
     ax[1].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[1].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[1].set_xlabel('$L_2/L_1$')
+    ax[1].legend(frameon=False,loc=1)
+
+    ax[2].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[2].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[2].set_xlabel('$z$')
     
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
 
@@ -256,7 +259,7 @@ def plt_profile_fit_2h(samp,lsamp,
     h   = profile[0].header
     p   = profile[1].data
     cov = profile[2].data
-
+    print(h['N_LENSES'])
     CovDST  = cov.COV_ST.reshape(len(p),len(p))
     CovDSX  = cov.COV_SX.reshape(len(p),len(p))
     
@@ -551,29 +554,26 @@ def make_fcl_plot():
 
 def make_mag_mass_plot():
 
-    samples =  ['mh_all_'+pcat,'mh_M_1_all_'+pcat,
-            'mh_M_2_all_'+pcat,'mh_M_3_all_'+pcat,
+    samples =  ['mh_all_'+pcat,
             'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
             'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
             'mh_Lrm_all_'+pcat,'mh_LrM_all_'+pcat,
             'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
 
-    samples_gold =  ['mh_all_'+best,'mh_M_1_all_'+best,
-            'mh_M_2_all_'+best,'mh_M_3_all_'+best,
+    samples_gold =  ['mh_all_'+best,
             'mh_Mm_all_'+best,'mh_MM_all_'+best,
             'mh_zm_all_'+best,'mh_zM_all_'+best,
             'mh_Lrm_all_'+best,'mh_LrM_all_'+best,
             'mh_blue_all_'+best,'mh_red_all_'+best]
     
     
-    csamp = ['k','C3','C3','C3',
+    csamp = ['k',
             'gold','gold',
             'royalblue','royalblue',
             'C9','C9',
             'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
-            '$M_1$','$M_2$','$M_3$',
             '$M^{pair}_r < -21.0$',
             '$M^{pair}_r \geq -21.0$',
             '$z < 0.4$',
@@ -583,7 +583,7 @@ def make_mag_mass_plot():
             r'$blue\,\,pairs$',
             r'$red\,\,pairs$']
 
-    mark = ['o','^','o','v'] + ['v','^']*4
+    mark = ['o'] + ['v','^']*4
     
     lMfit = []
     lMfit_gold = []

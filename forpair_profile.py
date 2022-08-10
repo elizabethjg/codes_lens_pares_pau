@@ -377,7 +377,7 @@ def main(sample,pcat,
 
         mz      = (L[3] >= z_min)*(L[3] < z_max)
         mtot    = (Mtot >= Mtot_min)*(Mtot < Mtot_max)
-        mratio  = (Lratio >= Lratio_min)*(L[3] < Lratio_max)
+        mratio  = (Lratio >= Lratio_min)*(Lratio < Lratio_max)
         mlenses = mz*mratio*mtot    
             
         if colorcut == 'red':
