@@ -305,7 +305,7 @@ def plt_profile_fit_2h(samp,lsamp,
     fitpar = fitted[0].header
     lgM   = fitted[1].data.logM
     
-    rplot = np.logspace(np.log10(h['RIN']/1000.),np.log10(h['ROUT']/1000.),20)
+    rplot = np.logspace(np.log10((h['RIN']-20.)/1000.),np.log10((h['ROUT'])/1000.),20)
     
     nfw  = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
     
@@ -317,17 +317,17 @@ def plt_profile_fit_2h(samp,lsamp,
     
     if plot:
         
-        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
         
-        ds = ds1h#+ds2h
+        ds = ds1h+ds2h
         
         axDS.plot(0,0,'w.',label=lsamp)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
         axDS.plot(rplot,ds1h,'C4')
-        # axDS.plot(rplot,ds2h,'C4--')
+        axDS.plot(rplot,ds2h,'C4--')
         # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
@@ -335,11 +335,13 @@ def plt_profile_fit_2h(samp,lsamp,
             axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
         axDS.set_xlabel(r'$R [Mpc/h]$')
         axDS.set_ylim(0.095,500)
-        axDS.set_xlim(h['RIN']/1000.,h['ROUT']/1000.)
+        axDS.set_xlim((h['RIN']-20)/1000.,(h['ROUT']+3e3)/1000.)
         axDS.yaxis.set_ticks([0.1,1,10,100])
         axDS.set_yticklabels([0.1,1,10,100])
+        axDS.xaxis.set_ticks([0.1,1,10])
+        axDS.set_xticklabels([0.1,1,10])
         axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
-        axDS.axvline(ROUT/1000.,color='C7')    
+        # axDS.axvline(ROUT/1000.,color='C7')    
         axDS.legend(frameon=False,loc=1,fontsize=12)
         
         
@@ -414,7 +416,7 @@ def make_plot_profile():
     
     lMfit = []
     
-    fDS, axDS = plt.subplots(5,4, figsize=(14,17),sharex = True,sharey = True)
+    fDS, axDS = plt.subplots(5,4, figsize=(14.5,17),sharex = True,sharey = True)
     fDS.subplots_adjust(hspace=0,wspace=0)
     
     fC, axC = plt.subplots(5,4, figsize=(12,14),sharex = True,sharey = True)
@@ -435,8 +437,8 @@ def make_plot_profile():
             'mh_MM_all_'+pcat,'mh_MM_all_'+best,
             'mh_zm_all_'+pcat,'mh_zm_all_'+best,
             'mh_zM_all_'+pcat,'mh_zM_all_'+best,
-            'mh_Lrm_all_'+pcat,'mh_Lrm_all_'+best,
-            'mh_LrM_all_'+pcat,'mh_LrM_all_'+best,
+            'mh_Lrm2_all_'+pcat,'mh_Lrm2_all_'+best,
+            'mh_LrM2_all_'+pcat,'mh_LrM2_all_'+best,
             'mh_red_all_'+pcat,'mh_red_all_'+best,
             'mh_blue_all_'+pcat,'mh_blue_all_'+best]
     
@@ -445,8 +447,8 @@ def make_plot_profile():
             'Total sample - $M^{pair}_r \geq -21.0$','Gold sample - $M^{pair}_r \geq -21.0$',
             'Total sample - $z < 0.4$','Gold sample - $z < 0.4$ ',
             'Total sample - $z \geq 0.4$','Gold sample - $z \geq 0.4$',
-            'Total sample - $L_2/L_1 < 0.8$','Gold sample - $L_2/L_1 < 0.8$',
-            'Total sample - $L_2/L_1 \geq 0.8$','Gold sample - $L_2/L_1 \geq 0.8$ ',
+            'Total sample - $L_2/L_1 < 0.5$','Gold sample - $L_2/L_1 < 0.5$',
+            'Total sample - $L_2/L_1 \geq 0.5$','Gold sample - $L_2/L_1 \geq 0.5$ ',
             r'Total sample - $red\,\,pairs$',r'Gold sample - $red\,\,pairs$',
             r'Total sample - $blue\,\,pairs$',r'Gold sample - $blue\,\,pairs$']
             
@@ -515,16 +517,16 @@ def make_plot_profile2():
 
 def make_fcl_plot():
 
-    samples =  ['mh_all_'+pcat,'mh_Mm_all_'+pcat,
-            'mh_MM_all_'+pcat,'mh_zm_all_'+pcat,
-            'mh_zM_all_'+pcat,'mh_Lrm_all_'+pcat,
-            'mh_LrM_all_'+pcat,
+    samples =  ['mh_all_'+pcat,
+            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
+            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
+            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
             'mh_blue_all_'+pcat,'mh_red_all_'+pcat,]
 
     samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
             'mh_MM_all_'+best,'mh_zm_all_'+best,
-            'mh_zM_all_'+best,'mh_Lrm_all_'+best,
-            'mh_LrM_all_'+best,
+            'mh_zM_all_'+best,'mh_Lrm2_all_'+best,
+            'mh_LrM2_all_'+best,
             'mh_blue_all_'+best,'mh_red_all_'+best]
     
     
@@ -539,8 +541,8 @@ def make_fcl_plot():
             '$M^{pair}_r \geq -21.0$',
             '$z < 0.4$',
             '$z \geq 0.4$',
-            '$L_2/L_1 < 0.8$',
-            '$L_2/L_1 \geq 0.8$',
+            '$L_2/L_1 < 0.5$',
+            '$L_2/L_1 \geq 0.5$',
             r'$blue\,\,pairs$',
             r'$red\,\,pairs$']
 
@@ -565,13 +567,13 @@ def make_mag_mass_plot():
     samples =  ['mh_all_'+pcat,
             'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
             'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
-            'mh_Lrm_all_'+pcat,'mh_LrM_all_'+pcat,
+            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
             'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
 
     samples_gold =  ['mh_all_'+best,
             'mh_Mm_all_'+best,'mh_MM_all_'+best,
             'mh_zm_all_'+best,'mh_zM_all_'+best,
-            'mh_Lrm_all_'+best,'mh_LrM_all_'+best,
+            'mh_Lrm2_all_'+best,'mh_LrM2_all_'+best,
             'mh_blue_all_'+best,'mh_red_all_'+best]
     
     
@@ -586,8 +588,8 @@ def make_mag_mass_plot():
             '$M^{pair}_r \geq -21.0$',
             '$z < 0.4$',
             '$z \geq 0.4$',
-            '$L_2/L_1 < 0.8$',
-            '$L_2/L_1 \geq 0.8$',
+            '$L_2/L_1 < 0.5$',
+            '$L_2/L_1 \geq 0.5$',
             r'$blue\,\,pairs$',
             r'$red\,\,pairs$']
 
@@ -601,7 +603,7 @@ def make_mag_mass_plot():
         lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
 
 
-    f, ax = plt.subplots(1,2, figsize=(12,4),sharex = True,sharey = True)
+    f, ax = plt.subplots(1,2, figsize=(13,4),sharex = True,sharey = True)
     f.subplots_adjust(hspace=0,wspace=0)
 
     ax[0].text(-20.6,13,'Total sample') 
@@ -627,7 +629,7 @@ def make_mag_mass_plot():
                             yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
                      
-    ax[1].legend(frameon=False,loc=3,ncol=3,fontsize=11)
+    ax[0].legend(frameon=False,loc=3,ncol=3,fontsize=11)
     ax[1].set_xlabel(r'$\langle M_r \rangle$')
     ax[0].set_xlabel(r'$\langle M_r \rangle$')
     ax[0].set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
