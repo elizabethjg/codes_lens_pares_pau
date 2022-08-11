@@ -62,14 +62,13 @@ def color_plot():
     label_x = '$M^{pair}_{r}$'
     label_y = '$M^{pair}_{r} - M^{pair}_{i}$'
     
-    separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
-    separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
-
     Lratio = 10.**(-0.4*(L[-1]-L[8]))
     Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
     
-    f, ax = plt.subplots(1,3, figsize=(14,3))
+    f, ax = plt.subplots(2,2, figsize=(10,8))
     # f.subplots_adjust(hspace=0,wspace=0)
+    
+    ax = ax.flatten()
     
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
@@ -77,17 +76,26 @@ def color_plot():
     ax[0].set_ylabel('$n$')
     ax[1].set_ylabel('$n$')
     ax[2].set_ylabel('$n$')
-    
-    ax[1].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[1].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[1].set_xlabel('$L_2/L_1$')
-    ax[1].legend(frameon=False,loc=1)
+    ax[3].set_ylabel('$n$')
 
-    ax[2].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[2].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[2].set_xlabel('$z$')
+    ax[1].hist(color,np.linspace(-0.,1.2,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[1].hist(colorb,np.linspace(-0.,1.2,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[1].set_xlabel(label_y)
     
+    ax[2].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[2].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[2].set_xlabel('$L_2/L_1$')
+
+    ax[3].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[3].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[3].set_xlabel(r'$z^{pair}$')
+
+    ax[0].legend(frameon=False,loc=2)    
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
+    
+    separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
+    separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
+
 
 def plt_profile_wofit(samp):
     
