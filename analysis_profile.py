@@ -21,7 +21,80 @@ lM200  = np.array([11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.671172
 
 pcat = '_photo_z_2nd_run_mag_i'
 best = '_photo_z_2nd_run_mag_i_best'
+vane = '_vane'
 ftype = '_boost'
+
+
+def color_plot_vane():
+    
+    from medianas import separate_medianas
+    
+    
+    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
+    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+    
+    L = np.vstack((L1.T,L3.T)).T
+    
+    M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
+    M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
+    
+    
+    color = Mtot-Mtoti
+
+    L1b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+vane).T                                                            
+    L3b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+vane).T
+    
+    Lb = np.vstack((L1b.T,L3b.T)).T
+    
+    M1b = Lb[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2b = Lb[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    Mtotb = -2.5*np.log10(10**(-0.4*M1b)+10**(-0.4*M2b))
+    M1ib = Lb[7]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2ib = Lb[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    Mtotib = -2.5*np.log10(10**(-0.4*M1ib)+10**(-0.4*M2ib))
+    
+    colorb = Mtotb-Mtotib
+
+    label_x = '$M^{pair}_{r}$'
+    label_y = '$M^{pair}_{r} - M^{pair}_{i}$'
+    
+    Lratio = 10.**(-0.4*(L[-1]-L[8]))
+    Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
+    
+    f, ax = plt.subplots(2,2, figsize=(10,8))
+    # f.subplots_adjust(hspace=0,wspace=0)
+    
+    ax = ax.flatten()
+    
+    ax[0].hist(Mtot,20,color='C4',label='Phot sample',lw=2,histtype='step',density=True)
+    ax[0].hist(Mtotb,20,color='C1',label='ML sample',lw=2,histtype='step',density=True)
+    ax[0].set_xlabel('$M^{pair}_{r}$')
+    ax[0].set_ylabel('$n$')
+    ax[1].set_ylabel('$n$')
+    ax[2].set_ylabel('$n$')
+    ax[3].set_ylabel('$n$')
+
+    ax[1].hist(color,np.linspace(-0.,1.2,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[1].hist(colorb,np.linspace(-0.,1.2,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[1].set_xlabel(label_y)
+    
+    ax[2].hist(Lratio,20,color='C4',label='Phot sample',lw=2,histtype='step',density=True)
+    ax[2].hist(Lratiob,20,color='C1',label='ML sample',lw=2,histtype='step',density=True)
+    ax[2].set_xlabel('$L_2/L_1$')
+
+    ax[3].hist(L[3],20,color='C4',label='Phot sample',lw=2,histtype='step',density=True)
+    ax[3].hist(Lb[3],20,color='C1',label='ML sample',lw=2,histtype='step',density=True)
+    ax[3].set_xlabel(r'$z^{pair}$')
+
+    ax[0].legend(frameon=False,loc=2)    
+    f.savefig('../final_plots/Mdist_vaneadd.pdf',bbox_inches='tight')
+    
+    separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_vane.pdf')
+
 
 def color_plot():
     
@@ -563,7 +636,10 @@ def make_fcl_plot():
     f.savefig('../final_plots/contamination.pdf',bbox_inches='tight')
 
 def make_mag_mass_plot():
-
+    
+    from scipy.optimize import curve_fit
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, meanmag, lM200)
+    m,n = popt
     samples =  ['mh_all_'+pcat,
             'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
             'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
@@ -603,8 +679,11 @@ def make_mag_mass_plot():
         lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
 
 
-    f, ax = plt.subplots(1,2, figsize=(13,4),sharex = True,sharey = True)
+    f, axall = plt.subplots(2,2, figsize=(13,6),sharex = True,gridspec_kw={'height_ratios': [2.5, 1]})
     f.subplots_adjust(hspace=0,wspace=0)
+
+    ax  = axall[0,:]
+    axr = axall[1,:]
 
     ax[0].text(-20.6,13,'Total sample') 
     ax[1].text(-20.6,13,'Gold sample') 
@@ -613,6 +692,9 @@ def make_mag_mass_plot():
     for j in np.arange(len(csamp)):
         ax[0].plot(meanmag,lM200,'k')
         ax[1].plot(meanmag,lM200,'k')
+        ax[0].plot(meanmag,meanmag*m+n,'C0--')
+        ax[1].plot(meanmag,meanmag*m+n,'C0--')
+        print(10**(lMfit_gold[j][1]-lMfit_gold[j][-1]*m+n))
         if j == 0:
         
             ax[0].errorbar(lMfit[j][-1],lMfit[j][1],markersize=10,
@@ -621,6 +703,21 @@ def make_mag_mass_plot():
             ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],markersize=10,
                             yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
+
+
+            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
+            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
+                            markersize=10,
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            
+            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
+            
+            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
+                            markersize=10,
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+                            
         else:
             ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
                             yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
@@ -628,13 +725,39 @@ def make_mag_mass_plot():
             ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
                             yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
+
+            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
+            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            
+            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
+            
+            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+
+
                      
     ax[0].legend(frameon=False,loc=3,ncol=3,fontsize=11)
-    ax[1].set_xlabel(r'$\langle M_r \rangle$')
-    ax[0].set_xlabel(r'$\langle M_r \rangle$')
+    axr[1].set_xlabel(r'$\langle M_r \rangle$')
+    axr[0].set_xlabel(r'$\langle M_r \rangle$')
     ax[0].set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
+    axr[0].set_ylabel(r'$M^{fit}_{200}/M^{MICE}_{200}$')
     
     ax[0].axis([-21.7,-20.1,10.2,13.2])
+    ax[1].axis([-21.7,-20.1,10.2,13.2])
+    axr[0].axis([-21.7,-20.1,-0.6,19])
+    axr[1].axis([-21.7,-20.1,-0.6,19])
+    
+    axr[0].set_yticks([1,5,10,15])
+    axr[1].set_yticks([1,5,10,15])
+    ax[1].set_yticks([])
+    axr[1].set_yticklabels([])
+    
+    axr[0].grid()
+    axr[1].grid()
+    
     f.savefig('../final_plots/mass_mag.pdf',bbox_inches='tight')
 
 
