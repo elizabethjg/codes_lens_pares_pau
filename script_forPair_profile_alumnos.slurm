@@ -37,7 +37,10 @@ conda activate myenv
 ##python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i_best' -sample 'mh_M_2' -nbins 15 -RIN 100 -ROUT 10000 -ncores 64 -Mtot_min -21.17 -Mtot_max -20.59
 ##python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i_best' -sample 'mh_M_3' -nbins 15 -RIN 100 -ROUT 10000 -ncores 64 -Mtot_min -20.59 
 
-python -u forpair_profile.py -pcat '_vane' -sample 'mh' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32  -fields w1w3
-python -u forpair_profile.py -pcat '_vane' -sample 'mh_MM' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_min -21.0 -fields w1w3
-python -u forpair_profile.py -pcat '_vane' -sample 'mh_Mm' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_max -21.0 -fields w1w3
+##python -u forpair_profile.py -pcat '_vane' -sample 'mh' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32  -fields w1w3
+##python -u forpair_profile.py -pcat '_vane' -sample 'mh_MM' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_min -21.0 -fields w1w3
+##python -u forpair_profile.py -pcat '_vane' -sample 'mh_Mm' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_max -21.0 -fields w1w3
+python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i' -sample 'mh' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32  -fields w1w3
+python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i' -sample 'mh_MM' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_min -21.0 -fields w1w3
+python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i' -sample 'mh_Mm' -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_max -21.0 -fields w1w3
 
