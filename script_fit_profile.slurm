@@ -19,5 +19,5 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 conda activate myenv
 
-srun ./run_fit_zphot.sh
-##srun ./run_fit_zphotw3.sh
+##srun ./run_fit_zphot.sh
+srun ./run_fit_zphotw3.sh
