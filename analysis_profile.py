@@ -760,6 +760,132 @@ def make_mag_mass_plot():
     
     f.savefig('../final_plots/mass_mag.pdf',bbox_inches='tight')
 
+def make_mag_mass_plot_vane():
+    
+    best = '_vane'
+    
+    from scipy.optimize import curve_fit
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, meanmag, lM200)
+    m,n = popt
+    samples =  ['mh_w1w3_'+pcat,
+            'mh_Mm_w1w3_'+pcat,'mh_MM_w1w3_'+pcat,
+            'mh_zm_w1w3_'+pcat,'mh_zM_w1w3_'+pcat,
+            'mh_Lrm2_w1w3_'+pcat,'mh_LrM2_w1w3_'+pcat,
+            'mh_blue_w1w3_'+pcat,'mh_red_w1w3_'+pcat]
+
+    samples_gold =  ['mh_w1w3_'+best,
+            'mh_Mm_w1w3_'+best,'mh_MM_w1w3_'+best,
+            'mh_zm_w1w3_'+best,'mh_zM_w1w3_'+best,
+            'mh_Lrm2_w1w3_'+best,'mh_LrM2_w1w3_'+best,
+            'mh_blue_w1w3_'+best,'mh_red_w1w3_'+best]
+    
+    
+    csamp = ['k',
+            'gold','gold',
+            'royalblue','royalblue',
+            'C9','C9',
+            'palevioletred','palevioletred']
+    
+    lsamp = ['all pairs',
+            '$M^{pair}_r < -21.0$',
+            '$M^{pair}_r \geq -21.0$',
+            '$z < 0.4$',
+            '$z \geq 0.4$',
+            '$L_2/L_1 < 0.5$',
+            '$L_2/L_1 \geq 0.5$',
+            r'$blue\,\,pairs$',
+            r'$red\,\,pairs$']
+
+    mark = ['o'] + ['v','^']*4
+    
+    lMfit = []
+    lMfit_gold = []
+    
+    for j in range(len(samples)):
+        lMfit += [plt_profile_fit_2h(samples[j],lsamp[j],plot=False,fytpe = ftype)]
+        lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
+
+
+    f, axall = plt.subplots(2,2, figsize=(13,6),sharex = True,gridspec_kw={'height_ratios': [2.5, 1]})
+    f.subplots_adjust(hspace=0,wspace=0)
+
+    ax  = axall[0,:]
+    axr = axall[1,:]
+
+    ax[0].text(-20.6,13,'Phot sample') 
+    ax[1].text(-20.6,13,'ML sample') 
+    
+    
+    for j in np.arange(len(csamp)):
+        ax[0].plot(meanmag,lM200,'k')
+        ax[1].plot(meanmag,lM200,'k')
+        ax[0].plot(meanmag,meanmag*m+n,'C0--')
+        ax[1].plot(meanmag,meanmag*m+n,'C0--')
+        print(10**(lMfit_gold[j][1]-lMfit_gold[j][-1]*m+n))
+        if j == 0:
+        
+            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],markersize=10,
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],markersize=10,
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+
+
+            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
+            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
+                            markersize=10,
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            
+            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
+            
+            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
+                            markersize=10,
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+                            
+        else:
+            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
+                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+
+            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
+            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+            
+            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
+            
+            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
+                            yerr=err,
+                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
+
+
+                     
+    ax[0].legend(frameon=False,loc=3,ncol=3,fontsize=11)
+    axr[1].set_xlabel(r'$\langle M_r \rangle$')
+    axr[0].set_xlabel(r'$\langle M_r \rangle$')
+    ax[0].set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
+    axr[0].set_ylabel(r'$M^{fit}_{200}/M^{MICE}_{200}$')
+    
+    ax[0].axis([-21.7,-20.1,10.2,13.2])
+    ax[1].axis([-21.7,-20.1,10.2,13.2])
+    axr[0].axis([-21.7,-20.1,-0.6,19])
+    axr[1].axis([-21.7,-20.1,-0.6,19])
+    
+    axr[0].set_yticks([1,5,10,15])
+    axr[1].set_yticks([1,5,10,15])
+    ax[1].set_yticks([])
+    axr[1].set_yticklabels([])
+    
+    axr[0].grid()
+    axr[1].grid()
+    
+    f.savefig('../final_plots/mass_mag_vane.pdf',bbox_inches='tight')
 
          
 
