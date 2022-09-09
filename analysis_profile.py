@@ -100,6 +100,27 @@ def color_plot():
     
     from medianas import separate_medianas
     
+    M1 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R1.dat').T
+    M2 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R2.dat').T
+    M3 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R3.dat').T
+    M4 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R4.dat').T
+    
+    M = np.vstack((M1.T,M2.T,M3.T,M4.T)).T
+    
+    M1_mice = np.zeros(len(M[1]))
+    M2_mice = np.zeros(len(M[1]))
+    
+    M1_mice[M[8]<M[17]] = M[8][M[8]<M[17]]
+    M1_mice[M[8]>M[17]] = M[17][M[8]>M[17]]
+    M2_mice[M[8]<M[17]] = M[17][M[8]<M[17]]
+    M2_mice[M[8]>M[17]] = M[8][M[8]>M[17]]
+
+    
+    Mtot_mice   = -2.5*np.log10(10**(-0.4*M[8])+10**(-0.4*M[17]))
+    Mtot_i_mice = -2.5*np.log10(10**(-0.4*M[10])+10**(-0.4*M[19]))
+    z_mice      = M[3]
+    Lratio_mice = 10.**(-0.4*(M2_mice-M1_mice))
+    color_mice  = Mtot_mice - Mtot_i_mice
     
     L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
     L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T                                    
@@ -143,6 +164,7 @@ def color_plot():
     
     ax = ax.flatten()
     
+    ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.3,density=True)
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[0].set_xlabel('$M^{pair}_{r}$')
@@ -151,19 +173,22 @@ def color_plot():
     ax[2].set_ylabel('$n$')
     ax[3].set_ylabel('$n$')
 
+    ax[1].hist(color_mice,np.linspace(-0.,1.2,20),color='C7',label='MICE sample',lw=2,density=True,alpha=0.3)
     ax[1].hist(color,np.linspace(-0.,1.2,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[1].hist(colorb,np.linspace(-0.,1.2,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[1].set_xlabel(label_y)
     
+    ax[2].hist(Lratio_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.3)
     ax[2].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[2].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[2].set_xlabel('$L_2/L_1$')
 
+    ax[3].hist(z_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.3)
     ax[3].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[3].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[3].set_xlabel(r'$z^{pair}$')
 
-    ax[0].legend(frameon=False,loc=2)    
+    ax[1].legend(frameon=False,loc=1)    
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
     
     separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
