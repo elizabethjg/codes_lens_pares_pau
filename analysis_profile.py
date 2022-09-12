@@ -29,7 +29,7 @@ def compute_density(ra,dec):
     ra = np.deg2rad(ra)
     dec = np.deg2rad(dec)
     
-    area = (np.sin(dec.max())-np.sin(dec.min()))*(ra.max()-ra.min())*(180/np.pi)**2
+    area = 0.7*(np.sin(dec.max())-np.sin(dec.min()))*(ra.max()-ra.min())*(180/np.pi)**2
     
     return len(ra)/(area*3600.)
 
