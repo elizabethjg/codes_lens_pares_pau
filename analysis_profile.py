@@ -24,6 +24,16 @@ best = '_photo_z_2nd_run_mag_i_best'
 vane = '_vane'
 ftype = '_boost'
 
+def compute_density(ra,dec):
+    
+    ra = np.deg2rad(ra)
+    dec = np.deg2rad(dec)
+    
+    area = (np.sin(dec.max())-np.sin(dec.min()))*(ra.max()-ra.min())*(180/np.pi)**2
+    
+    return len(ra)/(area*3600.)
+
+
 
 def color_plot_vane():
     
@@ -115,6 +125,11 @@ def color_plot():
     M2_mice[M[8]<M[17]] = M[17][M[8]<M[17]]
     M2_mice[M[8]>M[17]] = M[8][M[8]>M[17]]
 
+    print('density M1 = ',compute_density(M1[1],M1[2]))
+    print('density M2 = ',compute_density(M2[1],M2[2]))
+    print('density M3 = ',compute_density(M3[1],M3[2]))
+    print('density M4 = ',compute_density(M4[1],M4[2]))
+
     
     Mtot_mice   = -2.5*np.log10(10**(-0.4*M[8])+10**(-0.4*M[17]))
     Mtot_i_mice = -2.5*np.log10(10**(-0.4*M[10])+10**(-0.4*M[19]))
@@ -125,6 +140,10 @@ def color_plot():
     L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
     L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T                                    
     L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+    
+    print('density W1 = ',compute_density(L1[1],L1[2]))
+    print('density W2 = ',compute_density(L2[1],L2[2]))
+    print('density W3 = ',compute_density(L3[1],L3[2]))
     
     L = np.vstack((L1.T,L2.T,L3.T)).T
     
@@ -164,7 +183,7 @@ def color_plot():
     
     ax = ax.flatten()
     
-    ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.3,density=True)
+    ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[0].set_xlabel('$M^{pair}_{r}$')
@@ -173,17 +192,17 @@ def color_plot():
     ax[2].set_ylabel('$n$')
     ax[3].set_ylabel('$n$')
 
-    ax[1].hist(color_mice,np.linspace(-0.,1.2,20),color='C7',label='MICE sample',lw=2,density=True,alpha=0.3)
+    ax[1].hist(color_mice,np.linspace(-0.,1.2,20),color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
     ax[1].hist(color,np.linspace(-0.,1.2,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[1].hist(colorb,np.linspace(-0.,1.2,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[1].set_xlabel(label_y)
     
-    ax[2].hist(Lratio_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.3)
+    ax[2].hist(Lratio_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
     ax[2].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[2].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[2].set_xlabel('$L_2/L_1$')
 
-    ax[3].hist(z_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.3)
+    ax[3].hist(z_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
     ax[3].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[3].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[3].set_xlabel(r'$z^{pair}$')
