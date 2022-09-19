@@ -183,7 +183,7 @@ def color_plot():
     
     ax = ax.flatten()
     
-    ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
+    # ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[0].set_xlabel('$M^{pair}_{r}$')
@@ -192,22 +192,22 @@ def color_plot():
     ax[2].set_ylabel('$n$')
     ax[3].set_ylabel('$n$')
 
-    ax[1].hist(color_mice,np.linspace(-0.,1.2,20),color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
+    # ax[1].hist(color_mice,np.linspace(-0.,1.2,20),color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
     ax[1].hist(color,np.linspace(-0.,1.2,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[1].hist(colorb,np.linspace(-0.,1.2,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[1].set_xlabel(label_y)
     
-    ax[2].hist(Lratio_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
+    # ax[2].hist(Lratio_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
     ax[2].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[2].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[2].set_xlabel('$L_2/L_1$')
 
-    ax[3].hist(z_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
+    # ax[3].hist(z_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
     ax[3].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[3].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[3].set_xlabel(r'$z^{pair}$')
 
-    ax[1].legend(frameon=False,loc=1)    
+    ax[0].legend(frameon=False,loc=2)    
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
     
     separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
@@ -434,24 +434,30 @@ def plt_profile_fit_2h(samp,lsamp,
     
     if plot:
         
-        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
         
-        ds = ds1h+ds2h
+        ds = ds1h#+ds2h
+        
+        maskr = (p.Rp > (RIN/1000.))*(p.Rp < (ROUT/1000.))
+        dsfit = Delta_Sigma_NFW_2h(p.Rp[maskr],zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
+        
+        chi2 = str(np.round(chi_red(dsfit,p.DSigma_T[maskr],p.error_DSigma_T[maskr],1),1))
         
         axDS.plot(0,0,'w.',label=lsamp)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
+        axDS.plot(0,0,'w.',label=r'$\chi^2_{red} = $'+chi2)
         axDS.plot(rplot,ds1h,'C4')
-        axDS.plot(rplot,ds2h,'C4--')
+        # axDS.plot(rplot,ds2h,'C4--')
         # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
         if ylabel:
             axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
         axDS.set_xlabel(r'$R [Mpc/h]$')
-        axDS.set_ylim(0.095,500)
+        axDS.set_ylim(0.095,1500)
         axDS.set_xlim((h['RIN']-20)/1000.,(h['ROUT']+3e3)/1000.)
         axDS.yaxis.set_ticks([0.1,1,10,100])
         axDS.set_yticklabels([0.1,1,10,100])
