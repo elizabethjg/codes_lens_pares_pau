@@ -369,10 +369,10 @@ def plt_profile_align(samp):
     f.savefig(folder+'plots/profile_'+samp+'.png',bbox_inches='tight')
 
 
-def plt_profile_fit_2h(samp,lsamp,
+def plt_profile_fit_2h(samp,lsamp1,lsamp2,
                        axDS = plt,axC = plt,
                        RIN=300,ROUT=10000, fytpe = '',
-                       ylabel = True, plot = True):
+                       ylabel = True, chist = 'C0',plot = True):
     
 
     p_name = 'profile_'+samp+'.fits'
@@ -444,14 +444,13 @@ def plt_profile_fit_2h(samp,lsamp,
         
         chi2 = str(np.round(chi_red(dsfit,p.DSigma_T[maskr],p.error_DSigma_T[maskr],1),1))
         
-        axDS.plot(0,0,'w.',label=lsamp)
+        axDS.plot(0,0,'w.',label=lsamp1+' - '+lsamp2)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
         axDS.plot(0,0,'w.',label=r'$\chi^2_{red} = $'+chi2)
         axDS.plot(rplot,ds1h,'C4')
         # axDS.plot(rplot,ds2h,'C4--')
-        # axDS.fill_between(p.Rp,p.DSigma_T+error_DST,p.DSigma_T-error_DST,color='C1',alpha=0.4)
         axDS.set_xscale('log')
         axDS.set_yscale('log')
         if ylabel:
@@ -464,14 +463,124 @@ def plt_profile_fit_2h(samp,lsamp,
         axDS.xaxis.set_ticks([0.1,1,10])
         axDS.set_xticklabels([0.1,1,10])
         axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
-        # axDS.axvline(ROUT/1000.,color='C7')    
         axDS.legend(frameon=False,loc=1,fontsize=12)
         
         
-        axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),label=lsamp,histtype='step')
-        axC.axvline(np.median(lgM[2500:]),alpha=0.5)
-        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--')
-        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--')
+        axC.plot(13,0,'w.',label=lsamp2)
+        axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist)
+        axC.axvline(np.median(lgM[2500:]),alpha=0.5,color=chist)
+        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
+        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--',color=chist)
+        axC.legend(frameon=False,loc=1)
+        axC.set_xlabel('$N_{it}$')
+        if ylabel:
+            axC.set_ylabel('$\log M_{200}$')
+    
+    return np.append(fmass,Mmean)
+
+
+def plt_cov(samp,lsamp1,lsamp2,
+                       axDS = plt,axC = plt,
+                       RIN=300,ROUT=10000, fytpe = '',
+                       ylabel = True, chist = 'C0',plot = True):
+    
+
+    p_name = 'profile_'+samp+'.fits'
+    profile = fits.open(folder+p_name)
+
+    print(p_name)
+    
+    # '''
+    h   = profile[0].header
+    p   = profile[1].data
+    cov = profile[2].data
+    print(h['N_LENSES'])
+    CovDST  = cov.COV_ST.reshape(len(p),len(p))
+    CovDSX  = cov.COV_SX.reshape(len(p),len(p))
+    
+    cosmo_as = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
+
+    error_DSX = np.sqrt(np.diag(CovDSX))
+    error_DST = np.sqrt(np.diag(CovDST))
+
+    ### compute dilution
+    bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
+    area = np.pi*np.diff(bines**2)
+    
+    ngal = p.NGAL_w
+    
+    d = ngal/area
+    
+    fcl = ((d - np.mean(d[-2:]))*area)/ngal
+    
+    bcorr = 1./(1-fcl)
+
+    p.DSigma_T = bcorr*p.DSigma_T
+    p.DSigma_X = bcorr*p.DSigma_X
+    p.error_DSigma_T = bcorr*p.error_DSigma_T
+    p.error_DSigma_X = bcorr*p.error_DSigma_X
+
+    
+    zmean = h['z_mean']    
+    Mmean = h['M_mean']    
+    
+    ndots = p.shape[0]
+    
+    
+    # FIT MONOPOLE
+    fitted = fits.open(folder+'fitresults'+ftype+'_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+p_name)
+    fitpar = fitted[0].header
+    lgM   = fitted[1].data.logM
+    
+    rplot = np.logspace(np.log10((h['RIN']-20.)/1000.),np.log10((h['ROUT'])/1000.),20)
+    
+    nfw  = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
+    
+    fmass = np.percentile(lgM[2500:], [16,50,84])
+    
+    mass = str(np.round(fmass[1],1))+'^{+'+str(np.round(np.diff(fmass)[1],1))+'}'+'_{-'+str(np.round(np.diff(fmass)[0],1))+'}'
+    cfit = str(np.round(fitpar['c200'],1))+'$'
+    
+    
+    if plot:
+        
+        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
+        
+        ds = ds1h#+ds2h
+        
+        maskr = (p.Rp > (RIN/1000.))*(p.Rp < (ROUT/1000.))
+        dsfit = Delta_Sigma_NFW_2h(p.Rp[maskr],zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
+        
+        chi2 = str(np.round(chi_red(dsfit,p.DSigma_T[maskr],p.error_DSigma_T[maskr],1),1))
+        
+        axDS.plot(0,0,'w.',label=lsamp1+' - '+lsamp2)
+        axDS.plot(p.Rp,p.DSigma_T,'C1o')
+        axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
+        axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
+        axDS.plot(0,0,'w.',label=r'$\chi^2_{red} = $'+chi2)
+        axDS.plot(rplot,ds1h,'C4')
+        # axDS.plot(rplot,ds2h,'C4--')
+        axDS.set_xscale('log')
+        axDS.set_yscale('log')
+        if ylabel:
+            axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
+        axDS.set_xlabel(r'$R [Mpc/h]$')
+        axDS.set_ylim(0.095,1500)
+        axDS.set_xlim((h['RIN']-20)/1000.,(h['ROUT']+3e3)/1000.)
+        axDS.yaxis.set_ticks([0.1,1,10,100])
+        axDS.set_yticklabels([0.1,1,10,100])
+        axDS.xaxis.set_ticks([0.1,1,10])
+        axDS.set_xticklabels([0.1,1,10])
+        axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
+        axDS.legend(frameon=False,loc=1,fontsize=12)
+        
+        
+        axC.plot(13,0,'w.',label=lsamp2)
+        axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist)
+        axC.axvline(np.median(lgM[2500:]),alpha=0.5,color=chist)
+        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
+        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--',color=chist)
         axC.legend(frameon=False,loc=1)
         axC.set_xlabel('$N_{it}$')
         if ylabel:
@@ -542,9 +651,10 @@ def make_plot_profile():
     fDS, axDS = plt.subplots(5,4, figsize=(14.5,17),sharex = True,sharey = True)
     fDS.subplots_adjust(hspace=0,wspace=0)
     
-    fC, axC = plt.subplots(5,4, figsize=(12,14),sharex = True,sharey = True)
+    fC, axC = plt.subplots(5,2, figsize=(7,17),sharex = True,sharey = True)
     fC.subplots_adjust(hspace=0,wspace=0)
     
+    axC[0,1].axis('off')
     axDS[0,2].axis('off')
     axDS[0,3].axis('off')
     
@@ -552,6 +662,7 @@ def make_plot_profile():
     axC = axC.flatten()
     
     axDS = np.append(axDS[:2],axDS[4:])
+    axC  = np.append(axC[:1],axC[2:])
     
     
             
@@ -565,29 +676,29 @@ def make_plot_profile():
             'mh_red_all_'+pcat,'mh_red_all_'+best,
             'mh_blue_all_'+pcat,'mh_blue_all_'+best]
     
-    lsamp = ['Total sample - all pairs','Gold sample - all pairs',
-            'Total sample - $M^{pair}_r < -21.0$','Gold sample - $M^{pair}_r < -21.0$',
-            'Total sample - $M^{pair}_r \geq -21.0$','Gold sample - $M^{pair}_r \geq -21.0$',
-            'Total sample - $z < 0.4$','Gold sample - $z < 0.4$ ',
-            'Total sample - $z \geq 0.4$','Gold sample - $z \geq 0.4$',
-            'Total sample - $L_2/L_1 < 0.5$','Gold sample - $L_2/L_1 < 0.5$',
-            'Total sample - $L_2/L_1 \geq 0.5$','Gold sample - $L_2/L_1 \geq 0.5$ ',
-            r'Total sample - $red\,\,pairs$',r'Gold sample - $red\,\,pairs$',
-            r'Total sample - $blue\,\,pairs$',r'Gold sample - $blue\,\,pairs$']
+    lsamp1 = ['Total sample','Gold sample']*len(samp)
+    
+    lsamp2 = ['all pairs', 
+              '$M^{pair}_r < -21.0$', '$M^{pair}_r \geq -21.0$', 
+              '$z < 0.4$', '$z \geq 0.4$',
+              '$L_2/L_1 < 0.5$','$L_2/L_1 \geq 0.5$',
+              r'$red\,\,pairs$',r'$blue\,\,pairs$']
             
+    ind = [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8]
+    chist = ['C4','C1']*9
     
     ylabel = [True,False]+[True,False,False,False]*4
     
     for j in range(len(samp)):
         lMfit += [plt_profile_fit_2h(samp[j],
-                lsamp[j],axDS[j],axC[j],
-                fytpe = ftype, ylabel=ylabel[j])]
+                lsamp1[j],lsamp2[ind[j]],axDS[j],axC[ind[j]],
+                fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
         # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
     
     
     
-    fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
-    fC.savefig('../final_plots/chains2'+pcat+ftype+'.png',bbox_inches='tight')
+    # fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
+    fC.savefig('../final_plots/chains2'+pcat+ftype+'.pdf',bbox_inches='tight')
 
 
 def make_plot_profile2():
