@@ -369,8 +369,8 @@ def plt_profile_align(samp):
     f.savefig(folder+'plots/profile_'+samp+'.png',bbox_inches='tight')
 
 
-def plt_profile_fit_2h(samp,lsamp1,lsamp2,
-                       axDS = plt,axC = plt,
+def plt_profile_fit_2h(samp,lsamp,
+                       axDS = plt,
                        RIN=300,ROUT=10000, fytpe = '',
                        ylabel = True, chist = 'C0',plot = True):
     
@@ -444,7 +444,7 @@ def plt_profile_fit_2h(samp,lsamp1,lsamp2,
         
         chi2 = str(np.round(chi_red(dsfit,p.DSigma_T[maskr],p.error_DSigma_T[maskr],1),1))
         
-        axDS.plot(0,0,'w.',label=lsamp1+' - '+lsamp2)
+        axDS.plot(0,0,'w.',label=lsamp)
         axDS.plot(p.Rp,p.DSigma_T,'C1o')
         axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
         axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
@@ -465,128 +465,35 @@ def plt_profile_fit_2h(samp,lsamp1,lsamp2,
         axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
         axDS.legend(frameon=False,loc=1,fontsize=12)
         
-        
-        axC.plot(13,0,'w.',label=lsamp2)
-        axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist)
-        axC.axvline(np.median(lgM[2500:]),alpha=0.5,color=chist)
-        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
-        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--',color=chist)
-        axC.legend(frameon=False,loc=1)
-        axC.set_xlabel('$N_{it}$')
-        if ylabel:
-            axC.set_ylabel('$\log M_{200}$')
-    
-    return np.append(fmass,Mmean)
+    return [fmass,Mmean,lgM[2500:]]
 
 
-def plt_cov(samp,lsamp1,lsamp2,
-                       axDS = plt,axC = plt,
-                       RIN=300,ROUT=10000, fytpe = '',
-                       ylabel = True, chist = 'C0',plot = True):
+def plt_mcmc(samp,lsamp,axC = plt,
+             RIN=300,ROUT=10000, fytpe = '',
+            ylabel = True, legend=True,chist = 'C0'):
     
 
     p_name = 'profile_'+samp+'.fits'
-    profile = fits.open(folder+p_name)
-
-    print(p_name)
-    
-    # '''
-    h   = profile[0].header
-    p   = profile[1].data
-    cov = profile[2].data
-    print(h['N_LENSES'])
-    CovDST  = cov.COV_ST.reshape(len(p),len(p))
-    CovDSX  = cov.COV_SX.reshape(len(p),len(p))
-    
-    cosmo_as = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
-
-    error_DSX = np.sqrt(np.diag(CovDSX))
-    error_DST = np.sqrt(np.diag(CovDST))
-
-    ### compute dilution
-    bines = np.logspace(np.log10(h['RIN']),np.log10(h['ROUT']),num=len(p)+1)
-    area = np.pi*np.diff(bines**2)
-    
-    ngal = p.NGAL_w
-    
-    d = ngal/area
-    
-    fcl = ((d - np.mean(d[-2:]))*area)/ngal
-    
-    bcorr = 1./(1-fcl)
-
-    p.DSigma_T = bcorr*p.DSigma_T
-    p.DSigma_X = bcorr*p.DSigma_X
-    p.error_DSigma_T = bcorr*p.error_DSigma_T
-    p.error_DSigma_X = bcorr*p.error_DSigma_X
-
-    
-    zmean = h['z_mean']    
-    Mmean = h['M_mean']    
-    
-    ndots = p.shape[0]
-    
     
     # FIT MONOPOLE
     fitted = fits.open(folder+'fitresults'+ftype+'_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+p_name)
     fitpar = fitted[0].header
     lgM   = fitted[1].data.logM
     
-    rplot = np.logspace(np.log10((h['RIN']-20.)/1000.),np.log10((h['ROUT'])/1000.),20)
     
-    nfw  = Delta_Sigma_fit(p.Rp,p.DSigma_T,p.error_DSigma_T,zmean,cosmo_as)
+    axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist)
+    axC.axvline(np.median(lgM[2500:]),alpha=1.,color=chist)
+    # axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
+    # axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--',color=chist)
     
-    fmass = np.percentile(lgM[2500:], [16,50,84])
+    axC.axvspan(np.percentile(lgM[2500:], [16,50,84])[0],np.percentile(lgM[2500:], [16,50,84])[2],alpha=0.1,color=chist)
     
-    mass = str(np.round(fmass[1],1))+'^{+'+str(np.round(np.diff(fmass)[1],1))+'}'+'_{-'+str(np.round(np.diff(fmass)[0],1))+'}'
-    cfit = str(np.round(fitpar['c200'],1))+'$'
-    
-    
-    if plot:
-        
-        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
-        ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
-        
-        ds = ds1h#+ds2h
-        
-        maskr = (p.Rp > (RIN/1000.))*(p.Rp < (ROUT/1000.))
-        dsfit = Delta_Sigma_NFW_2h(p.Rp[maskr],zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
-        
-        chi2 = str(np.round(chi_red(dsfit,p.DSigma_T[maskr],p.error_DSigma_T[maskr],1),1))
-        
-        axDS.plot(0,0,'w.',label=lsamp1+' - '+lsamp2)
-        axDS.plot(p.Rp,p.DSigma_T,'C1o')
-        axDS.errorbar(p.Rp,p.DSigma_T,yerr=p.error_DSigma_T,ecolor='C1',fmt='None')
-        axDS.plot(rplot,ds,'C3',label='$\log M_{200}= '+mass+'\,\,c_{200} = '+cfit)
-        axDS.plot(0,0,'w.',label=r'$\chi^2_{red} = $'+chi2)
-        axDS.plot(rplot,ds1h,'C4')
-        # axDS.plot(rplot,ds2h,'C4--')
-        axDS.set_xscale('log')
-        axDS.set_yscale('log')
-        if ylabel:
-            axDS.set_ylabel(r'$\Delta\Sigma_{T} [M_{\odot}pc^{-2} h ]$')
-        axDS.set_xlabel(r'$R [Mpc/h]$')
-        axDS.set_ylim(0.095,1500)
-        axDS.set_xlim((h['RIN']-20)/1000.,(h['ROUT']+3e3)/1000.)
-        axDS.yaxis.set_ticks([0.1,1,10,100])
-        axDS.set_yticklabels([0.1,1,10,100])
-        axDS.xaxis.set_ticks([0.1,1,10])
-        axDS.set_xticklabels([0.1,1,10])
-        axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
-        axDS.legend(frameon=False,loc=1,fontsize=12)
-        
-        
-        axC.plot(13,0,'w.',label=lsamp2)
-        axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist)
-        axC.axvline(np.median(lgM[2500:]),alpha=0.5,color=chist)
-        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
-        axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--',color=chist)
-        axC.legend(frameon=False,loc=1)
-        axC.set_xlabel('$N_{it}$')
-        if ylabel:
-            axC.set_ylabel('$\log M_{200}$')
-    
-    return np.append(fmass,Mmean)
+    axC.set_xlabel('$\log M_{200}$')
+    axC.plot(13,0,'w,',label=lsamp)
+    if legend:
+        axC.legend(frameon=False,loc=2)
+    if ylabel:
+        axC.set_ylabel('$P(\log M_{200})$')   
 
 
 def dilution(samp):
@@ -640,8 +547,6 @@ def fcl_plot(samples,lsamps,csamps,marker,ax=plot):
 
 def make_plot_profile():
 
-    
-    
     pcat = '_photo_z_2nd_run_mag_i'
     best = '_photo_z_2nd_run_mag_i_best'
     
@@ -651,7 +556,7 @@ def make_plot_profile():
     fDS, axDS = plt.subplots(5,4, figsize=(14.5,17),sharex = True,sharey = True)
     fDS.subplots_adjust(hspace=0,wspace=0)
     
-    fC, axC = plt.subplots(5,2, figsize=(7,17),sharex = True,sharey = True)
+    fC, axC = plt.subplots(5,2, figsize=(6,10),sharex = True,sharey = True)
     fC.subplots_adjust(hspace=0,wspace=0)
     
     axC[0,1].axis('off')
@@ -688,11 +593,16 @@ def make_plot_profile():
     chist = ['C4','C1']*9
     
     ylabel = [True,False]+[True,False,False,False]*4
+    legend = [True,False]*len(samp)
     
     for j in range(len(samp)):
-        lMfit += [plt_profile_fit_2h(samp[j],
-                lsamp1[j],lsamp2[ind[j]],axDS[j],axC[ind[j]],
-                fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
+        # lMfit += [plt_profile_fit_2h(samp[j],
+                # lsamp1[j]+' - '+lsamp2[ind[j]],axDS[j],
+                # fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
+                
+        plt_mcmc(samp[j],lsamp2[ind[j]],axC[ind[j]],
+                fytpe = ftype, ylabel=ylabel[j],
+                legend=legend[j],chist=chist[j])
         # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
     
     
@@ -858,43 +768,44 @@ def make_mag_mass_plot():
         print(10**(lMfit_gold[j][1]-lMfit_gold[j][-1]*m+n))
         if j == 0:
         
-            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],markersize=10,
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+            ax[0].errorbar(lMfit[j][1],lMfit[j][0][1],markersize=10,
+                            yerr=np.array([np.diff(lMfit[j][0])]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
-            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],markersize=10,
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+            ax[1].errorbar(lMfit_gold[j][1],lMfit_gold[j][0][1],markersize=10,
+                            yerr=np.array([np.diff(lMfit[j][0])]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
 
 
-            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
-            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
+            err = 10**(lMfit[j][0][1]-(lMfit[j][1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j][0])]).T
+            axr[0].errorbar(lMfit[j][1],10**(lMfit[j][0][1]-(lMfit[j][1]*m+n)),
                             markersize=10,
                             yerr=err,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
             
-            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
+            err = 10**(lMfit_gold[j][0][1]-(lMfit_gold[j][1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j][0])]).T
             
-            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
+            axr[1].errorbar(lMfit_gold[j][1],10**(lMfit_gold[j][0][1]-(lMfit_gold[j][1]*m+n)),
                             markersize=10,
                             yerr=err,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
                             
         else:
-            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+            ax[0].errorbar(lMfit[j][1],lMfit[j][0][1],
+                            yerr=np.array([np.diff(lMfit[j][0])]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
-            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
+            ax[1].errorbar(lMfit_gold[j][1],lMfit_gold[j][0][1],
+                            yerr=np.array([np.diff(lMfit[j][0])]).T,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
 
-            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
-            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
+
+            err = 10**(lMfit[j][0][1]-(lMfit[j][1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j][0])]).T
+            axr[0].errorbar(lMfit[j][1],10**(lMfit[j][0][1]-(lMfit[j][1]*m+n)),
                             yerr=err,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
             
-            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
+            err = 10**(lMfit_gold[j][0][1]-(lMfit_gold[j][1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j][0])]).T
             
-            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
+            axr[1].errorbar(lMfit_gold[j][1],10**(lMfit_gold[j][0][1]-(lMfit_gold[j][1]*m+n)),
                             yerr=err,
                             fmt=csamp[j],label=lsamp[j],marker=mark[j])
 
@@ -920,6 +831,129 @@ def make_mag_mass_plot():
     axr[1].grid()
     
     f.savefig('../final_plots/mass_mag.pdf',bbox_inches='tight')
+
+
+def make_mag_mass_violin_plot():
+    
+    
+    from scipy.optimize import curve_fit
+
+    
+    samples =  ['mh_all_'+pcat,
+            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
+            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
+            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
+            'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
+
+    samples_gold =  ['mh_all_'+best,
+            'mh_Mm_all_'+best,'mh_MM_all_'+best,
+            'mh_zm_all_'+best,'mh_zM_all_'+best,
+            'mh_Lrm2_all_'+best,'mh_LrM2_all_'+best,
+            'mh_blue_all_'+best,'mh_red_all_'+best]
+    
+    
+    csamp = ['k',
+            'gold','gold',
+            'royalblue','royalblue',
+            'C9','C9',
+            'palevioletred','palevioletred']
+    
+    lsamp = ['all pairs',
+            '$M^{pair}_r < -21.0$',
+            '$M^{pair}_r \geq -21.0$',
+            '$z < 0.4$',
+            '$z \geq 0.4$',
+            '$L_2/L_1 < 0.5$',
+            '$L_2/L_1 \geq 0.5$',
+            r'$blue\,\,pairs$',
+            r'$red\,\,pairs$']
+
+    mark = ['o'] + ['v','^']*4
+    
+    lMfit = []
+    lMfit_gold = []
+    
+    for j in range(len(samples)):
+        lMfit += [plt_profile_fit_2h(samples[j],lsamp[j],plot=False,fytpe = ftype)]
+        lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
+
+
+    f, ax = plt.subplots(1,1, figsize=(10,7))
+
+
+    ax.errorbar(0,0,markersize=10,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt='k',marker='o',label='Total sample')
+    ax.errorbar(0,0,markersize=10,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
+
+    
+    
+    MM      = []
+    LM      = []
+    MM_gold = []
+    LM_gold = []
+    
+    for j in np.arange(len(csamp)):
+        
+        MM      += [lMfit[j][1]]
+        LM      += [lMfit[j][0][1]]
+        MM_gold += [lMfit_gold[j][1]]
+        LM_gold += [lMfit_gold[j][0][1]]
+        
+        
+        
+        vp = ax.violinplot(lMfit[j][2],
+                              positions=[lMfit[j][1]],
+                              showextrema=False, 
+                              showmedians=False)
+        vp['bodies'][0].set_facecolor(csamp[j])
+        vp['bodies'][0].set_alpha(0.07)
+        vp = ax.violinplot(lMfit_gold[j][2],
+                              positions=[lMfit_gold[j][1]],
+                              showextrema=False, 
+                              showmedians=False)
+        vp['bodies'][0].set_facecolor(csamp[j])
+        vp['bodies'][0].set_alpha(0.07)
+
+        if j > 0:
+            ax.errorbar(0,0,markersize=5,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt=csamp[j],marker=mark[j],label=lsamp[j])
+                     
+        ax.errorbar(lMfit[j][1],lMfit[j][0][1],markersize=15,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt=csamp[j],marker=mark[j])
+        ax.errorbar(lMfit_gold[j][1],lMfit_gold[j][0][1],markersize=15,
+                     yerr=np.array([np.diff(lMfit_gold[j][0])]).T,
+                     fmt=csamp[j],marker=mark[j], mfc='w',mew=3)
+
+    MM = np.array(MM)
+    MM_gold = np.array(MM_gold)
+    LM_gold = np.array(LM_gold)
+    LM = np.array(LM)
+    
+    ax.legend(frameon=False,loc=3,ncol=5,fontsize=11)
+    ax.set_xlabel(r'$\langle M_r \rangle$')
+    ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
+
+    
+    ax.axis([-21.7,-20.1,10.8,13.2])
+
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM, LM)
+    m,n = popt
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM_gold, LM_gold)
+    m_gold,n_gold = popt
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, np.append(MM,MM_gold), np.append(LM,LM_gold))
+    m_all,n_all = popt
+    
+    ax.plot(np.sort(MM),np.sort(MM)*m+n,'C7')
+    ax.plot(np.sort(MM_gold),np.sort(MM_gold)*m_gold+n_gold,'C7--')
+
+    
+    f.savefig('../final_plots/mass_mag_violin.pdf',bbox_inches='tight')
+
 
 def make_mag_mass_plot_vane():
     
