@@ -470,7 +470,8 @@ def plt_profile_fit_2h(samp,lsamp,
 
 def plt_mcmc(samp,lsamp,axC = plt,
              RIN=300,ROUT=10000, fytpe = '',
-            ylabel = True, legend=True,chist = 'C0'):
+            ylabel = True, legend=True,
+            lw=1,chist = 'C0'):
     
 
     p_name = 'profile_'+samp+'.fits'
@@ -481,7 +482,7 @@ def plt_mcmc(samp,lsamp,axC = plt,
     lgM   = fitted[1].data.logM
     
     
-    axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist)
+    axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist,label=lsamp,lw=lw)
     axC.axvline(np.median(lgM[2500:]),alpha=1.,color=chist)
     # axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
     # axC.axvline(np.percentile(lgM[2500:], [16,50,84])[2],ls='--',color=chist)
@@ -489,9 +490,8 @@ def plt_mcmc(samp,lsamp,axC = plt,
     axC.axvspan(np.percentile(lgM[2500:], [16,50,84])[0],np.percentile(lgM[2500:], [16,50,84])[2],alpha=0.1,color=chist)
     
     axC.set_xlabel('$\log M_{200}$')
-    axC.plot(13,0,'w,',label=lsamp)
     if legend:
-        axC.legend(frameon=False,loc=2)
+        axC.legend(loc=2,fontsize=12)
     if ylabel:
         axC.set_ylabel('$P(\log M_{200})$')   
 
@@ -556,7 +556,7 @@ def make_plot_profile():
     fDS, axDS = plt.subplots(5,4, figsize=(14.5,17),sharex = True,sharey = True)
     fDS.subplots_adjust(hspace=0,wspace=0)
     
-    fC, axC = plt.subplots(5,2, figsize=(6,10),sharex = True,sharey = True)
+    fC, axC = plt.subplots(5,2, figsize=(6,12),sharex = True,sharey = True)
     fC.subplots_adjust(hspace=0,wspace=0)
     
     axC[0,1].axis('off')
@@ -583,30 +583,37 @@ def make_plot_profile():
     
     lsamp1 = ['Total sample','Gold sample']*len(samp)
     
-    lsamp2 = ['all pairs', 
-              '$M^{pair}_r < -21.0$', '$M^{pair}_r \geq -21.0$', 
-              '$z < 0.4$', '$z \geq 0.4$',
-              '$L_2/L_1 < 0.5$','$L_2/L_1 \geq 0.5$',
-              r'$red\,\,pairs$',r'$blue\,\,pairs$']
+    lsamp2 = ['all pairs','all pairs', 
+              '$M^{pair}_r < -21.0$','$M^{pair}_r < -21.0$', 
+              '$M^{pair}_r \geq -21.0$','$M^{pair}_r \geq -21.0$', 
+              '$z < 0.4$','$z < 0.4$', 
+              '$z \geq 0.4$','$z \geq 0.4$',
+              '$L_2/L_1 < 0.5$','$L_2/L_1 < 0.5$',
+              '$L_2/L_1 \geq 0.5$','$L_2/L_1 \geq 0.5$',
+              r'$red\,\,pairs$',r'$red\,\,pairs$',
+              r'$blue\,\,pairs$',r'$blue\,\,pairs$']
+              
+    lsamp = ['Total sample','Gold sample']+lsamp2[2:]
             
-    ind = [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8]
+    ind = [0,0,1,2,1,2,3,4,3,4,5,6,5,6,7,8,7,8]
     chist = ['C4','C1']*9
+    lw = [1,1]+[1,1,2,2]*4
     
     ylabel = [True,False]+[True,False,False,False]*4
-    legend = [True,False]*len(samp)
+    legend = [True,True]+[True,False,True,False]*4
     
     for j in range(len(samp)):
-        # lMfit += [plt_profile_fit_2h(samp[j],
-                # lsamp1[j]+' - '+lsamp2[ind[j]],axDS[j],
-                # fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
+        lMfit += [plt_profile_fit_2h(samp[j],
+                lsamp1[j]+' - '+lsamp2[j],axDS[j],
+                fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
                 
-        plt_mcmc(samp[j],lsamp2[ind[j]],axC[ind[j]],
+        plt_mcmc(samp[j],lsamp[j],axC[ind[j]],
                 fytpe = ftype, ylabel=ylabel[j],
-                legend=legend[j],chist=chist[j])
+                legend=legend[j],chist=chist[j],lw=lw[j])
         # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
     
     
-    
+    axC[0].set_ylim(0,1600)
     # fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
     fC.savefig('../final_plots/chains2'+pcat+ftype+'.pdf',bbox_inches='tight')
 
@@ -878,7 +885,7 @@ def make_mag_mass_violin_plot():
         lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
 
 
-    f, ax = plt.subplots(1,1, figsize=(10,7))
+    f, ax = plt.subplots(1,1, figsize=(10.5,7))
 
 
     ax.errorbar(0,0,markersize=10,
@@ -892,16 +899,19 @@ def make_mag_mass_violin_plot():
     
     MM      = []
     LM      = []
+    eLM      = []
     MM_gold = []
     LM_gold = []
+    eLM_gold = []
     
     for j in np.arange(len(csamp)):
         
-        MM      += [lMfit[j][1]]
-        LM      += [lMfit[j][0][1]]
-        MM_gold += [lMfit_gold[j][1]]
-        LM_gold += [lMfit_gold[j][0][1]]
-        
+        MM       += [lMfit[j][1]]
+        LM       += [lMfit[j][0][1]]
+        eLM      += [np.diff(lMfit[j][0]).mean()]
+        MM_gold  += [lMfit_gold[j][1]]
+        LM_gold  += [lMfit_gold[j][0][1]]
+        eLM_gold += [np.diff(lMfit_gold[j][0]).mean()]
         
         
         vp = ax.violinplot(lMfit[j][2],
@@ -909,13 +919,13 @@ def make_mag_mass_violin_plot():
                               showextrema=False, 
                               showmedians=False)
         vp['bodies'][0].set_facecolor(csamp[j])
-        vp['bodies'][0].set_alpha(0.07)
+        vp['bodies'][0].set_alpha(0.1)
         vp = ax.violinplot(lMfit_gold[j][2],
                               positions=[lMfit_gold[j][1]],
                               showextrema=False, 
                               showmedians=False)
         vp['bodies'][0].set_facecolor(csamp[j])
-        vp['bodies'][0].set_alpha(0.07)
+        vp['bodies'][0].set_alpha(0.1)
 
         if j > 0:
             ax.errorbar(0,0,markersize=5,
@@ -934,23 +944,25 @@ def make_mag_mass_violin_plot():
     LM_gold = np.array(LM_gold)
     LM = np.array(LM)
     
-    ax.legend(frameon=False,loc=3,ncol=5,fontsize=11)
+    
     ax.set_xlabel(r'$\langle M_r \rangle$')
     ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
 
     
-    ax.axis([-21.7,-20.1,10.8,13.2])
+    ax.axis([-21.7,-20.4,10.8,13.2])
 
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM, LM)
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM, LM,sigma=eLM)
     m,n = popt
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM_gold, LM_gold)
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM_gold, LM_gold,sigma=eLM_gold)
     m_gold,n_gold = popt
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, np.append(MM,MM_gold), np.append(LM,LM_gold))
+    popt, pcov = curve_fit(lambda x,m,n: x*m+n, np.append(MM,MM_gold), np.append(LM,LM_gold),sigma=np.append(eLM,eLM_gold))
     m_all,n_all = popt
     
-    ax.plot(np.sort(MM),np.sort(MM)*m+n,'C7')
-    ax.plot(np.sort(MM_gold),np.sort(MM_gold)*m_gold+n_gold,'C7--')
-
+    ax.plot(meanmag,meanmag*m+n,'C7',label='Total sample fit')
+    ax.plot(meanmag,meanmag*m_gold+n_gold,'C7--',label='Gold sample fit')
+    ax.plot(meanmag,meanmag*m_all+n_all,'k',label='All sample fit')
+    ax.plot(meanmag,lM200,'C7:',label='MICE')
+    ax.legend(frameon=False,loc=3,ncol=5,fontsize=11)
     
     f.savefig('../final_plots/mass_mag_violin.pdf',bbox_inches='tight')
 
