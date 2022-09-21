@@ -180,7 +180,7 @@ def color_plot():
     Lratio = 10.**(-0.4*(L[-1]-L[8]))
     Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
     
-    f, ax = plt.subplots(2,2, figsize=(10,8))
+    f, ax = plt.subplots(2,2, figsize=(10,6))
     # f.subplots_adjust(hspace=0,wspace=0)
     
     ax = ax.flatten()
@@ -188,7 +188,7 @@ def color_plot():
     # ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[0].set_xlabel('$M^{pair}_{r}$')
+    ax[0].set_xlabel('$M^{pair}_{r}$',fontsize=11)
     ax[0].set_ylabel('$n$')
     ax[1].set_ylabel('$n$')
     ax[2].set_ylabel('$n$')
@@ -209,11 +209,12 @@ def color_plot():
     ax[3].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
     ax[3].set_xlabel(r'$z^{pair}$')
 
-    ax[0].legend(frameon=False,loc=2)    
+    ax[0].legend(frameon=False,loc=2,fontsize=12)    
+    f.tight_layout(pad=0.8)
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
     
-    separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
-    separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
+    # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
+    # separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
 
 
 def plt_profile_wofit(samp):
@@ -716,7 +717,7 @@ def make_fcl_plot():
     
     f.savefig('../final_plots/contamination.pdf',bbox_inches='tight')
 
-def make_mag_mass_plot():
+def make_mag_mass_mice_plot():
     
     from scipy.optimize import curve_fit
     popt, pcov = curve_fit(lambda x,m,n: x*m+n, meanmag, lM200)
@@ -840,14 +841,26 @@ def make_mag_mass_plot():
     axr[0].grid()
     axr[1].grid()
     
-    f.savefig('../final_plots/mass_mag.pdf',bbox_inches='tight')
+    f.savefig('../final_plots/mass_mag_mice.pdf',bbox_inches='tight')
 
 
-def make_mag_mass_violin_plot():
+def make_mag_mass_plot():
+    
+    def linear(x,m,n):
+        return x*m+n
     
     
     from scipy.optimize import curve_fit
 
+    # MICE MASS-TO-LIGHT RELATION
+    
+    popt, pcov = curve_fit(linear, meanmag, lM200)
+    m_mice,n_mice = popt
+    print('MICE sample fit')
+    print(m_mice,n_mice)    
+
+    
+    # SAMPLES AND LABELS
     
     samples =  ['mh_all_'+pcat,
             'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
@@ -880,6 +893,8 @@ def make_mag_mass_violin_plot():
 
     mark = ['o'] + ['v','^']*4
     
+    # EXTRACTING DATA
+    
     lMfit = []
     lMfit_gold = []
     
@@ -888,13 +903,22 @@ def make_mag_mass_violin_plot():
         lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
 
 
-    fig, ax = plt.subplots(1,1, figsize=(10.5,7))
+    # MAKE PLOTS
+
+    fig, ax   = plt.subplots(1,1, figsize=(10.5,7))
+    figr, axr = plt.subplots(1,1, figsize=(10.5,4))
 
 
     ax.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt='k',marker='o',label='Total sample')
     ax.errorbar(0,0,markersize=10,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
+    axr.errorbar(0,0,markersize=10,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt='k',marker='o',label='Total sample')
+    axr.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
 
@@ -930,17 +954,47 @@ def make_mag_mass_violin_plot():
         # vp['bodies'][0].set_facecolor(csamp[j])
         # vp['bodies'][0].set_alpha(0.1)
 
-        if j > 0:
-            ax.errorbar(0,0,markersize=5,
-                     yerr=np.array([np.diff(lMfit[j][0])]).T,
-                     fmt=csamp[j],marker=mark[j],label=lsamp[j])
-                     
+
+        # MAKE SCATTER PLOT
+
         ax.errorbar(lMfit[j][1],lMfit[j][0][1],markersize=15,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt=csamp[j],marker=mark[j])
         ax.errorbar(lMfit_gold[j][1],lMfit_gold[j][0][1],markersize=15,
                      yerr=np.array([np.diff(lMfit_gold[j][0])]).T,
                      fmt=csamp[j],marker=mark[j], mfc='w',mew=3)
+                     
+
+        # MAKE MICE RATIO PLOT
+
+        err = 10**(lMfit[j][0][1]-(lMfit[j][1]*m_mice+n_mice))*np.log(10.)*np.array([np.diff(lMfit[j][0])]).T
+        axr.errorbar(lMfit[j][1],10**(lMfit[j][0][1]-(lMfit[j][1]*m_mice+n_mice)),
+                        yerr=err,markersize=10,
+                        fmt=csamp[j],marker=mark[j])
+        
+        err = 10**(lMfit_gold[j][0][1]-(lMfit_gold[j][1]*m_mice+n_mice))*np.log(10.)*np.array([np.diff(lMfit_gold[j][0])]).T
+        
+        axr.errorbar(lMfit_gold[j][1],10**(lMfit_gold[j][0][1]-(lMfit_gold[j][1]*m_mice+n_mice)),
+                        yerr=err,markersize=10,
+                        fmt=csamp[j],marker=mark[j],mfc='w',mew=3)
+
+
+        # JUST FOR THE LABELS
+
+        if j > 0:
+            ax.errorbar(0,0,markersize=5,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt=csamp[j],marker=mark[j],label=lsamp[j])
+            axr.errorbar(0,0,markersize=5,
+                     yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     fmt=csamp[j],marker=mark[j],label=lsamp[j])
+                     
+        # if j == 6:
+            # ax.errorbar(0,0,markersize=5,
+                     # yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     # fmt='w',marker=',',label=' ')
+    
+
 
     MM = np.array(MM)
     MM_gold = np.array(MM_gold)
@@ -950,64 +1004,103 @@ def make_mag_mass_violin_plot():
     eLM = np.array(eLM)
     
     
-    ax.set_xlabel(r'$\langle M_r \rangle$')
-    ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
-
-    ax.axis([-21.7,-20.4,10.8,13.2])
+    # FIT MASS-TO-LIGHT RELATION
 
     mlim = -20.
     
-    mask = MM < mlim
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM[mask], LM[mask],sigma=eLM[mask])
+    mask = MM < mlim    
+    popt, pcov = curve_fit(linear, MM[mask], LM[mask],sigma=eLM[mask])
     m,n = popt
     em,en = np.sqrt(np.diag(pcov))
-    
     print('Total sample fit')
     print(m,n)
     print(em,en)
+
     mask = MM_gold < mlim
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, MM_gold[mask], LM_gold[mask],sigma=eLM_gold[mask])
+    popt, pcov = curve_fit(linear, MM_gold[mask], LM_gold[mask],sigma=eLM_gold[mask])
     m_gold,n_gold = popt
     em_gold,en_gold = np.sqrt(np.diag(pcov))
-    
     print('Gold sample fit')
     print(m_gold,n_gold)
     print(em_gold,en_gold)
+    
     mask = np.append(MM,MM_gold) < mlim
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, np.append(MM,MM_gold)[mask], np.append(LM,LM_gold)[mask],sigma=np.append(eLM,eLM_gold)[mask])
+    popt, pcov = curve_fit(linear, np.append(MM,MM_gold)[mask], np.append(LM,LM_gold)[mask],sigma=np.append(eLM,eLM_gold)[mask])
     m_all,n_all = popt
     em_all,en_all = np.sqrt(np.diag(pcov))
-    
     print('All sample fit')
     print(m_all,n_all)    
     print(em_all,en_all)    
-    
-    
-    
-    f = lambda x: x*(m+em)+(n+en)
-    g = lambda x: x*(m-em)+(n-en)
-    ax.plot(meanmag,meanmag*m+n,'C4',label='Total sample fit')
-    ax.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C4',alpha=0.3)
-    ax.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C4',alpha=0.3)
 
-    f = lambda x: x*(m_gold+em_gold)+(n_gold+en_gold)
-    g = lambda x: x*(m_gold-em_gold)+(n_gold-en_gold)    
-    ax.plot(meanmag,meanmag*m_gold+n_gold,'C1',label='Gold sample fit')
-    ax.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C1',alpha=0.3)
-    ax.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C1',alpha=0.3)
+    
+    ax.plot(meanmag,meanmag*m+n,'C4',
+            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+'$\pm$'+str(np.round(em,2))+r', $\beta = $'+str(np.round(n,1))+'$\pm$'+str(np.round(en,1)))
+            
+    ax.fill_between(meanmag, 
+                    linear(meanmag,m+em,n+en), 
+                    linear(meanmag,m-em,n-en), 
+                    interpolate=True, 
+                    color='C4',alpha=0.3)
 
-    f = lambda x: x*(m_all+em_all)+(n_all+en_all)
-    g = lambda x: x*(m_all-em_all)+(n_all-en_all)    
-    ax.plot(meanmag,meanmag*m_all+n_all,'C3',label='All sample fit')
-    ax.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C3',alpha=0.3)
-    ax.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C3',alpha=0.3)
+    ax.plot(meanmag,meanmag*m_gold+n_gold,'C1',
+            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+'$\pm$'+str(np.round(em_gold,2))+r', $\beta = $'+str(np.round(n_gold,1))+'$\pm$'+str(np.round(en_gold,1)))
+            
+    ax.fill_between(meanmag, 
+                    linear(meanmag,m_gold+em_gold,n_gold+en_gold), 
+                    linear(meanmag,m_gold-em_gold,n_gold-en_gold), 
+                    interpolate=True, 
+                    color='C1',alpha=0.3)
 
+    ax.plot(meanmag,meanmag*m_all+n_all,'C3',
+            label=r'All sample, $\alpha = $'+str(np.round(m_all,2))+'$\pm$'+str(np.round(em_all,2))+r', $\beta = $'+str(np.round(n_gold,1))+'$\pm$'+str(np.round(en_all,1)))
+            
+    ax.fill_between(meanmag, 
+                    linear(meanmag,m_all+em_all,n_all+en_all), 
+                    linear(meanmag,m_all-em_all,n_all-en_all), 
+                    interpolate=True, 
+                    color='C3',alpha=0.3)
 
     ax.plot(meanmag,lM200,'C7',label='MICE - True pairs')
-    ax.plot(meanmag_p1,lM200_p1,'C7:',label='MICE - PAUS\,1')
-    ax.legend(frameon=False,loc=3,ncol=4,fontsize=11)
+    ax.plot(0,0,'w,',label=' ')
     
-    fig.savefig('../final_plots/mass_mag_violin.pdf',bbox_inches='tight')
+    ax.legend(frameon=False,loc=3,ncol=3,fontsize=11)
+    ax.set_xlabel(r'$\langle M_r \rangle$')
+    ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
+    ax.axis([-21.7,-20.4,10.8,13.2])
+    fig.savefig('../final_plots/mass_mag.pdf',bbox_inches='tight')
+
+
+    f = lambda x: 10**(linear(x,m+em,n+en) - linear(x,m_mice,n_mice))
+    g = lambda x: 10**(linear(x,m-em,n-en) - linear(x,m_mice,n_mice))
+    axr.plot(meanmag,10**(linear(meanmag,m,n) - linear(meanmag,m_mice,n_mice)),'C4',label='Total sample fit')
+    axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C4',alpha=0.3)
+    axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C4',alpha=0.3)
+
+    f = lambda x: 10**(linear(x,m_gold+em_gold,n_gold+en_gold) - linear(x,m_mice,n_mice))
+    g = lambda x: 10**(linear(x,m_gold-em_gold,n_gold-en_gold) - linear(x,m_mice,n_mice))   
+    axr.plot(meanmag,10**((meanmag*m_gold+n_gold) - (meanmag*m_mice+n_mice)),'C1',label='Gold sample fit')
+    axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C1',alpha=0.3)
+    axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C1',alpha=0.3)
+
+    f = lambda x: 10**(linear(x,m_all+em_all,n_all+en_all) - linear(x,m_mice,n_mice))
+    g = lambda x: 10**(linear(x,m_all-em_all,n_all-en_all) - linear(x,m_mice,n_mice))    
+    axr.plot(meanmag,10**(linear(meanmag,m_all,n_all) - linear(meanmag,m_mice,n_mice)),'C3',label='All sample fit')
+    axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C3',alpha=0.3)
+    axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C3',alpha=0.3)
+
+    axr.plot(meanmag_p1,10**(lM200_p1 - linear(meanmag_p1,m_mice,n_mice)),
+           'C7x',markersize=10,label='MICE - PAUS\,1')
+    
+    axr.grid()
+    axr.legend(loc=2,ncol=5,fontsize=11)
+    axr.set_xlabel(r'$\langle M_r \rangle$')
+    axr.set_ylabel(r'$M^{fit}_{200}/M^{MICE}_{200}$')
+    axr.axis([-22.3,-20.4,0,18])
+    
+    figr.savefig('../final_plots/mass_mag_mice.pdf',bbox_inches='tight')
+
+    
+    
 
 
 def make_mag_mass_plot_vane():
