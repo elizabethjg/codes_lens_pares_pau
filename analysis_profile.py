@@ -21,6 +21,9 @@ lM200  = np.array([11.32221929, 11.54406804, 11.92427929, 12.22530928, 12.671172
 
 meanmag_p1 = np.array([-21.44801166, -22.24667956])
 lM200_p1   = np.array([12.1487476 , 12.76705489])
+elM200_p1  = np.array([0.22447506, 0.29605648])
+
+
 pcat = '_photo_z_2nd_run_mag_i'
 best = '_photo_z_2nd_run_mag_i_best'
 vane = '_vane'
@@ -214,7 +217,7 @@ def color_plot():
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
     
     # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
-    # separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
+    separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
 
 
 def plt_profile_wofit(samp):
@@ -905,8 +908,8 @@ def make_mag_mass_plot():
 
     # MAKE PLOTS
 
-    fig, ax   = plt.subplots(1,1, figsize=(10.5,7))
-    figr, axr = plt.subplots(1,1, figsize=(10.5,4))
+    fig, ax   = plt.subplots(1,1, figsize=(11,7))
+    figr, axr = plt.subplots(1,1, figsize=(11,4))
 
 
     ax.errorbar(0,0,markersize=10,
@@ -982,10 +985,10 @@ def make_mag_mass_plot():
         # JUST FOR THE LABELS
 
         if j > 0:
-            ax.errorbar(0,0,markersize=5,
+            ax.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt=csamp[j],marker=mark[j],label=lsamp[j])
-            axr.errorbar(0,0,markersize=5,
+            axr.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt=csamp[j],marker=mark[j],label=lsamp[j])
                      
@@ -1008,7 +1011,7 @@ def make_mag_mass_plot():
 
     mlim = -20.
     
-    mask = MM < mlim    
+    mask = (MM < mlim)
     popt, pcov = curve_fit(linear, MM[mask], LM[mask],sigma=eLM[mask])
     m,n = popt
     em,en = np.sqrt(np.diag(pcov))
@@ -1072,30 +1075,36 @@ def make_mag_mass_plot():
 
     f = lambda x: 10**(linear(x,m+em,n+en) - linear(x,m_mice,n_mice))
     g = lambda x: 10**(linear(x,m-em,n-en) - linear(x,m_mice,n_mice))
-    axr.plot(meanmag,10**(linear(meanmag,m,n) - linear(meanmag,m_mice,n_mice)),'C4',label='Total sample fit')
+    axr.plot(meanmag,10**(linear(meanmag,m,n) - linear(meanmag,m_mice,n_mice)),'C4',label='Total sample')
     axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C4',alpha=0.3)
     axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C4',alpha=0.3)
 
     f = lambda x: 10**(linear(x,m_gold+em_gold,n_gold+en_gold) - linear(x,m_mice,n_mice))
     g = lambda x: 10**(linear(x,m_gold-em_gold,n_gold-en_gold) - linear(x,m_mice,n_mice))   
-    axr.plot(meanmag,10**((meanmag*m_gold+n_gold) - (meanmag*m_mice+n_mice)),'C1',label='Gold sample fit')
+    axr.plot(meanmag,10**((meanmag*m_gold+n_gold) - (meanmag*m_mice+n_mice)),'C1',label='Gold sample')
     axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C1',alpha=0.3)
     axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C1',alpha=0.3)
 
     f = lambda x: 10**(linear(x,m_all+em_all,n_all+en_all) - linear(x,m_mice,n_mice))
     g = lambda x: 10**(linear(x,m_all-em_all,n_all-en_all) - linear(x,m_mice,n_mice))    
-    axr.plot(meanmag,10**(linear(meanmag,m_all,n_all) - linear(meanmag,m_mice,n_mice)),'C3',label='All sample fit')
+    axr.plot(meanmag,10**(linear(meanmag,m_all,n_all) - linear(meanmag,m_mice,n_mice)),'C3',label='All sample')
     axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)<=g(meanmag), interpolate=True, color='C3',alpha=0.3)
     axr.fill_between(meanmag, f(meanmag), g(meanmag), where=f(meanmag)>=g(meanmag), interpolate=True, color='C3',alpha=0.3)
 
-    axr.plot(meanmag_p1,10**(lM200_p1 - linear(meanmag_p1,m_mice,n_mice)),
-           'C7x',markersize=10,label='MICE - PAUS\,1')
+
+    err = 10**(lM200_p1 - linear(meanmag_p1,m_mice,n_mice))*np.log(10.)*elM200_p1
+
+    axr.errorbar(meanmag_p1,10**(lM200_p1 - linear(meanmag_p1,m_mice,n_mice)),
+                 yerr=err,markersize=10,label='MICE - PAUS\,1',
+                 fmt='C7',marker='x')
+    
+    axr.plot(meanmag,np.ones(len(meanmag)),'k--')
     
     axr.grid()
     axr.legend(loc=2,ncol=5,fontsize=11)
     axr.set_xlabel(r'$\langle M_r \rangle$')
     axr.set_ylabel(r'$M^{fit}_{200}/M^{MICE}_{200}$')
-    axr.axis([-22.3,-20.4,0,18])
+    axr.axis([-22.3,-20.4,0,21])
     
     figr.savefig('../final_plots/mass_mag_mice.pdf',bbox_inches='tight')
 
