@@ -8,9 +8,9 @@ from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
-matplotlib.rcParams.update({'font.size': 14})
+# rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+# rc('text', usetex=True)
+# matplotlib.rcParams.update({'font.size': 14})
 
 cosmo = LambdaCDM(H0=100, Om0=0.3, Ode0=0.7)
 
@@ -1478,7 +1478,85 @@ def make_mag_mass_plot_vane():
     f.savefig('../final_plots/mass_mag_vane.pdf',bbox_inches='tight')
 
          
+def compare_MICE_mags():
 
+    # LOAD MICE CAT
+    
+    MICE = fits.open('../MICE_cat.fits')[1].data
+    
+    z_h  = MICE.z_cgal
+    mi_h = MICE.sdss_i_true - 0.8 * (np.arctan(1.5 * z_h) - 0.1489)
+    mr_h = MICE.sdss_r_true - 0.8 * (np.arctan(1.5 * z_h) - 0.1489)
+    
+    Dl_h = np.array(cosmo.luminosity_distance(z_h).value)*1.e6 
+    
+    Mr_h=mr_h+5.0-5.0*np.log10(Dl_h)
+    Mi_h=mi_h+5.0-5.0*np.log10(Dl_h)
+    
+    maskh  = (z_h > 0.2)*(z_h < 0.6)*(Mr_h < -19.5)
+    maskh2 = (z_h > 0.2)*(z_h < 0.6)*(Mr_h < -19.5)*(MICE.nsats <3)*(MICE.nsats >1)
+
+    # LOAD MICE PAIRS 
+    
+    M1 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R1.dat').T
+    M2 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R2.dat').T
+    M3 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R3.dat').T
+    M4 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R4.dat').T
+    
+    M = np.vstack((M1.T,M2.T,M3.T,M4.T)).T
+    
+    M1_mice = np.zeros(len(M[1]))
+    M2_mice = np.zeros(len(M[1]))
+    
+    M1_mice[M[8]<M[17]] = M[8][M[8]<M[17]]
+    M1_mice[M[8]>M[17]] = M[17][M[8]>M[17]]
+    M2_mice[M[8]<M[17]] = M[17][M[8]<M[17]]
+    M2_mice[M[8]>M[17]] = M[8][M[8]>M[17]]
+    
+    Mtot_mice   = -2.5*np.log10(10**(-0.4*M[8])+10**(-0.4*M[17]))
+    Mtot_i_mice = -2.5*np.log10(10**(-0.4*M[10])+10**(-0.4*M[19]))
+    z_mice      = M[3]
+    Lratio_mice = 10.**(-0.4*(M2_mice-M1_mice))
+    color_mice  = Mtot_mice - Mtot_i_mice
+    
+    # LOAD PAUS PAIRS 
+    
+    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
+    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T                                    
+    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+    
+    L = np.vstack((L1.T,L2.T,L3.T)).T
+    
+    M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
+    M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
+    
+    color = Mtot-Mtoti
+    
+    plt.figure()
+    plt.plot(Mr_h[maskh],(mr_h-mi_h)[maskh],'C7.',label='MICE halos')
+    plt.plot(Mr_h[maskh2],(mr_h-mi_h)[maskh2],'C0.',label='MICE halos - Nsats =  2',alpha=0.5)
+    plt.plot(Mtot_mice,color_mice,'C2x',label='MICE pairs',alpha=0.3)
+    plt.plot(Mtot,color,'C3x',label='PAUS pairs',alpha=0.5)
+    plt.xlabel('$M_r$')
+    plt.ylabel('$m_r - m_i$')
+    plt.legend()
+    plt.savefig('../color_mag.png')
+    
+    plt.figure()
+    plt.hist((mr_h-mi_h)[maskh],np.linspace(0,1.2,50),edgecolor='C7',label='MICE halos',histtype='step',lw=3,density=True)
+    plt.hist((mr_h-mi_h)[maskh2],np.linspace(0,1.2,50),edgecolor='C0',label='MICE halos - Nsats =  2',histtype='step',lw=3,density=True)
+    plt.hist(color_mice,np.linspace(0,1.2,50),edgecolor='C2',label='MICE pairs',histtype='step',lw=3,density=True)
+    plt.hist(color,np.linspace(0,1.2,50),edgecolor='C3',label='PAUS pairs',histtype='step',lw=3,density=True)
+    plt.ylabel('$n$')
+    plt.xlabel('$m_r - m_i$')
+    plt.legend()
+    plt.savefig('../color_hist.png')
+    
+    
 
 '''
 plt.figure()
@@ -1523,3 +1601,4 @@ plt.axis([-22.1,-19.3,10.2,13.2])
 plt.savefig('../Mag_lM200_w3_'+pcat+ftype+'.png',bbox_inches='tight')
     
 '''
+

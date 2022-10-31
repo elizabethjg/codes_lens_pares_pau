@@ -149,7 +149,7 @@ def partial_profile(RA0,DEC0,Z,field,
                 DSIGMAwsum_T = np.append(DSIGMAwsum_T,(et[mbin]*peso[mbin]).sum())
                 DSIGMAwsum_X = np.append(DSIGMAwsum_X,(ex[mbin]*peso[mbin]).sum())
                 WEIGHTsum    = np.append(WEIGHTsum,(peso[mbin]).sum())
-                Mwsum        = np.append(Mwsum,(m[mbin]*peso[mbin]).sum())
+                Mwsum        = np.append(Mwsum,((1.+m[mbin])*peso[mbin]).sum())
                 NGAL         = np.append(NGAL,mbin.sum())
                 
                 index = np.arange(mbin.sum())
@@ -505,10 +505,10 @@ def main(sample,pcat,
         # COMPUTING PROFILE        
                 
         Mcorr     = Mwsum/WEIGHTsum
-        DSigma_T  = (DSIGMAwsum_T/WEIGHTsum)/(1+Mcorr)
-        DSigma_X  = (DSIGMAwsum_X/WEIGHTsum)/(1+Mcorr)
-        eDSigma_T =  np.std((BOOTwsum_T/BOOTwsum),axis=0)/(1+Mcorr[0])
-        eDSigma_X =  np.std((BOOTwsum_X/BOOTwsum),axis=0)/(1+Mcorr[0])
+        DSigma_T  = (DSIGMAwsum_T/WEIGHTsum)/Mcorr
+        DSigma_X  = (DSIGMAwsum_X/WEIGHTsum)/Mcorr
+        eDSigma_T =  np.std((BOOTwsum_T/BOOTwsum),axis=0)/Mcorr[0]
+        eDSigma_X =  np.std((BOOTwsum_X/BOOTwsum),axis=0)/Mcorr[0]
         
         COV_St  = cov_matrix(DSigma_T[1:,:])
         COV_Sx  = cov_matrix(DSigma_X[1:,:])
