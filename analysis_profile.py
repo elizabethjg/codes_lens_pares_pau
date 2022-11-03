@@ -1412,8 +1412,73 @@ def make_lum_mass_plot():
     axin.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
     axin.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
     
+    fig.savefig('../final_plots/mass_lum_ext.pdf',bbox_inches='tight')  
     
-    fig.savefig('../final_plots/mass_lum_ext.pdf',bbox_inches='tight')   
+    # MRATIO PLOT 
+    
+    fig, axin = plt.subplots(1,1, figsize=(6,6))
+ 
+    axin.plot(LGirardi,10**(MGirardi-LGirardi),'o',color='olive')    
+    axin.errorbar(LGirardi,10**(MGirardi-LGirardi),markersize=4,
+                     yerr=eMGirardi*np.log(10.)*10**(MGirardi-LGirardi),
+                     fmt='none',
+                     color='olive',marker='o')
+                     
+    axin.plot(MM_gold,10**(LM_gold-MM_gold),'C1o')    
+    axin.errorbar(MM_gold,10**(LM_gold-MM_gold),markersize=4,
+                     yerr=eLM_gold*10**(LM_gold-MM_gold)*np.log(10.),
+                     fmt='none',
+                     color='C1',marker='o')
+                     
+    axin.plot(MM,10**(LM-MM),'C4o')    
+    axin.errorbar(MM,10**(LM-MM),markersize=4,
+                     yerr=eLM*10**(LM-MM)*np.log(10.),
+                     fmt='none',
+                     color='C4',marker='o')
+ 
+    
+    meanmag = np.arange(9.5,14,0.1)
+        
+    axin.plot(meanmag,10**(linear_viola(meanmag,m_v,ln_v)-meanmag),'C8--')
+    axin.plot(meanmag[meanmag >= 10.5],10**(linear_viola(meanmag,m_v,ln_v)-meanmag)[meanmag >= 10.5],'C8')
+            
+    axin.fill_between(meanmag, 
+                    10**(linear_viola(meanmag,m_v+em_v,ln_v+eln_v)-meanmag), 
+                    10**(linear_viola(meanmag,m_v-em_v,ln_v-eln_v)-meanmag), 
+                    interpolate=True, 
+                    color='C8',alpha=0.3)
+
+    
+
+    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_all,ln_all)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C3')
+    axin.plot(meanmag,10**(linear(meanmag,m_all,ln_all)-meanmag),'C3--')
+            
+    axin.fill_between(meanmag, 
+                    10**(linear(meanmag,m_all+em_all,ln_all+eln_all)-meanmag), 
+                    10**(linear(meanmag,m_all-em_all,ln_all-eln_all)-meanmag), 
+                    interpolate=True, 
+                    color='C3',alpha=0.3)   
+                    
+    axin.plot(np.log10(0.991e10),166.*0.6,'ko')
+    axin.errorbar(np.log10(0.991e10),166.*0.6,markersize=4,
+                     yerr=32*0.6,fmt='none',
+                     color='k',marker='o')
+                    
+    axin.axis([9.8,12.5,0,800])
+    
+    axin.axvspan(9.8,10.1,color='C7',alpha=0.2)
+    axin.axvspan(10,10.5,color='C3',alpha=0.2)
+    axin.axvspan(10.45,12.5,color='C8',alpha=0.2)
+    
+    axin.text(9.85,500,'Galaxies',rotation='vertical')
+    axin.text(10.1,500,'Pairs',rotation='vertical')
+    axin.text(10.8,500,'Groups/Clusters',rotation='vertical')
+
+    axin.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
+    axin.set_ylabel(r'$M_{200}/L_{TOT} h$')
+    
+    
+    fig.savefig('../final_plots/mlratio.pdf',bbox_inches='tight')   
 
          
 def compare_MICE_mags():
