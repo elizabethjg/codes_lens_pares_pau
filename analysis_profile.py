@@ -8,6 +8,7 @@ from fit_profiles_curvefit import *
 from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 from matplotlib import rc
+from matplotlib import cbook
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 14})
@@ -1072,9 +1073,10 @@ def make_lum_mass_plot():
     Lsun = (10**(-0.4*Msun))
     
     
-    def linear(x,m,n):
-        return np.log10(n*(10**x/L0)**m)+14.
 
+    def linear_viola(x,m,ln):
+        return ln+m*(x-11.5)+14.
+        
     def linear(x,m,ln):
         return ln+m*(x-np.log10(L0))+14.
     
@@ -1094,8 +1096,8 @@ def make_lum_mass_plot():
     dL0 = (10**11.5)/L0
     m_v = 1.16
     em_v = 0.13
-    n_v = 0.95/dL0**m_v
-    en_v = 0.14/dL0**m_v
+    n_v = 0.95
+    en_v = 0.14
     ln_v = np.log10(n_v)
     eln_v = en_v/(np.log(10.)*n_v)
     
@@ -1149,16 +1151,16 @@ def make_lum_mass_plot():
 
     # MAKE PLOTS
 
-    fig, axall = plt.subplots(2,1, figsize=(11,10),sharex = True,gridspec_kw={'height_ratios': [2.5, 1]})
+    fig, axall = plt.subplots(2,1, figsize=(12,12),sharex = True,gridspec_kw={'height_ratios': [3, 1]})
     fig.subplots_adjust(hspace=0,wspace=0)
 
     ax  = axall[0]
     axr = axall[1]
 
 
-    ax.errorbar(0,0,markersize=5,
-                     yerr=np.array([np.diff(lMfit[j][0])]).T,
-                     fmt='w',marker=',',label=' ')
+    # ax.errorbar(0,0,markersize=5,
+                     # yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     # fmt='w',marker=',',label=' ')
 
 
     ax.errorbar(0,0,markersize=10,
@@ -1207,13 +1209,13 @@ def make_lum_mass_plot():
 
         # MAKE MICE RATIO PLOT
 
-        err = 10**(lMfit[j][0][1]-linear(MM[-1],m_v,ln_v))*np.log(10.)*np.array([np.diff(lMfit[j][0])]).T
-        axr.errorbar(MM[-1],10**(lMfit[j][0][1]-linear(MM[-1],m_v,ln_v)),
+        err = 10**(lMfit[j][0][1]-linear_viola(MM[-1],m_v,ln_v))*np.log(10.)*np.array([np.diff(lMfit[j][0])]).T
+        axr.errorbar(MM[-1],10**(lMfit[j][0][1]-linear_viola(MM[-1],m_v,ln_v)),
                         yerr=err,markersize=10,
                         fmt=csamp[j],marker=mark[j])
         
-        err = 10**(lMfit_gold[j][0][1]-linear(MM[-1],m_v,ln_v))*np.log(10.)*np.array([np.diff(lMfit_gold[j][0])]).T
-        axr.errorbar(MM_gold[-1],10**(lMfit_gold[j][0][1]-linear(MM[-1],m_v,ln_v)),
+        err = 10**(lMfit_gold[j][0][1]-linear_viola(MM[-1],m_v,ln_v))*np.log(10.)*np.array([np.diff(lMfit_gold[j][0])]).T
+        axr.errorbar(MM_gold[-1],10**(lMfit_gold[j][0][1]-linear_viola(MM[-1],m_v,ln_v)),
                         yerr=err,markersize=10,
                         fmt=csamp[j],marker=mark[j],mfc='w',mew=3)
 
@@ -1274,18 +1276,19 @@ def make_lum_mass_plot():
     print(m_all,n_all)    
     print(em_all,en_all)    
 
-    ax.plot(meanmag,linear(meanmag,m_v,ln_v),'C8',
-            label=r'Viola et. al. (2015), $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2))+r', $\beta = $'+str(np.round(n_v,2))+'$\pm$'+str(np.round(en_v,2)))
+    ax.plot(meanmag,linear_viola(meanmag,m_v,ln_v),'C8',
+            # label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2))+r', $\beta = $'+str(np.round(n_v/dL0**m_v,2))+'$\pm$'+str(np.round(en_v/dL0**m_v,2)))
+            label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2)))
             
     ax.fill_between(meanmag, 
-                    linear(meanmag,m_v+em_v,ln_v+eln_v), 
-                    linear(meanmag,m_v-em_v,ln_v-eln_v), 
+                    linear_viola(meanmag,m_v+em_v,ln_v+eln_v), 
+                    linear_viola(meanmag,m_v-em_v,ln_v-eln_v), 
                     interpolate=True, 
                     color='C8',alpha=0.3)
 
     
     ax.plot(meanmag,linear(meanmag,m,ln),'C4',
-            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+'$\pm$'+str(np.round(em,2))+r', $\beta = $'+str(np.round(n,2))+'$\pm$'+str(np.round(en,2)))
+            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+'$\pm$'+str(np.round(em,2)))
             
     ax.fill_between(meanmag, 
                     linear(meanmag,m+em,ln+eln), 
@@ -1294,7 +1297,7 @@ def make_lum_mass_plot():
                     color='C4',alpha=0.3)
 
     ax.plot(meanmag,linear(meanmag,m_gold,ln_gold),'C1',
-            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+'$\pm$'+str(np.round(em_gold,2))+r', $\beta = $'+str(np.round(n_gold,2))+'$\pm$'+str(np.round(en_gold,2)))
+            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+'$\pm$'+str(np.round(em_gold,2)))
             
     ax.fill_between(meanmag, 
                     linear(meanmag,m_gold+em_gold,ln_gold+eln_gold), 
@@ -1303,7 +1306,7 @@ def make_lum_mass_plot():
                     color='C1',alpha=0.3)
 
     ax.plot(meanmag,linear(meanmag,m_all,ln_all),'C3',
-            label=r'All sample, $\alpha = $'+str(np.round(m_all,2))+'$\pm$'+str(np.round(em_all,2))+r', $\beta = $'+str(np.round(n_gold,2))+'$\pm$'+str(np.round(en_all,2)))
+            label=r'All pair sub-samples, $\alpha = $'+str(np.round(m_all,2))+'$\pm$'+str(np.round(em_all,2)))
             
     ax.fill_between(meanmag, 
                     linear(meanmag,m_all+em_all,ln_all+eln_all), 
@@ -1314,7 +1317,7 @@ def make_lum_mass_plot():
     # ax.plot(meanmag,lM200,'C7',label='MICE - True pairs')
     # ax.plot(0,0,'w,',label=' ')
     
-    ax.legend(frameon=False,loc=3,ncol=3,fontsize=11)
+    ax.legend(loc=3,ncol=2,fontsize=11)
     ax.set_xlabel(r'$\langle M_r \rangle$')
     ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
     ax.axis([10.,10.5,10.8,13.2])
@@ -1323,139 +1326,59 @@ def make_lum_mass_plot():
     
     axr.grid()
     # axr.legend(loc=2,ncol=5,fontsize=11)
-    axr.set_xlabel(r'$ \log \langle (L_1+L_2)/(h^{-2} L_\odot) \rangle$')
+    axr.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
     axr.set_ylabel(r'$M_{200}/M^{Viola}_{200}$')
     axr.set_ylim(0,3.)
     
+    # INNER PLOT
+    
+    axin = axall[0].inset_axes([0.6,0.1,0.37,0.45])
+    
+    meanmag = np.arange(10,14,1)
+    axin.plot(meanmag,linear_viola(meanmag,m_v,ln_v),'C8',
+            label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2)))
+            
+    axin.fill_between(meanmag, 
+                    linear_viola(meanmag,m_v+em_v,ln_v+eln_v), 
+                    linear_viola(meanmag,m_v-em_v,ln_v-eln_v), 
+                    interpolate=True, 
+                    color='C8',alpha=0.3)
+
+    
+    axin.plot(meanmag,linear(meanmag,m,ln),'C4',
+            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+'$\pm$'+str(np.round(em,2)))
+            
+    axin.fill_between(meanmag, 
+                    linear(meanmag,m+em,ln+eln), 
+                    linear(meanmag,m-em,ln-eln), 
+                    interpolate=True, 
+                    color='C4',alpha=0.3)
+
+    axin.plot(meanmag,linear(meanmag,m_gold,ln_gold),'C1',
+            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+'$\pm$'+str(np.round(em_gold,2)))
+            
+    axin.fill_between(meanmag, 
+                    linear(meanmag,m_gold+em_gold,ln_gold+eln_gold), 
+                    linear(meanmag,m_gold-em_gold,ln_gold-eln_gold), 
+                    interpolate=True, 
+                    color='C1',alpha=0.3)
+
+    axin.plot(meanmag,linear(meanmag,m_all,ln_all),'C3',
+            label=r'All pair sub-samples, $\alpha = $'+str(np.round(m_all,2))+'$\pm$'+str(np.round(em_all,2)))
+            
+    axin.fill_between(meanmag, 
+                    linear(meanmag,m_all+em_all,ln_all+eln_all), 
+                    linear(meanmag,m_all-em_all,ln_all-eln_all), 
+                    interpolate=True, 
+                    color='C3',alpha=0.3)
+    axin.axis([10,12.5,11,15])
+    
+    axin.axvspan(10,10.5,color='C3',alpha=0.3)
+    axin.axvspan(10.5,12.5,color='C8',alpha=0.3)
+    axin.text(10.1,11.2,'Pairs')
+    axin.text(11,11.2,'Groups/Clusters')
+    
     fig.savefig('../final_plots/mass_lum.pdf',bbox_inches='tight')   
-
-
-def make_mag_mass_plot_vane():
-    
-    best = '_vane'
-    
-    from scipy.optimize import curve_fit
-    popt, pcov = curve_fit(lambda x,m,n: x*m+n, meanmag, lM200)
-    m,n = popt
-    samples =  ['mh_w1w3_'+pcat,
-            'mh_Mm_w1w3_'+pcat,'mh_MM_w1w3_'+pcat,
-            'mh_zm_w1w3_'+pcat,'mh_zM_w1w3_'+pcat,
-            'mh_Lrm2_w1w3_'+pcat,'mh_LrM2_w1w3_'+pcat,
-            'mh_blue_w1w3_'+pcat,'mh_red_w1w3_'+pcat]
-
-    samples_gold =  ['mh_w1w3_'+best,
-            'mh_Mm_w1w3_'+best,'mh_MM_w1w3_'+best,
-            'mh_zm_w1w3_'+best,'mh_zM_w1w3_'+best,
-            'mh_Lrm2_w1w3_'+best,'mh_LrM2_w1w3_'+best,
-            'mh_blue_w1w3_'+best,'mh_red_w1w3_'+best]
-    
-    
-    csamp = ['k',
-            'gold','gold',
-            'royalblue','royalblue',
-            'C9','C9',
-            'palevioletred','palevioletred']
-    
-    lsamp = ['all pairs',
-            '$M^{pair}_r < -21.0$',
-            '$M^{pair}_r \geq -21.0$',
-            '$z < 0.4$',
-            '$z \geq 0.4$',
-            '$L_2/L_1 < 0.5$',
-            '$L_2/L_1 \geq 0.5$',
-            r'$blue\,\,pairs$',
-            r'$red\,\,pairs$']
-
-    mark = ['o'] + ['v','^']*4
-    
-    lMfit = []
-    lMfit_gold = []
-    
-    for j in range(len(samples)):
-        lMfit += [plt_profile_fit_2h(samples[j],lsamp[j],plot=False,fytpe = ftype)]
-        lMfit_gold += [plt_profile_fit_2h(samples_gold[j],lsamp[j],plot=False,fytpe = ftype)]
-
-
-    f, axall = plt.subplots(2,2, figsize=(13,6),sharex = True,gridspec_kw={'height_ratios': [2.5, 1]})
-    f.subplots_adjust(hspace=0,wspace=0)
-
-    ax  = axall[0,:]
-    axr = axall[1,:]
-
-    ax[0].text(-20.6,13,'Phot sample') 
-    ax[1].text(-20.6,13,'ML sample') 
-    
-    
-    for j in np.arange(len(csamp)):
-        ax[0].plot(meanmag,lM200,'k')
-        ax[1].plot(meanmag,lM200,'k')
-        ax[0].plot(meanmag,meanmag*m+n,'C0--')
-        ax[1].plot(meanmag,meanmag*m+n,'C0--')
-        print(10**(lMfit_gold[j][1]-lMfit_gold[j][-1]*m+n))
-        if j == 0:
-        
-            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],markersize=10,
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],markersize=10,
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-
-
-            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
-            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
-                            markersize=10,
-                            yerr=err,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-            
-            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
-            
-            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
-                            markersize=10,
-                            yerr=err,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-                            
-        else:
-            ax[0].errorbar(lMfit[j][-1],lMfit[j][1],
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-            ax[1].errorbar(lMfit_gold[j][-1],lMfit_gold[j][1],
-                            yerr=np.array([np.diff(lMfit[j])[:-1]]).T,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-
-            err = 10**(lMfit[j][1]-(lMfit[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit[j])[:-1]]).T
-            axr[0].errorbar(lMfit[j][-1],10**(lMfit[j][1]-(lMfit[j][-1]*m+n)),
-                            yerr=err,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-            
-            err = 10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n))*np.log(10.)*np.array([np.diff(lMfit_gold[j])[:-1]]).T
-            
-            axr[1].errorbar(lMfit_gold[j][-1],10**(lMfit_gold[j][1]-(lMfit_gold[j][-1]*m+n)),
-                            yerr=err,
-                            fmt=csamp[j],label=lsamp[j],marker=mark[j])
-
-
-                     
-    ax[0].legend(frameon=False,loc=3,ncol=3,fontsize=11)
-    axr[1].set_xlabel(r'$\langle M_r \rangle$')
-    axr[0].set_xlabel(r'$\langle M_r \rangle$')
-    ax[0].set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
-    axr[0].set_ylabel(r'$M^{fit}_{200}/M^{MICE}_{200}$')
-    
-    ax[0].axis([-21.7,-20.1,10.2,13.2])
-    ax[1].axis([-21.7,-20.1,10.2,13.2])
-    axr[0].axis([-21.7,-20.1,-0.6,19])
-    axr[1].axis([-21.7,-20.1,-0.6,19])
-    
-    axr[0].set_yticks([1,5,10,15])
-    axr[1].set_yticks([1,5,10,15])
-    ax[1].set_yticks([])
-    axr[1].set_yticklabels([])
-    
-    axr[0].grid()
-    axr[1].grid()
-    
-    f.savefig('../final_plots/mass_mag_vane.pdf',bbox_inches='tight')
 
          
 def compare_MICE_mags():
