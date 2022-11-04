@@ -1424,15 +1424,15 @@ def make_lum_mass_plot():
                      fmt='none',
                      color='olive',marker='o')
                      
-    axin.plot(MM_gold,10**(LM_gold-MM_gold),'C1o')    
-    axin.errorbar(MM_gold,10**(LM_gold-MM_gold),markersize=4,
-                     yerr=eLM_gold*10**(LM_gold-MM_gold)*np.log(10.),
+    axin.plot(MM_gold[:3],10**(LM_gold-MM_gold)[:3],'C1o')    
+    axin.errorbar(MM_gold[:3],10**(LM_gold-MM_gold)[:3],markersize=4,
+                     yerr=(eLM_gold*10**(LM_gold-MM_gold)*np.log(10.))[:3],
                      fmt='none',
                      color='C1',marker='o')
                      
-    axin.plot(MM,10**(LM-MM),'C4o')    
-    axin.errorbar(MM,10**(LM-MM),markersize=4,
-                     yerr=eLM*10**(LM-MM)*np.log(10.),
+    axin.plot(MM[:3],10**(LM-MM)[:3],'C4o')    
+    axin.errorbar(MM[:3],10**(LM-MM)[:3],markersize=4,
+                     yerr=(eLM*10**(LM-MM)*np.log(10.))[:3],
                      fmt='none',
                      color='C4',marker='o')
  
@@ -1450,14 +1450,32 @@ def make_lum_mass_plot():
 
     
 
-    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_all,ln_all)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C3')
-    axin.plot(meanmag,10**(linear(meanmag,m_all,ln_all)-meanmag),'C3--')
+    # axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_all,ln_all)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C3')
+    # axin.plot(meanmag,10**(linear(meanmag,m_all,ln_all)-meanmag),'C3--')
+            
+    # axin.fill_between(meanmag, 
+                    # 10**(linear(meanmag,m_all+em_all,ln_all+eln_all)-meanmag), 
+                    # 10**(linear(meanmag,m_all-em_all,ln_all-eln_all)-meanmag), 
+                    # interpolate=True, 
+                    # color='C3',alpha=0.3)   
+
+    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_gold,ln_gold)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C1')
+    axin.plot(meanmag,10**(linear(meanmag,m_gold,ln_gold)-meanmag),'C1--')
             
     axin.fill_between(meanmag, 
-                    10**(linear(meanmag,m_all+em_all,ln_all+eln_all)-meanmag), 
-                    10**(linear(meanmag,m_all-em_all,ln_all-eln_all)-meanmag), 
+                    10**(linear(meanmag,m_gold+em_gold,ln_gold+eln_gold)-meanmag), 
+                    10**(linear(meanmag,m_gold-em_gold,ln_gold-eln_gold)-meanmag), 
                     interpolate=True, 
-                    color='C3',alpha=0.3)   
+                    color='C1',alpha=0.3)   
+
+    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m,ln)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C4')
+    axin.plot(meanmag,10**(linear(meanmag,m,ln)-meanmag),'C4--')
+            
+    axin.fill_between(meanmag, 
+                    10**(linear(meanmag,m+em,ln+eln)-meanmag), 
+                    10**(linear(meanmag,m-em,ln-eln)-meanmag), 
+                    interpolate=True, 
+                    color='C4',alpha=0.3)   
                     
     axin.plot(np.log10(0.991e10),166.*0.6,'ko')
     axin.errorbar(np.log10(0.991e10),166.*0.6,markersize=4,
@@ -1466,10 +1484,13 @@ def make_lum_mass_plot():
                     
     axin.axis([9.8,12.5,0,800])
     
+    axin.axhspan((166-32)*0.6,(166+32)*0.6,color='C7',alpha=0.2)
     axin.axvspan(9.8,10.1,color='C7',alpha=0.2)
     axin.axvspan(10,10.5,color='C3',alpha=0.2)
     axin.axvspan(10.45,12.5,color='C8',alpha=0.2)
     
+    axin.plot([9.8,10.1],[166*0.6]*2,'k')
+    axin.plot([9.8,12.5],[166*0.6]*2,'k--')
     axin.text(9.85,500,'Galaxies',rotation='vertical')
     axin.text(10.1,500,'Pairs',rotation='vertical')
     axin.text(10.8,500,'Groups/Clusters',rotation='vertical')
@@ -1478,7 +1499,7 @@ def make_lum_mass_plot():
     axin.set_ylabel(r'$M_{200}/L_{TOT} h$')
     
     
-    fig.savefig('../final_plots/mlratio.pdf',bbox_inches='tight')   
+    fig.savefig('../final_plots/mlratio.png',bbox_inches='tight')   
 
          
 def compare_MICE_mags():
