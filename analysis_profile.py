@@ -1071,6 +1071,22 @@ def make_lum_mass_plot():
     eMGirardi = np.array([0.25,0.14,0.23,0.19,0.24,0.20,0.10,0.23,0.10,0.14])
     LGirardi = (np.array([11.85,12.14,12.10,12.05,11.75,11.79,11.41,11.81,12.20,12.10]))+np.log10(0.7**2)
     
+    L_Mandel    = np.log10(np.array([0.075,0.19,0.47,1.1,2.1,3.2,5.0])*1.2e10)
+
+    M_Mandel    = np.log10(np.array([3.16,2.2,4.1,14.9,54.,157.,578.])*1.e11*0.77)
+    eM_MandelM  = (np.array([40.,7.9,4.1,5.0,14.,46.,180.])*1.e11*0.77)/(10**M_Mandel*np.log(10.))
+    eM_Mandelm  = (np.array([3.13,2.1,3.0,4.6,14.,43.,114.])*1.e11*0.77)/(10**M_Mandel*np.log(10.))
+    ML_Mandel   = np.array([246,69,51,79,151,285,674])*0.77*(1./0.7)
+    eML_MandelM = np.array([3113,242,51,27,38,83,78])*0.77*(1./0.7)
+    eML_Mandelm = np.array([243,66,37,24,38,78,203])*0.77*(1./0.7)
+
+    M_Mandel2     = np.log10(np.array([0.31,4.0,4.4,7.1,26.,21.,100.])*1.e11*0.77)
+    eM_MandelM2   = (np.array([6.44,2.7,3.4,2.8,15.,48.,208.])*1.e11*0.77)/(10**M_Mandel*np.log(10.))
+    eM_Mandelm2   = (np.array([0.30,3.9,2.6,3.0,13.,21.,100.])*1.e11*0.77)/(10**M_Mandel*np.log(10.))
+    ML_Mandel2   = np.array([26,129,57,41,74,40,122])*0.77*(1./0.7)
+    eML_MandelM2 = np.array([507,88,44,16,43,90,253])*0.77*(1./0.7)
+    eML_Mandelm2 = np.array([24,128,33,17,37,40,121])*0.77*(1./0.7)
+    
     Msun = 4.65
     lM0  = np.log10(1.e14)
     L0   = (10**10.5)
@@ -1279,6 +1295,18 @@ def make_lum_mass_plot():
     print(m_all,n_all)    
     print(em_all,en_all)    
 
+
+    popt, pcov = curve_fit(linear, L_Mandel, M_Mandel,sigma=eM_MandelM)
+    m_mandel,ln_mandel = popt
+    em_mandel,eln_mandel = np.abs(np.sqrt(np.diag(pcov)))
+    n_mandel  = 10**ln_mandel
+    en_mandel = np.abs(ln_mandel*np.log(10))*eln_mandel
+
+    print('Mandel sample fit')
+    print(m_mandel,n_mandel)
+    print(em_mandel,en_mandel)
+
+
     ax.plot(meanmag,linear_viola(meanmag,m_v,ln_v),'C8',
             # label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2))+r', $\beta = $'+str(np.round(n_v/dL0**m_v,2))+'$\pm$'+str(np.round(en_v/dL0**m_v,2)))
             label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2)))
@@ -1354,7 +1382,7 @@ def make_lum_mass_plot():
                      color='C4',marker='o')
  
     
-    meanmag = np.arange(9.5,14,0.5)
+    meanmag = np.arange(9.2,14,0.5)
         
     axin.plot(meanmag,linear_viola(meanmag,m_v,ln_v),'C8--')
     axin.plot(meanmag[meanmag >= 10.5],linear_viola(meanmag,m_v,ln_v)[meanmag >= 10.5],'C8')
@@ -1437,7 +1465,7 @@ def make_lum_mass_plot():
                      color='C4',marker='o')
  
     
-    meanmag = np.arange(9.5,14,0.1)
+    meanmag = np.arange(9.,14,0.1)
         
     axin.plot(meanmag,10**(linear_viola(meanmag,m_v,ln_v)-meanmag),'C8--')
     axin.plot(meanmag[meanmag >= 10.5],10**(linear_viola(meanmag,m_v,ln_v)-meanmag)[meanmag >= 10.5],'C8')
@@ -1450,48 +1478,58 @@ def make_lum_mass_plot():
 
     
 
-    # axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_all,ln_all)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C3')
-    # axin.plot(meanmag,10**(linear(meanmag,m_all,ln_all)-meanmag),'C3--')
+    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_all,ln_all)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C3')
+    axin.plot(meanmag,10**(linear(meanmag,m_all,ln_all)-meanmag),'C3--')
+            
+    axin.fill_between(meanmag, 
+                    10**(linear(meanmag,m_all+em_all,ln_all+eln_all)-meanmag), 
+                    10**(linear(meanmag,m_all-em_all,ln_all-eln_all)-meanmag), 
+                    interpolate=True, 
+                    color='C3',alpha=0.3)   
+
+    # axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_gold,ln_gold)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C1')
+    # axin.plot(meanmag,10**(linear(meanmag,m_gold,ln_gold)-meanmag),'C1--')
             
     # axin.fill_between(meanmag, 
-                    # 10**(linear(meanmag,m_all+em_all,ln_all+eln_all)-meanmag), 
-                    # 10**(linear(meanmag,m_all-em_all,ln_all-eln_all)-meanmag), 
+                    # 10**(linear(meanmag,m_gold+em_gold,ln_gold+eln_gold)-meanmag), 
+                    # 10**(linear(meanmag,m_gold-em_gold,ln_gold-eln_gold)-meanmag), 
                     # interpolate=True, 
-                    # color='C3',alpha=0.3)   
+                    # color='C1',alpha=0.3)   
 
-    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_gold,ln_gold)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C1')
-    axin.plot(meanmag,10**(linear(meanmag,m_gold,ln_gold)-meanmag),'C1--')
+    # axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m,ln)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C4')
+    # axin.plot(meanmag,10**(linear(meanmag,m,ln)-meanmag),'C4--')
             
-    axin.fill_between(meanmag, 
-                    10**(linear(meanmag,m_gold+em_gold,ln_gold+eln_gold)-meanmag), 
-                    10**(linear(meanmag,m_gold-em_gold,ln_gold-eln_gold)-meanmag), 
-                    interpolate=True, 
-                    color='C1',alpha=0.3)   
-
-    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m,ln)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C4')
-    axin.plot(meanmag,10**(linear(meanmag,m,ln)-meanmag),'C4--')
-            
-    axin.fill_between(meanmag, 
-                    10**(linear(meanmag,m+em,ln+eln)-meanmag), 
-                    10**(linear(meanmag,m-em,ln-eln)-meanmag), 
-                    interpolate=True, 
-                    color='C4',alpha=0.3)   
+    # axin.fill_between(meanmag, 
+                    # 10**(linear(meanmag,m+em,ln+eln)-meanmag), 
+                    # 10**(linear(meanmag,m-em,ln-eln)-meanmag), 
+                    # interpolate=True, 
+                    # color='C4',alpha=0.3)   
                     
-    axin.plot(np.log10(0.991e10),166.*0.6,'ko')
-    axin.errorbar(np.log10(0.991e10),166.*0.6,markersize=4,
-                     yerr=32*0.6,fmt='none',
+    # axin.plot(np.log10(0.991e10),166.*0.6,'ko')
+    # axin.errorbar(np.log10(0.991e10),166.*0.6,markersize=4,
+                     # yerr=32*0.6,fmt='none',
+                     # color='k',marker='o')
+
+    axin.plot(L_Mandel,ML_Mandel,'ko')
+    axin.errorbar(L_Mandel,ML_Mandel,markersize=4,
+                     yerr=np.array([eML_MandelM,eML_Mandelm]),fmt='none',
+                     color='k',marker='o')
+
+    axin.plot(L_Mandel,ML_Mandel2,'kx')
+    axin.errorbar(L_Mandel,ML_Mandel2,markersize=4,
+                     yerr=np.array([eML_MandelM2,eML_Mandelm2]),fmt='none',
                      color='k',marker='o')
                     
-    axin.axis([9.8,12.5,0,800])
+    axin.axis([9.2,12.5,0,800])
     
-    axin.axhspan((166-32)*0.6,(166+32)*0.6,color='C7',alpha=0.2)
-    axin.axvspan(9.8,10.1,color='C7',alpha=0.2)
+    # axin.axhspan((166-32)*0.6,(166+32)*0.6,color='C7',alpha=0.2)
+    axin.axvspan(9.2,10.1,color='C7',alpha=0.2)
     axin.axvspan(10,10.5,color='C3',alpha=0.2)
     axin.axvspan(10.45,12.5,color='C8',alpha=0.2)
     
-    axin.plot([9.8,10.1],[166*0.6]*2,'k')
-    axin.plot([9.8,12.5],[166*0.6]*2,'k--')
-    axin.text(9.85,500,'Galaxies',rotation='vertical')
+    axin.plot([9.2,10.1],[166*0.6]*2,'k')
+    axin.plot([9.2,12.5],[166*0.6]*2,'k--')
+    axin.text(9.3,500,'Galaxies',rotation='vertical')
     axin.text(10.1,500,'Pairs',rotation='vertical')
     axin.text(10.8,500,'Groups/Clusters',rotation='vertical')
 
