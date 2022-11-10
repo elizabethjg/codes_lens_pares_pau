@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=fitw1w3
+#SBATCH --job-name=fitGold
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=56
 #SBATCH --time=3-00:00:00

@@ -509,15 +509,15 @@ def make_plot_profile():
     
     
             
-    samp =  ['mh_all_'+pcat,'mh_all_'+best,
-            'mh_Mm_all_'+pcat,'mh_Mm_all_'+best,
-            'mh_MM_all_'+pcat,'mh_MM_all_'+best,
-            'mh_zm_all_'+pcat,'mh_zm_all_'+best,
-            'mh_zM_all_'+pcat,'mh_zM_all_'+best,
-            'mh_Lrm2_all_'+pcat,'mh_Lrm2_all_'+best,
-            'mh_LrM2_all_'+pcat,'mh_LrM2_all_'+best,
-            'mh_red_all_'+pcat,'mh_red_all_'+best,
-            'mh_blue_all_'+pcat,'mh_blue_all_'+best]
+    samp =  ['pk_all_'+pcat,'pk_all_'+best,
+            'pk_Mm_all_'+pcat,'pk_Mm_all_'+best,
+            'pk_MM_all_'+pcat,'pk_MM_all_'+best,
+            'pk_zm_all_'+pcat,'pk_zm_all_'+best,
+            'pk_zM_all_'+pcat,'pk_zM_all_'+best,
+            'pk_Lrm2_all_'+pcat,'pk_Lrm2_all_'+best,
+            'pk_LrM2_all_'+pcat,'pk_LrM2_all_'+best,
+            'pk_red_all_'+pcat,'pk_red_all_'+best,
+            'pk_blue_all_'+pcat,'pk_blue_all_'+best]
     
     lsamp1 = ['Total sample','Gold sample']*len(samp)
     
@@ -579,11 +579,11 @@ def make_plot_profile2():
         
     
             
-    samp =  ['mh_all_'+pcat,'mh_all_'+best,
-            'mh_M_1_all_'+pcat,'mh_M_1_all_'+best,
-            'mh_M_2_all_'+pcat,'mh_M_2_all_'+best,
-            'mh_M_3_all_'+pcat,'mh_M_3_all_'+best]
-            # 'mh_M_4_all_'+pcat,'mh_M_4_all_'+best]
+    samp =  ['pk_all_'+pcat,'pk_all_'+best,
+            'pk_M_1_all_'+pcat,'pk_M_1_all_'+best,
+            'pk_M_2_all_'+pcat,'pk_M_2_all_'+best,
+            'pk_M_3_all_'+pcat,'pk_M_3_all_'+best]
+            # 'pk_M_4_all_'+pcat,'pk_M_4_all_'+best]
     
     lsamp = ['Total sample - all pairs','Gold sample - all pairs',
             'Total sample - $M_1$', 'Gold sample - $M_1$',
@@ -607,17 +607,17 @@ def make_plot_profile2():
 
 def make_fcl_plot():
 
-    samples =  ['mh_all_'+pcat,
-            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
-            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
-            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
-            'mh_blue_all_'+pcat,'mh_red_all_'+pcat,]
+    samples =  ['pk_all_'+pcat,
+            'pk_Mm_all_'+pcat,'pk_MM_all_'+pcat,
+            'pk_zm_all_'+pcat,'pk_zM_all_'+pcat,
+            'pk_Lrm2_all_'+pcat,'pk_LrM2_all_'+pcat,
+            'pk_blue_all_'+pcat,'pk_red_all_'+pcat,]
 
-    samples_gold =  ['mh_all_'+best,'mh_Mm_all_'+best,
-            'mh_MM_all_'+best,'mh_zm_all_'+best,
-            'mh_zM_all_'+best,'mh_Lrm2_all_'+best,
-            'mh_LrM2_all_'+best,
-            'mh_blue_all_'+best,'mh_red_all_'+best]
+    samples_gold =  ['pk_all_'+best,'pk_Mm_all_'+best,
+            'pk_MM_all_'+best,'pk_zm_all_'+best,
+            'pk_zM_all_'+best,'pk_Lrm2_all_'+best,
+            'pk_LrM2_all_'+best,
+            'pk_blue_all_'+best,'pk_red_all_'+best]
     
     
     csamp = ['k',
@@ -657,17 +657,17 @@ def make_mag_mass_mice_plot():
     from scipy.optimize import curve_fit
     popt, pcov = curve_fit(lambda x,m,n: x*m+n, meanmag, lM200)
     m,n = popt
-    samples =  ['mh_all_'+pcat,
-            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
-            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
-            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
-            'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
+    samples =  ['pk_all_'+pcat,
+            'pk_Mm_all_'+pcat,'pk_MM_all_'+pcat,
+            'pk_zm_all_'+pcat,'pk_zM_all_'+pcat,
+            'pk_Lrm2_all_'+pcat,'pk_LrM2_all_'+pcat,
+            'pk_blue_all_'+pcat,'pk_red_all_'+pcat]
 
-    samples_gold =  ['mh_all_'+best,
-            'mh_Mm_all_'+best,'mh_MM_all_'+best,
-            'mh_zm_all_'+best,'mh_zM_all_'+best,
-            'mh_Lrm2_all_'+best,'mh_LrM2_all_'+best,
-            'mh_blue_all_'+best,'mh_red_all_'+best]
+    samples_gold =  ['pk_all_'+best,
+            'pk_Mm_all_'+best,'pk_MM_all_'+best,
+            'pk_zm_all_'+best,'pk_zM_all_'+best,
+            'pk_Lrm2_all_'+best,'pk_LrM2_all_'+best,
+            'pk_blue_all_'+best,'pk_red_all_'+best]
     
     
     csamp = ['k',
@@ -810,17 +810,17 @@ def make_mag_mass_plot():
     
     # SAMPLES AND LABELS
     
-    samples =  ['mh_all_'+pcat,
-            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
-            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
-            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
-            'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
+    samples =  ['pk_all_'+pcat,
+            'pk_Mm_all_'+pcat,'pk_MM_all_'+pcat,
+            'pk_zm_all_'+pcat,'pk_zM_all_'+pcat,
+            'pk_Lrm2_all_'+pcat,'pk_LrM2_all_'+pcat,
+            'pk_blue_all_'+pcat,'pk_red_all_'+pcat]
 
-    samples_gold =  ['mh_all_'+best,
-            'mh_Mm_all_'+best,'mh_MM_all_'+best,
-            'mh_zm_all_'+best,'mh_zM_all_'+best,
-            'mh_Lrm2_all_'+best,'mh_LrM2_all_'+best,
-            'mh_blue_all_'+best,'mh_red_all_'+best]
+    samples_gold =  ['pk_all_'+best,
+            'pk_Mm_all_'+best,'pk_MM_all_'+best,
+            'pk_zm_all_'+best,'pk_zM_all_'+best,
+            'pk_Lrm2_all_'+best,'pk_LrM2_all_'+best,
+            'pk_blue_all_'+best,'pk_red_all_'+best]
     
     
     csamp = ['k',
@@ -1130,17 +1130,17 @@ def make_lum_mass_plot():
         
     # SAMPLES AND LABELS
     
-    samples =  ['mh_all_'+pcat,
-            'mh_Mm_all_'+pcat,'mh_MM_all_'+pcat,
-            'mh_zm_all_'+pcat,'mh_zM_all_'+pcat,
-            'mh_Lrm2_all_'+pcat,'mh_LrM2_all_'+pcat,
-            'mh_blue_all_'+pcat,'mh_red_all_'+pcat]
+    samples =  ['pk_all_'+pcat,
+            'pk_Mm_all_'+pcat,'pk_MM_all_'+pcat,
+            'pk_zm_all_'+pcat,'pk_zM_all_'+pcat,
+            'pk_Lrm2_all_'+pcat,'pk_LrM2_all_'+pcat,
+            'pk_blue_all_'+pcat,'pk_red_all_'+pcat]
 
-    samples_gold =  ['mh_all_'+best,
-            'mh_Mm_all_'+best,'mh_MM_all_'+best,
-            'mh_zm_all_'+best,'mh_zM_all_'+best,
-            'mh_Lrm2_all_'+best,'mh_LrM2_all_'+best,
-            'mh_blue_all_'+best,'mh_red_all_'+best]
+    samples_gold =  ['pk_all_'+best,
+            'pk_Mm_all_'+best,'pk_MM_all_'+best,
+            'pk_zm_all_'+best,'pk_zM_all_'+best,
+            'pk_Lrm2_all_'+best,'pk_LrM2_all_'+best,
+            'pk_blue_all_'+best,'pk_red_all_'+best]
     
     
     csamp = ['k',
