@@ -70,7 +70,7 @@ def partial_profile(RA0,DEC0,Z,field,
         
         bines = np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1)
         # delta = (ROUT/(3600*KPCSCALE)) + 0.1
-        delta = (10.*ROUT)/(3600*KPCSCALE)
+        delta = (15.*ROUT)/(3600*KPCSCALE)
 
         
         mask_region = (abs(S.RAJ2000 -RA0) < delta)&(abs(S.DECJ2000 - DEC0) < delta)
@@ -293,73 +293,73 @@ def main(sample,pcat,
         
         
         if fields == 'all':
-            L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L1[1]))*1                             
-            L1 = np.vstack((L1,field))                                
-                                                                    
-            L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L2[1]))*2                             
-            L2 = np.vstack((L2,field))                                
-                                            
-            L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L3[1]))*3
-            L3 = np.vstack((L3,field))
-        
-            L = np.vstack((L1.T,L2.T,L3.T)).T
-            
-        elif fields == 'w3':
-                                            
-            L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L3[1]))*3
-            L3 = np.vstack((L3,field))
-            
-            L = L3
-
-        elif fields == 'w1':
-
-            L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L1[1]))*1                             
-            L1 = np.vstack((L1,field))                                
-                                                                    
-            L = L1
-        elif fields == 'w2':
-                                                                    
-            L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L2[1]))*2                             
-            L2 = np.vstack((L2,field))                                
-                        
-            L = L2
-            
-        elif fields == 'w1w2':
-            
-            L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L1[1]))*1                             
-            L1 = np.vstack((L1,field))                                
-                                                                    
-            L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L2[1]))*2                             
-            L2 = np.vstack((L2,field))                                
+            L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T
+            field = np.ones(len(L1[1]))*1                       
+            L1 = np.vstack((L1,field))                          
                                                                 
-            L = np.vstack((L1.T,L2.T)).T
-        elif fields == 'w1w3':
-
-            L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L1[1]))*1                             
-            L1 = np.vstack((L1,field))                                
-                                                                                                                
-            L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L3[1]))*3
-            L3 = np.vstack((L3,field))
-            
-            L = np.vstack((L1.T,L3.T)).T
-        elif fields == 'w2w3':
-
-                                                                    
-            L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T
-            field = np.ones(len(L2[1]))*2                             
-            L2 = np.vstack((L2,field))                                
-                                            
-            L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+            L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T
+            field = np.ones(len(L2[1]))*2                       
+            L2 = np.vstack((L2,field))                          
+                                                                
+            L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
+            field = np.ones(len(L3[1]))*3                       
+            L3 = np.vstack((L3,field))                          
+                                                                
+            L = np.vstack((L1.T,L2.T,L3.T)).T                   
+                                                                
+        elif fields == 'w3':                                    
+                                                                
+            L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
+            field = np.ones(len(L3[1]))*3                       
+            L3 = np.vstack((L3,field))                          
+                                                                
+            L = L3                                              
+                                                                
+        elif fields == 'w1':                                    
+                                                                
+            L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T
+            field = np.ones(len(L1[1]))*1                       
+            L1 = np.vstack((L1,field))                          
+                                                                
+            L = L1                                              
+        elif fields == 'w2':                                    
+                                                                
+            L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T
+            field = np.ones(len(L2[1]))*2                       
+            L2 = np.vstack((L2,field))                          
+                                                                
+            L = L2                                              
+                                                                
+        elif fields == 'w1w2':                                  
+                                                                
+            L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T
+            field = np.ones(len(L1[1]))*1                       
+            L1 = np.vstack((L1,field))                          
+                                                                
+            L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T
+            field = np.ones(len(L2[1]))*2                       
+            L2 = np.vstack((L2,field))                          
+                                                                
+            L = np.vstack((L1.T,L2.T)).T                        
+        elif fields == 'w1w3':                                  
+                                                                
+            L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T
+            field = np.ones(len(L1[1]))*1                       
+            L1 = np.vstack((L1,field))                          
+                                                                                              
+            L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
+            field = np.ones(len(L3[1]))*3                       
+            L3 = np.vstack((L3,field))                          
+                                                                
+            L = np.vstack((L1.T,L3.T)).T                        
+        elif fields == 'w2w3':                                  
+                                                                
+                                                                
+            L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T
+            field = np.ones(len(L2[1]))*2                       
+            L2 = np.vstack((L2,field))                          
+                                                                
+            L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
             field = np.ones(len(L3[1]))*3
             L3 = np.vstack((L3,field))           
             
@@ -391,7 +391,8 @@ def main(sample,pcat,
 
         Nlenses = mlenses.sum()
         
-        Mmean = -2.5*np.log10(np.mean(10**(-0.4*Mtot[mlenses])))
+        Mmean  = -2.5*np.log10(np.mean(10**(-0.4*Mtot[mlenses])))
+        Mmeani = -2.5*np.log10(np.mean(10**(-0.4*Mtoti[mlenses])))
 
         if Nlenses < ncores:
                 ncores = Nlenses
@@ -541,7 +542,8 @@ def main(sample,pcat,
         h.append(('z_mean',np.round(zmean,4)))
         h.append(('M_min',np.round(Mtot_min,4)))
         h.append(('M_max',np.round(Mtot_max,4)))
-        h.append(('M_mean',np.round(Mmean,4)))
+        h.append(('M_mean_r',np.round(Mmean,4)))
+        h.append(('M_mean_i',np.round(Mmeani,4)))
         h.append(('Lratio_min',np.round(Lratio_min,4)))
         h.append(('Lratio_max',np.round(Lratio_max,4)))
         h.append(('hcosmo',np.round(hcosmo,4)))

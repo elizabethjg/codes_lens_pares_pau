@@ -25,8 +25,8 @@ lM200_p1   = np.array([12.1487476 , 12.76705489])
 elM200_p1  = np.array([0.22447506, 0.29605648])
 
 
-pcat = '_photo_z_2nd_run_mag_i'
-best = '_photo_z_2nd_run_mag_i_best'
+pcat = 'Total'
+best = 'Gold'
 vane = '_vane'
 ftype = '_boost'
 
@@ -72,15 +72,16 @@ def color_plot():
     Lratio_mice = 10.**(-0.4*(M2_mice-M1_mice))
     color_mice  = Mtot_mice - Mtot_i_mice
     
-    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
-    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T                                    
-    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+    L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T                                                            
+    # L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T                                    
+    L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
     
     print('density W1 = ',compute_density(L1[1],L1[2]))
-    print('density W2 = ',compute_density(L2[1],L2[2]))
+    # print('density W2 = ',compute_density(L2[1],L2[2]))
     print('density W3 = ',compute_density(L3[1],L3[2]))
     
-    L = np.vstack((L1.T,L2.T,L3.T)).T
+    # L = np.vstack((L1.T,L2.T,L3.T)).T
+    L = np.vstack((L1.T,L3.T)).T
     
     M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     M2 = L[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
@@ -92,11 +93,12 @@ def color_plot():
     
     color = Mtot-Mtoti
 
-    L1b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+best).T                                                            
-    L2b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+best).T                                    
-    L3b = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+best).T
+    L1b = np.loadtxt('../pareconk/Pares-PAUS_W1-'+best).T                                                            
+    # L2b = np.loadtxt('../pareconk/Pares-PAUS_W2-'+best).T                                    
+    L3b = np.loadtxt('../pareconk/Pares-PAUS_W3-'+best).T
     
-    Lb = np.vstack((L1b.T,L2b.T,L3b.T)).T
+    # Lb = np.vstack((L1b.T,L2b.T,L3b.T)).T
+    Lb = np.vstack((L1b.T,L3b.T)).T
     
     M1b = Lb[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
     M2b = Lb[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
@@ -1583,9 +1585,9 @@ def compare_MICE_mags():
     
     # LOAD PAUS PAIRS 
     
-    L1 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W1-Photo_z_calibrate'+pcat).T                                                            
-    L2 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W2-Photo_z_calibrate'+pcat).T                                    
-    L3 = np.loadtxt('../catlogoscon5log10h/Pares-PAUS_W3-Photo_z_calibrate'+pcat).T
+    L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T                                                            
+    L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T                                    
+    L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
     
     L = np.vstack((L1.T,L2.T,L3.T)).T
     
