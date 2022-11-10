@@ -398,7 +398,7 @@ def main(sample,pcat,
                 ncores = Nlenses
 
         sample = sample+'_'+fields+'_'
-        outfile = '../profiles3/profile_'+sample+pcat+'.fits'
+        outfile = '../profiles_pk/profile_'+sample+pcat+'.fits'
         print('Saving in file ',outfile)        
         print('Nlenses',Nlenses)
         print('CORRIENDO EN ',ncores,' CORES')
