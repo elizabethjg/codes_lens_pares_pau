@@ -372,8 +372,10 @@ def plt_profile_fit_2h(samp,lsamp,
     
     if plot:
         
-        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
+        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        ds2h   = ds1h
+        
         
         ds = ds1h+ds2h
         
@@ -518,8 +520,8 @@ def make_plot_profile():
     lsamp1 = ['Total sample','Gold sample']*len(samp)
     
     lsamp2 = ['all pairs','all pairs', 
-              '$M^{pair}_r < -21.0$','$M^{pair}_r < -21.0$', 
-              '$M^{pair}_r \geq -21.0$','$M^{pair}_r \geq -21.0$', 
+              '$M^{pair}_r < -22.0$','$M^{pair}_r < -22.0$', 
+              '$M^{pair}_r \geq -22.0$','$M^{pair}_r \geq -22.0$', 
               '$z < 0.4$','$z < 0.4$', 
               '$z \geq 0.4$','$z \geq 0.4$',
               '$L_2/L_1 < 0.5$','$L_2/L_1 < 0.5$',
@@ -623,8 +625,8 @@ def make_fcl_plot():
             'palevioletred','palevioletred',]
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -21.0$',
-            '$M^{pair}_r \geq -21.0$',
+            '$M^{pair}_r < -22.0$',
+            '$M^{pair}_r \geq -22.0$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -1023,8 +1025,8 @@ def make_lum_mass_plot():
             'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -21.0$',
-            '$M^{pair}_r \geq -21.0$',
+            '$M^{pair}_r < -22.0$',
+            '$M^{pair}_r \geq -22.0$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
