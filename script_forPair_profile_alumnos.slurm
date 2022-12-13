@@ -20,7 +20,7 @@ python -u forpair_profile.py -pcat 'Total' -sample 'pk_Mm2'   -nbins 15 -RIN 100
 ##python -u forpair_profile.py -pcat 'Gold' -sample  'pk_zm'   -nbins 15 -RIN 100 -ROUT 10000 -ncores 128 -z_max 0.4       -fields w1w3
 ##python -u forpair_profile.py -pcat 'Gold' -sample  'pk_red'  -nbins 15 -RIN 100 -ROUT 10000 -ncores 128 -colorcut 'red'  -fields w1w3
 ##python -u forpair_profile.py -pcat 'Gold' -sample  'pk_blue' -nbins 15 -RIN 100 -ROUT 10000 -ncores 128 -colorcut 'blue' -fields w1w3
-python -u forpair_profile.py -pcat 'Gold' -sample  'pk_MM'   -nbins 15 -RIN 100 -ROUT 10000 -ncores 128 -Mtot_min -22.5  -fields w1w3
+python -u forpair_profile.py -pcat 'Gold' -sample  'pk_MM2'   -nbins 15 -RIN 100 -ROUT 10000 -ncores 128 -Mtot_min -22.5  -fields w1w3
 python -u forpair_profile.py -pcat 'Gold' -sample  'pk_Mm2'   -nbins 15 -RIN 100 -ROUT 10000 -ncores 128 -Mtot_max -22.5  -fields w1w3
 ##python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i' -sample 'mh_M1'   -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_max -21.09
 ##python -u forpair_profile.py -pcat '_photo_z_2nd_run_mag_i' -sample 'mh_M2'   -nbins 15 -RIN 100 -ROUT 10000 -ncores 32 -Mtot_min -21.09 -Mtot_max -20.65

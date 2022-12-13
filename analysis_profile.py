@@ -9,6 +9,7 @@ from fit_profiles_curvefit import Delta_Sigma_fit
 from models_profiles import *
 from matplotlib import rc
 from matplotlib import cbook
+import pandas as pd
 # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 # rc('text', usetex=True)
 # matplotlib.rcParams.update({'font.size': 14})
@@ -44,6 +45,41 @@ def compute_density(ra,dec):
 def color_plot():
     
     from medianas import separate_medianas
+    
+    # LOAD PAUS CATALOGS
+    
+    w1 = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W1_no_k_corr.csv')
+    w3 = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W3_no_k_corr.csv')
+    w1_best = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W1_best_pz_no_k_corr.csv')
+    w3_best = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W3_best_pz_no_k_corr.csv')
+    
+    mr  = np.append(w1.mag_r_no_k,w3.mag_r_no_k)
+    mrb = np.append(w1_best.mag_r_no_k,w3_best.mag_r_no_k)
+    zp  = np.append(w1.zb,w3.zb)
+    zpb  = np.append(w1_best.zb,w3_best.zb)
+
+    mp  = (mr > -23.5) & (zp < 0.6) & (zp > 0.2)
+    mpb = (mrb > -23.5) & (zpb < 0.6) & (zpb > 0.2)
+    
+    mr  = mr[mp]
+    zp  = zp[mp]
+    zpb = zpb[mpb]
+    
+    mrb  = mrb[mpb]
+    mi  = np.append(w1.mag_i_no_k,w3.mag_i_no_k)[mp]
+    
+    mib = np.append(w1_best.mag_i_no_k,w3_best.mag_i_no_k)[mpb]
+    
+    Mr  = mr - 5.*np.log10(np.array(cosmo.luminosity_distance(zp))*1.e6) + 5
+    Mi  = mi - 5.*np.log10(np.array(cosmo.luminosity_distance(zp))*1.e6) + 5
+    Mrb = mrb - 5.*np.log10(np.array(cosmo.luminosity_distance(zpb))*1.e6) + 5
+    Mib = mib - 5.*np.log10(np.array(cosmo.luminosity_distance(zpb))*1.e6) + 5
+
+    colorp  = Mr - Mi
+    colorpb = Mrb - Mib
+        
+    
+    # LOAD MICE CATALOG
     
     M1 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R1.dat').T
     M2 = np.loadtxt('../MICE-pairs/True-pairs-0.2-0.6-50-paralentes-R2.dat').T
@@ -109,45 +145,93 @@ def color_plot():
     
     colorb = Mtotb-Mtotib
 
-    label_x = '$M^{pair}_{r}$'
-    label_y = '$M^{pair}_{r} - M^{pair}_{i}$'
+    label_x = '$M_{r}$'
+    label_y = '$M_{r} - M_{i}$'
     
     Lratio = 10.**(-0.4*(L[-1]-L[8]))
     Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
     
-    f, ax = plt.subplots(2,2, figsize=(10,6))
-    # f.subplots_adjust(hspace=0,wspace=0)
+    f, ax = plt.subplots(2,3, figsize=(12,6))
+    f.subplots_adjust(hspace=0)
     
     ax = ax.flatten()
+
+    for j in range(len(ax)):
+            ax[j].set_ylabel('$n$')
     
     # ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
+    ax[0].plot(-24,0.1,'w,',label='Total sample')
+    ax[0].hist(Mr,np.linspace(-24,-19.5,20),color='C7',alpha=0.5,label='PAUS galaxies',lw=2,density=True)
+    ax[0].axvline(np.median(Mr),color='C7',lw=2)
+    ax[0].hist(M1,np.linspace(-24,-19.5,20),color='k',label='Galaxy pairs',lw=2,histtype='step',density=True)
+    ax[0].hist(M1,np.linspace(-24,-19.5,20),color='C4',lw=2,histtype='step',density=True)
+    ax[0].hist(M2,np.linspace(-24,-19.5,20),color='C4',lw=2,histtype='step',density=True,ls='--')
+    ax[0].axvline(np.median(M1),color='C4',lw=2)
+    ax[0].axvline(np.median(M2),color='C4',lw=2,ls='--')
+    ax[0].legend(frameon=False,loc=2,fontsize=12)    
+    
+    ax[3].plot(-24,0.1,'w,',label='Gold sample')
+    ax[3].legend(frameon=False,loc=2,fontsize=12)    
+    ax[3].set_ylim([0,0.52])
+    ax[3].hist(Mrb,np.linspace(-24,-19.5,20),color='C7',alpha=0.5,label='Total sample',lw=2,density=True)
+    ax[3].axvline(np.median(Mrb),color='C7',lw=2)
+    ax[3].hist(M1b,np.linspace(-24,-19.5,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[3].hist(M2b,np.linspace(-24,-19.5,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True,ls='--')
+    ax[3].axvline(np.median(M1b),color='C1',lw=2)
+    ax[3].axvline(np.median(M2b),color='C1',lw=2,ls='--')
+    ax[3].set_xlabel('$M_{r}$',fontsize=11)
+    
+    ax[1].axvline(np.median(M1-M1i),color='k',lw=2, label='Brightest')
+    ax[1].axvline(np.median(M2-M2i),color='k',lw=2,ls='--', label='Faintest')
+    ax[1].legend(frameon=False,loc=2,fontsize=12)    
+    ax[1].hist(colorp,np.linspace(-0.,0.6,20),color='C7',alpha=0.5,label='PAUS galaxies',lw=2,density=True)
+    ax[1].axvline(np.median(colorp),color='C7',lw=2)
+    ax[1].hist(M1-M1i,np.linspace(-0.,0.6,20),color='C4',lw=2,histtype='step',density=True)
+    ax[1].hist(M2-M2i,np.linspace(-0.,0.6,20),color='C4',lw=2,histtype='step',density=True,ls='--')
+    ax[1].axvline(np.median(M1-M1i),color='C4',lw=2)
+    ax[1].axvline(np.median(M2-M2i),color='C4',lw=2,ls='--')
+    
+    
+    ax[4].hist(colorpb,np.linspace(-0.,0.6,20),color='C7',alpha=0.5,label='Gold sample',lw=2,density=True)
+    ax[4].axvline(np.median(colorpb),color='C7',lw=2)
+    ax[4].hist(M1b-M1ib,np.linspace(-0.,0.6,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[4].hist(M2b-M2ib,np.linspace(-0.,0.6,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True,ls='--')
+    ax[4].axvline(np.median(M1b-M1ib),color='C1',lw=2)
+    ax[4].axvline(np.median(M2b-M2ib),color='C1',lw=2,ls='--')
+    ax[4].set_xlabel('$M_{r}-M_{i}$')
+
+    ax[2].hist(zp,np.linspace(0.2,0.6,20),color='C7',label='Total sample',lw=2,alpha=0.5,density=True)
+    ax[2].axvline(np.median(zp),color='C7',lw=2)
+    ax[2].hist(L[3],np.linspace(0.2,0.6,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[2].axvline(np.median(L[3]),color='C4',lw=2)
+
+    ax[5].hist(zpb,np.linspace(0.2,0.6,20),color='C7',label='Total sample',lw=2,alpha=0.5,density=True)
+    ax[5].axvline(np.median(zpb),color='C7',lw=2)
+    ax[5].hist(Lb[3],np.linspace(0.2,0.6,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[5].axvline(np.median(Lb[3]),color='C1',lw=2)
+    ax[5].set_xlabel(r'$z$')
+    
+    f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
+
+    f, ax = plt.subplots(2,1, figsize=(6,6))
+
     ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
     ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[0].set_xlabel('$M^{pair}_{r}$',fontsize=11)
+    ax[0].axvline(np.median(Mtot),color='C4',lw=2)
+    ax[0].axvline(np.median(Mtotb),color='C1',lw=2)
+
+    ax[1].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[1].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[1].axvline(np.median(Lratio),color='C4',lw=2)
+    ax[1].axvline(np.median(Lratiob),color='C1',lw=2)
+    ax[0].set_xlabel('$M^{pair}_r$')
+    ax[1].set_xlabel('$L_2/L_1$')
     ax[0].set_ylabel('$n$')
     ax[1].set_ylabel('$n$')
-    ax[2].set_ylabel('$n$')
-    ax[3].set_ylabel('$n$')
-
-    # ax[1].hist(color_mice,np.linspace(-0.,1.2,20),color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
-    ax[1].hist(color,np.linspace(-0.,1.2,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[1].hist(colorb,np.linspace(-0.,1.2,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[1].set_xlabel(label_y)
-    
-    # ax[2].hist(Lratio_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
-    ax[2].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[2].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[2].set_xlabel('$L_2/L_1$')
-
-    # ax[3].hist(z_mice,20,color='C7',label='MICE sample',lw=2,density=True,alpha=0.4)
-    ax[3].hist(L[3],20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[3].hist(Lb[3],20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[3].set_xlabel(r'$z^{pair}$')
-
-    ax[0].legend(frameon=False,loc=2,fontsize=12)    
+    ax[0].legend(frameon=False,loc=2,fontsize=12)
     f.tight_layout(pad=0.8)
-    f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
-    
+    f.savefig('../final_plots/Lratio.pdf',bbox_inches='tight')
+
     # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
     separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
 
@@ -508,8 +592,8 @@ def make_plot_profile():
     
             
     samp =  ['pk_w1w3_'+pcat,'pk_w1w3_'+best,
-            'pk_Mm_w1w3_'+pcat,'pk_Mm_w1w3_'+best,
-            'pk_MM_w1w3_'+pcat,'pk_MM_w1w3_'+best,
+            'pk_Mm2_w1w3_'+pcat,'pk_Mm2_w1w3_'+best,
+            'pk_MM2_w1w3_'+pcat,'pk_MM2_w1w3_'+best,
             'pk_zm_w1w3_'+pcat,'pk_zm_w1w3_'+best,
             'pk_zM_w1w3_'+pcat,'pk_zM_w1w3_'+best,
             'pk_Lrm2_w1w3_'+pcat,'pk_Lrm2_w1w3_'+best,
@@ -520,8 +604,8 @@ def make_plot_profile():
     lsamp1 = ['Total sample','Gold sample']*len(samp)
     
     lsamp2 = ['all pairs','all pairs', 
-              '$M^{pair}_r < -22.0$','$M^{pair}_r < -22.0$', 
-              '$M^{pair}_r \geq -22.0$','$M^{pair}_r \geq -22.0$', 
+              '$M^{pair}_r < -22.5$','$M^{pair}_r < -22.5$', 
+              '$M^{pair}_r \geq -22.5$','$M^{pair}_r \geq -22.5$', 
               '$z < 0.4$','$z < 0.4$', 
               '$z \geq 0.4$','$z \geq 0.4$',
               '$L_2/L_1 < 0.5$','$L_2/L_1 < 0.5$',
@@ -539,6 +623,7 @@ def make_plot_profile():
     legend = [True,True]+[True,False,True,False]*4
     
     for j in range(len(samp)):
+        print
         lMfit += [plt_profile_fit_2h(samp[j],
                 lsamp1[j]+' - '+lsamp2[j],axDS[j],
                 fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
@@ -550,8 +635,8 @@ def make_plot_profile():
     
     
     axC[0].set_ylim(0,1200)
-    axC[0].set_xlim(10.7,13.3)
-    fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
+    axC[0].set_xlim(10.7,13.5)
+    # fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
     fC.savefig('../final_plots/chains2'+pcat+ftype+'.pdf',bbox_inches='tight')
 
 
@@ -606,13 +691,13 @@ def make_plot_profile2():
 def make_fcl_plot():
 
     samples =  ['pk_w1w3_'+pcat,
-            'pk_Mm_w1w3_'+pcat,'pk_MM_w1w3_'+pcat,
+            'pk_Mm2_w1w3_'+pcat,'pk_MM2_w1w3_'+pcat,
             'pk_zm_w1w3_'+pcat,'pk_zM_w1w3_'+pcat,
             'pk_Lrm2_w1w3_'+pcat,'pk_LrM2_w1w3_'+pcat,
             'pk_blue_w1w3_'+pcat,'pk_red_w1w3_'+pcat,]
 
-    samples_gold =  ['pk_w1w3_'+best,'pk_Mm_w1w3_'+best,
-            'pk_MM_w1w3_'+best,'pk_zm_w1w3_'+best,
+    samples_gold =  ['pk_w1w3_'+best,'pk_Mm2_w1w3_'+best,
+            'pk_MM2_w1w3_'+best,'pk_zm_w1w3_'+best,
             'pk_zM_w1w3_'+best,'pk_Lrm2_w1w3_'+best,
             'pk_LrM2_w1w3_'+best,
             'pk_blue_w1w3_'+best,'pk_red_w1w3_'+best]
@@ -625,8 +710,8 @@ def make_fcl_plot():
             'palevioletred','palevioletred',]
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.0$',
-            '$M^{pair}_r \geq -22.0$',
+            '$M^{pair}_r < -22.5$',
+            '$M^{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -682,13 +767,13 @@ def make_mag_mass_plot():
     # SAMPLES AND LABELS
     
     samples =  ['pk_w1w3_'+pcat,
-            'pk_Mm_w1w3_'+pcat,'pk_MM_w1w3_'+pcat,
+            'pk_Mm2_w1w3_'+pcat,'pk_MM2_w1w3'+pcat,
             'pk_zm_w1w3_'+pcat,'pk_zM_w1w3_'+pcat,
             'pk_Lrm2_w1w3_'+pcat,'pk_LrM2_w1w3_'+pcat,
             'pk_blue_w1w3_'+pcat,'pk_red_w1w3_'+pcat]
 
     samples_gold =  ['pk_w1w3_'+best,
-            'pk_Mm_w1w3_'+best,'pk_MM_w1w3_'+best,
+            'pk_Mm2_w1w3_'+best,'pk_MM2_w1w3'+best,
             'pk_zm_w1w3_'+best,'pk_zM_w1w3_'+best,
             'pk_Lrm2_w1w3_'+best,'pk_LrM2_w1w3_'+best,
             'pk_blue_w1w3_'+best,'pk_red_w1w3_'+best]
@@ -701,8 +786,8 @@ def make_mag_mass_plot():
             'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.0$',
-            '$M^{pair}_r \geq -22.0$',
+            '$M^{pair}_r < -22.5$',
+            '$M^{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -1006,13 +1091,13 @@ def make_lum_mass_plot():
     # SAMPLES AND LABELS
     
     samples =  ['pk_w1w3_'+pcat,
-            'pk_Mm_w1w3_'+pcat,'pk_MM_w1w3_'+pcat,
+            'pk_Mm2_w1w3_'+pcat,'pk_MM2_w1w3_'+pcat,
             'pk_zm_w1w3_'+pcat,'pk_zM_w1w3_'+pcat,
             'pk_Lrm2_w1w3_'+pcat,'pk_LrM2_w1w3_'+pcat,
             'pk_blue_w1w3_'+pcat,'pk_red_w1w3_'+pcat]
 
     samples_gold =  ['pk_w1w3_'+best,
-            'pk_Mm_w1w3_'+best,'pk_MM_w1w3_'+best,
+            'pk_Mm2_w1w3_'+best,'pk_MM2_w1w3_'+best,
             'pk_zm_w1w3_'+best,'pk_zM_w1w3_'+best,
             'pk_Lrm2_w1w3_'+best,'pk_LrM2_w1w3_'+best,
             'pk_blue_w1w3_'+best,'pk_red_w1w3_'+best]
@@ -1025,8 +1110,8 @@ def make_lum_mass_plot():
             'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.0$',
-            '$M^{pair}_r \geq -22.0$',
+            '$M^{pair}_r < -22.5$',
+            '$M^{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -1048,11 +1133,12 @@ def make_lum_mass_plot():
 
     # MAKE PLOTS
 
-    fig, axall = plt.subplots(2,1, figsize=(10,10),sharex = True,gridspec_kw={'height_ratios': [3, 1]})
-    fig.subplots_adjust(hspace=0,wspace=0)
+    # fig, axall = plt.subplots(2,1, figsize=(10,10),sharex = True,gridspec_kw={'height_ratios': [3, 1]})
+    # fig.subplots_adjust(hspace=0,wspace=0)
+    fig, ax = plt.subplots(1,1, figsize=(10,7))
 
-    ax  = axall[0]
-    axr = axall[1]
+    # ax  = axall[0]
+    # axr = axall[1]
 
 
     # ax.errorbar(0,0,markersize=5,
@@ -1065,12 +1151,12 @@ def make_lum_mass_plot():
     ax.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
-    axr.errorbar(0,0,markersize=10,
-                     yerr=np.array([np.diff(lMfit[j][0])]).T,
-                     fmt='k',marker='o',label='Total sample')
-    axr.errorbar(0,0,markersize=10,
-                     yerr=np.array([np.diff(lMfit[j][0])]).T,
-                     fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
+    # axr.errorbar(0,0,markersize=10,
+                     # yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     # fmt='k',marker='o',label='Total sample')
+    # axr.errorbar(0,0,markersize=10,
+                     # yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     # fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
 
     
     
@@ -1087,10 +1173,10 @@ def make_lum_mass_plot():
         
         MM       += [-0.4*(lMfit[j][1]-Msun)]
         LM       += [lMfit[j][0][1]]
-        eLM      += [np.diff(lMfit[j][0]).mean()]
+        eLM      += [np.diff(lMfit[j][0])]
         MM_gold  += [-0.4*(lMfit_gold[j][1]-Msun)]
         LM_gold  += [lMfit_gold[j][0][1]]
-        eLM_gold += [np.diff(lMfit_gold[j][0]).mean()]
+        eLM_gold += [np.diff(lMfit_gold[j][0])]
         
 
         # MAKE SCATTER PLOT
@@ -1102,7 +1188,7 @@ def make_lum_mass_plot():
                      yerr=np.array([np.diff(lMfit_gold[j][0])]).T,
                      fmt=csamp[j],marker=mark[j], mfc='w',mew=3)
                      
-
+        '''
         # MAKE MICE RATIO PLOT
 
         err = np.abs(10**(lMfit[j][0][1]-linear_viola(MM[-1],m_v,ln_v))*np.log(10.))*np.array([np.diff(lMfit[j][0])]).T
@@ -1115,16 +1201,16 @@ def make_lum_mass_plot():
                         yerr=err,markersize=10,
                         fmt=csamp[j],marker=mark[j],mfc='w',mew=3)
 
-
+        '''
         # JUST FOR THE LABELS
 
         if j > 0:
             ax.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt=csamp[j],marker=mark[j],label=lsamp[j])
-            axr.errorbar(0,0,markersize=10,
-                     yerr=np.array([np.diff(lMfit[j][0])]).T,
-                     fmt=csamp[j],marker=mark[j],label=lsamp[j])
+            # axr.errorbar(0,0,markersize=10,
+                     # yerr=np.array([np.diff(lMfit[j][0])]).T,
+                     # fmt=csamp[j],marker=mark[j],label=lsamp[j])
 
 
     MM = np.array(MM)
@@ -1137,12 +1223,16 @@ def make_lum_mass_plot():
     
     # FIT MASS-TO-LIGHT RELATION
 
-    mlim = 100.
+    # mlim = 100.
+    # mask = (MM < mlim)
     
-    mask = (MM < mlim)
-    popt, pcov = curve_fit(linear, MM[mask], LM[mask],sigma=eLM[mask])
+    mask = [False,True,True,False,False,False,False,False,False]
+    popt, pcov = curve_fit(linear, MM[mask], LM[mask])
+    popt1, pcov1 = curve_fit(linear, MM[mask], LM[mask] + [eLM[mask][0][0], -1.*eLM[mask][1][1]])
+    popt2, pcov2 = curve_fit(linear, MM[mask], LM[mask] - [eLM[mask][0][1], -1.*eLM[mask][1][0]])
+    
     m,ln = popt
-    em,eln = np.abs(np.sqrt(np.diag(pcov)))
+    em,eln = np.array([popt1 - popt, popt - popt2]).T
     n  = 10**ln
     en = np.abs(ln*np.log(10))*eln
     
@@ -1150,10 +1240,12 @@ def make_lum_mass_plot():
     print(m,n)
     print(em,en)
 
-    mask = MM_gold < mlim
-    popt, pcov = curve_fit(linear, MM_gold[mask], LM_gold[mask],sigma=eLM_gold[mask])
+    popt, pcov = curve_fit(linear, MM_gold[mask], LM_gold[mask])
+    popt1, pcov1 = curve_fit(linear, MM_gold[mask], LM_gold[mask] + [eLM_gold[mask][0][0], -1.*eLM_gold[mask][1][1]])
+    popt2, pcov2 = curve_fit(linear, MM_gold[mask], LM_gold[mask] - [eLM_gold[mask][0][1], -1.*eLM_gold[mask][1][0]])
+    
     m_gold,ln_gold = popt
-    em_gold,eln_gold = np.abs(np.sqrt(np.diag(pcov)))
+    em_gold,eln_gold = np.array([popt1 - popt, popt - popt2]).T
     n_gold  = 10**ln_gold
     en_gold = np.abs(ln_gold*np.log(10))*eln_gold
 
@@ -1161,8 +1253,9 @@ def make_lum_mass_plot():
     print(m_gold,n_gold)
     print(em_gold,en_gold)
     
-    mask = np.append(MM,MM_gold) < mlim
-    popt, pcov = curve_fit(linear, np.append(MM,MM_gold)[mask], np.append(LM,LM_gold)[mask],sigma=np.append(eLM,eLM_gold)[mask])
+    mask = mask*2
+    eLM_all = np.vstack((eLM,eLM_gold))
+    popt, pcov = curve_fit(linear, np.append(MM,MM_gold)[mask], np.append(LM,LM_gold)[mask],sigma=np.average(eLM_all,axis=1)[mask])
     m_all,ln_all = popt
     em_all,eln_all = np.abs(np.sqrt(np.diag(pcov)))
     n_all  = 10**ln_all
@@ -1186,10 +1279,10 @@ def make_lum_mass_plot():
 
     ax.plot(meanmag,linear_viola(meanmag,m_v,ln_v),'C8',
             # label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2))+r', $\beta = $'+str(np.round(n_v/dL0**m_v,2))+'$\pm$'+str(np.round(en_v/dL0**m_v,2)))
-            label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2)))
+            label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2))+r'$, \beta = $'+str(np.round(ln_v,2))+'$\pm$'+str(np.round(eln_v,2)))
 
     ax.plot(meanmag,linear(meanmag,m_mice,ln_mice),'C7',
-            label=r'MICE, $\alpha = $'+str(np.round(m_mice,2)))
+            label=r'MICE, $\alpha = $'+str(np.round(m_mice,2))+r', $\beta = $'+str(np.round(ln_mice,2)))
             
     ax.fill_between(meanmag, 
                     linear_viola(meanmag,m_v+em_v,ln_v+eln_v), 
@@ -1198,21 +1291,21 @@ def make_lum_mass_plot():
                     color='C8',alpha=0.3)
     
     ax.plot(meanmag,linear(meanmag,m,ln),'C4',
-            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+'$\pm$'+str(np.round(em,2)))
+            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+r'$^{+'+str(np.round(em[0],2))+r'}_{-'+str(np.round(em[1],2))+'}$'+r'$, \beta = $'+str(np.round(ln,2))+r'$^{+'+str(np.round(eln[0],2))+r'}_{-'+str(np.round(eln[1],2))+'}$')
 
             
     ax.fill_between(meanmag, 
-                    linear(meanmag,m+em,ln+eln), 
-                    linear(meanmag,m-em,ln-eln), 
+                    linear(meanmag,m-max(em),ln-max(eln)), 
+                    linear(meanmag,m+max(em),ln+max(eln)), 
                     interpolate=True, 
                     color='C4',alpha=0.3)
 
     ax.plot(meanmag,linear(meanmag,m_gold,ln_gold),'C1',
-            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+'$\pm$'+str(np.round(em_gold,2)))
+            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+r'$^{+'+str(np.round(em_gold[0],2))+r'}_{-'+str(np.round(em_gold[1],2))+'}$'+r', $\beta = $'+str(np.round(ln_gold,2))+r'$^{+'+str(np.round(eln_gold[0],2))+r'}_{-'+str(np.round(eln_gold[1],2))+'}$')
             
     ax.fill_between(meanmag, 
-                    linear(meanmag,m_gold+em_gold,ln_gold+eln_gold), 
-                    linear(meanmag,m_gold-em_gold,ln_gold-eln_gold), 
+                    linear(meanmag,m_gold+max(em_gold),ln_gold+max(eln_gold)), 
+                    linear(meanmag,m_gold-max(em_gold),ln_gold-max(eln_gold)), 
                     interpolate=True, 
                     color='C1',alpha=0.3)
 
@@ -1228,18 +1321,17 @@ def make_lum_mass_plot():
     # ax.plot(meanmag,lM200,'C7',label='MICE - True pairs')
     # ax.plot(0,0,'w,',label=' ')
     
-    ax.legend(loc=4,ncol=3,fontsize=11)
-    ax.set_xlabel(r'$\langle M_r \rangle$')
+    ax.legend(loc=4,ncol=2,fontsize=11)
     ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
-    ax.axis([10.3,11.05,10.8,13.2])
+    ax.axis([10.3,11.2,10.4,13.4])
     
-    axr.plot(meanmag,np.ones(len(meanmag)),'k--')
+    # axr.plot(meanmag,np.ones(len(meanmag)),'k--')
     
-    axr.grid()
+    # axr.grid()
     # axr.legend(loc=2,ncol=5,fontsize=11)
-    axr.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
-    axr.set_ylabel(r'$M^{Viola}_{200}/M_{200}$')
-    axr.set_ylim(0,7.)
+    ax.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
+    # axr.set_ylabel(r'$M^{Viola}_{200}/M_{200}$')
+    # axr.set_ylim(0,7.)
     fig.savefig('../final_plots/mass_lum.pdf',bbox_inches='tight')   
     
     # INNER PLOT
@@ -1254,11 +1346,11 @@ def make_lum_mass_plot():
                      
     axin.plot(MM_gold,LM_gold,'C1o')    
     axin.errorbar(MM_gold,LM_gold,markersize=4,
-                     yerr=eLM_gold,fmt='none',
+                     yerr=(eLM_gold).T,fmt='none',
                      color='C1',marker='o')
     axin.plot(MM,LM,'C4o')    
     axin.errorbar(MM,LM,markersize=4,
-                     yerr=eLM,fmt='none',
+                     yerr=eLM.T,fmt='none',
                      color='C4',marker='o')
  
     
@@ -1278,8 +1370,8 @@ def make_lum_mass_plot():
     axin.plot(meanmag,linear(meanmag,m,ln),'C4--')
             
     axin.fill_between(meanmag, 
-                    linear(meanmag,m+em,ln+eln), 
-                    linear(meanmag,m-em,ln-eln), 
+                    linear(meanmag,m+em[1],ln+eln[1]), 
+                    linear(meanmag,m-em[0],ln-eln[0]), 
                     interpolate=True, 
                     color='C4',alpha=0.3)
 
@@ -1287,8 +1379,8 @@ def make_lum_mass_plot():
             label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+'$\pm$'+str(np.round(em_gold,2)))
             
     axin.fill_between(meanmag, 
-                    linear(meanmag,m_gold+em_gold,ln_gold+eln_gold), 
-                    linear(meanmag,m_gold-em_gold,ln_gold-eln_gold), 
+                    linear(meanmag,m_gold+em_gold[1],ln_gold+eln_gold[1]), 
+                    linear(meanmag,m_gold-em_gold[0],ln_gold-eln_gold[0]), 
                     interpolate=True, 
                     color='C1',alpha=0.3)
 
@@ -1334,13 +1426,13 @@ def make_lum_mass_plot():
                      
     axin.plot(MM_gold[:3],10**(LM_gold-MM_gold)[:3],'C1o')    
     axin.errorbar(MM_gold[:3],10**(LM_gold-MM_gold)[:3],markersize=4,
-                     yerr=(eLM_gold*10**(LM_gold-MM_gold)*np.log(10.))[:3],
+                     yerr=np.array([(eLM_gold.T[0]*10**(LM_gold-MM_gold)*np.log(10.))[:3],(eLM_gold.T[1]*10**(LM_gold-MM_gold)*np.log(10.))[:3]]),
                      fmt='none',
                      color='C1',marker='o')
                      
     axin.plot(MM[:3],10**(LM-MM)[:3],'C4o')    
     axin.errorbar(MM[:3],10**(LM-MM)[:3],markersize=4,
-                     yerr=(eLM*10**(LM-MM)*np.log(10.))[:3],
+                     yerr=np.array([(eLM.T[0]*10**(LM-MM)*np.log(10.))[:3],(eLM.T[1]*10**(LM-MM)*np.log(10.))[:3]]),
                      fmt='none',
                      color='C4',marker='o')
  
@@ -1371,8 +1463,8 @@ def make_lum_mass_plot():
     axin.plot(meanmag,10**(linear(meanmag,m_gold,ln_gold)-meanmag),'C1--')
             
     axin.fill_between(meanmag, 
-                    10**(linear(meanmag,m_gold+em_gold,ln_gold+eln_gold)-meanmag), 
-                    10**(linear(meanmag,m_gold-em_gold,ln_gold-eln_gold)-meanmag), 
+                    10**(linear(meanmag,m_gold+em_gold[1],ln_gold+eln_gold[1])-meanmag), 
+                    10**(linear(meanmag,m_gold-em_gold[0],ln_gold-eln_gold[0])-meanmag), 
                     interpolate=True, 
                     color='C1',alpha=0.3)   
 
@@ -1380,8 +1472,8 @@ def make_lum_mass_plot():
     axin.plot(meanmag,10**(linear(meanmag,m,ln)-meanmag),'C4--')
             
     axin.fill_between(meanmag, 
-                    10**(linear(meanmag,m+em,ln+eln)-meanmag), 
-                    10**(linear(meanmag,m-em,ln-eln)-meanmag), 
+                    10**(linear(meanmag,m+em[1],ln+eln[1])-meanmag), 
+                    10**(linear(meanmag,m-em[0],ln-eln[0])-meanmag), 
                     interpolate=True, 
                     color='C4',alpha=0.3)   
                     
@@ -1417,7 +1509,7 @@ def make_lum_mass_plot():
     axin.set_ylabel(r'$M_{200}/L_{TOT} h$')
     
     
-    fig.savefig('../final_plots/mlratio.png',bbox_inches='tight')   
+    fig.savefig('../final_plots/mlratio.pdf',bbox_inches='tight')   
 
          
 def compare_MICE_mags():
