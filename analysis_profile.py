@@ -120,12 +120,14 @@ def color_plot():
     L = np.vstack((L1.T,L3.T)).T
     
     M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-    M2 = L[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
     M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-    M2i = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[-4]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
     
+    rp = L[-2]
+    Vr = L[-1]*cvel*1.e-3
     
     color = Mtot-Mtoti
 
@@ -137,19 +139,23 @@ def color_plot():
     Lb = np.vstack((L1b.T,L3b.T)).T
     
     M1b = Lb[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
-    M2b = Lb[-1]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2b = Lb[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
     Mtotb = -2.5*np.log10(10**(-0.4*M1b)+10**(-0.4*M2b))
     M1ib = Lb[7]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
-    M2ib = Lb[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2ib = Lb[-4]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
     Mtotib = -2.5*np.log10(10**(-0.4*M1ib)+10**(-0.4*M2ib))
+    
+    rpb = Lb[-2]
+    Vrb = Lb[-1]*cvel*1.e-3
+    
     
     colorb = Mtotb-Mtotib
 
     label_x = '$M_{r}$'
     label_y = '$M_{r} - M_{i}$'
     
-    Lratio = 10.**(-0.4*(L[-1]-L[8]))
-    Lratiob = 10.**(-0.4*(Lb[-1]-Lb[8]))
+    Lratio = 10.**(-0.4*(L[-3]-L[8]))
+    Lratiob = 10.**(-0.4*(Lb[-3]-Lb[8]))
     
     f, ax = plt.subplots(2,3, figsize=(12,6))
     f.subplots_adjust(hspace=0)
@@ -213,22 +219,35 @@ def color_plot():
     
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
 
-    f, ax = plt.subplots(2,1, figsize=(6,6))
+    f, ax = plt.subplots(1,3, figsize=(13,3))
+    ax = ax.flatten()
+    
+    
+    ax[0].hist(rp,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[0].hist(rpb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[0].axvline(np.median(rp),color='C4',lw=2)
+    ax[0].axvline(np.median(rpb),color='C1',lw=2)
 
-    ax[0].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[0].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[0].axvline(np.median(Mtot),color='C4',lw=2)
-    ax[0].axvline(np.median(Mtotb),color='C1',lw=2)
+    # ax[1].hist(Vr,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    # ax[1].hist(Vrb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    # ax[1].axvline(np.median(Vr),color='C4',lw=2)
+    # ax[1].axvline(np.median(Vrb),color='C1',lw=2)
 
-    ax[1].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
-    ax[1].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
-    ax[1].axvline(np.median(Lratio),color='C4',lw=2)
-    ax[1].axvline(np.median(Lratiob),color='C1',lw=2)
-    ax[0].set_xlabel('$M^{pair}_r$')
-    ax[1].set_xlabel('$L_2/L_1$')
-    ax[0].set_ylabel('$n$')
+    ax[1].hist(Mtot,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[1].hist(Mtotb,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[1].axvline(np.median(Mtot),color='C4',lw=2)
+    ax[1].axvline(np.median(Mtotb),color='C1',lw=2)
+
+    ax[2].hist(Lratio,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[2].hist(Lratiob,20,color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[2].axvline(np.median(Lratio),color='C4',lw=2)
+    ax[2].axvline(np.median(Lratiob),color='C1',lw=2)
+    ax[0].set_xlabel('$r_p [kpc]$')
+    ax[1].set_xlabel('$M^{pair}_r$')
+    ax[2].set_xlabel('$L_2/L_1$')
     ax[1].set_ylabel('$n$')
-    ax[0].legend(frameon=False,loc=2,fontsize=12)
+    ax[2].set_ylabel('$n$')
+    ax[2].legend(frameon=False,loc=1,fontsize=12)
     f.tight_layout(pad=0.8)
     f.savefig('../final_plots/Lratio.pdf',bbox_inches='tight')
 
@@ -1459,7 +1478,7 @@ def make_lum_mass_plot():
                     # interpolate=True, 
                     # color='C3',alpha=0.3)   
 
-    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m_gold,ln_gold)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C1')
+    axin.plot(meanmag[(meanmag <= 11.1)*(meanmag >= 10.4)],10**(linear(meanmag,m_gold,ln_gold)-meanmag)[(meanmag <= 11.1)*(meanmag >= 10.4)],'C1')
     axin.plot(meanmag,10**(linear(meanmag,m_gold,ln_gold)-meanmag),'C1--')
             
     axin.fill_between(meanmag, 
@@ -1468,7 +1487,7 @@ def make_lum_mass_plot():
                     interpolate=True, 
                     color='C1',alpha=0.3)   
 
-    axin.plot(meanmag[(meanmag <= 10.5)*(meanmag >= 10.)],10**(linear(meanmag,m,ln)-meanmag)[(meanmag <= 10.5)*(meanmag >= 10.)],'C4')
+    axin.plot(meanmag[(meanmag <= 11.1)*(meanmag >= 10.4)],10**(linear(meanmag,m,ln)-meanmag)[(meanmag <= 11.1)*(meanmag >= 10.4)],'C4')
     axin.plot(meanmag,10**(linear(meanmag,m,ln)-meanmag),'C4--')
             
     axin.fill_between(meanmag, 
@@ -1495,12 +1514,12 @@ def make_lum_mass_plot():
     axin.axis([9.2,12.5,0,800])
     
     # axin.axhspan((166-32)*0.6,(166+32)*0.6,color='C7',alpha=0.2)
-    axin.axvspan(9.2,10.1,color='C7',alpha=0.2)
-    axin.axvspan(10.3,11.05,color='C3',alpha=0.2)
-    axin.axvspan(10.45,12.5,color='C8',alpha=0.2)
+    # axin.axvspan(9.2,10.1,color='C7',alpha=0.2)
+    # axin.axvspan(10.3,11.05,color='C3',alpha=0.2)
+    # axin.axvspan(10.45,12.5,color='C8',alpha=0.2)
     
-    axin.plot([9.2,10.1],[166*0.6]*2,'k')
-    axin.plot([9.2,12.5],[166*0.6]*2,'k--')
+    # axin.plot([9.2,10.1],[166*0.6]*2,'k')
+    # axin.plot([9.2,12.5],[166*0.6]*2,'k--')
     axin.text(9.3,500,'Galaxies',rotation='vertical')
     axin.text(10.31,500,'Pairs',rotation='vertical')
     axin.text(10.8,500,'Groups/Clusters',rotation='vertical')
