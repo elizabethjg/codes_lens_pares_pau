@@ -40,6 +40,205 @@ def compute_density(ra,dec):
     
     return len(ra)/(area*3600.)
 
+def color_plot_vane():
+    
+    from medianas import separate_medianas
+    
+    # LOAD PAUS CATALOGS
+    
+    w1_deep = pd.read_csv('../pareconk/w1_DEEPZ_IATE.csv')
+    w1 = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W1_no_k_corr.csv')
+    w3 = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W3_no_k_corr.csv')
+    w1_best = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W1_best_pz_no_k_corr.csv')
+    w3_best = pd.read_csv('../pareconk/Photo_z_calibrate_iterative_W3_best_pz_no_k_corr.csv')
+    
+    mr  = np.append(w1.mag_r_no_k,w3.mag_r_no_k)
+    mrv = w1_deep.mag_r_K
+    mrb = np.append(w1_best.mag_r_no_k,w3_best.mag_r_no_k)
+    zp  = np.append(w1.zb,w3.zb)
+    zpb  = np.append(w1_best.zb,w3_best.zb)
+    zpv  = w1_deep.zb
+
+    mp  = (mr > -23.5) & (zp < 0.6) & (zp > 0.2)
+    mpb = (mrb > -23.5) & (zpb < 0.6) & (zpb > 0.2)
+    mpv = (mrv > -23.5) & (zpv < 0.6) & (zpv > 0.2)
+    
+    mr  = mr[mp]
+    mrv  = mrv[mpv]
+    mrb  = mrb[mpb]
+    
+    zp   = zp[mp]
+    zpv  = zpv[mpv]
+    zpb  = zpb[mpb]
+    
+    
+    mi  = np.append(w1.mag_i_no_k,w3.mag_i_no_k)[mp]
+    mib = np.append(w1_best.mag_i_no_k,w3_best.mag_i_no_k)[mpb]
+    miv = w1_deep.mag_i_K[mpv]
+    
+    Mr  = mr - 5.*np.log10(np.array(cosmo.luminosity_distance(zp))*1.e6) + 5
+    Mi  = mi - 5.*np.log10(np.array(cosmo.luminosity_distance(zp))*1.e6) + 5
+    
+    Mrb = mrb - 5.*np.log10(np.array(cosmo.luminosity_distance(zpb))*1.e6) + 5
+    Mib = mib - 5.*np.log10(np.array(cosmo.luminosity_distance(zpb))*1.e6) + 5
+
+    Mrv = mrv - 5.*np.log10(np.array(cosmo.luminosity_distance(zpv))*1.e6) + 5
+    Miv = miv - 5.*np.log10(np.array(cosmo.luminosity_distance(zpv))*1.e6) + 5
+
+    colorp  = Mr - Mi
+    colorpb = Mrb - Mib
+    colorpv = Mrv - Miv
+        
+    # LOAD PAIRS CATALOGUES
+    
+    L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T                                                            
+    # L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T                                    
+    L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
+    
+    print('density W1 = ',compute_density(L1[1],L1[2]))
+    # print('density W2 = ',compute_density(L2[1],L2[2]))
+    print('density W3 = ',compute_density(L3[1],L3[2]))
+    
+    # L = np.vstack((L1.T,L2.T,L3.T)).T
+    L = np.vstack((L1.T,L3.T)).T
+    
+    M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[13]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
+    M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[12]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
+    
+    rp = L[-2]
+    Vr = L[-1]*cvel*1.e-3
+    
+    color = Mtot-Mtoti
+
+    Lv = np.loadtxt('../pareconk/Pares-PAUS_W1-Vane').T
+    M1v = Lv[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lv[3]))*1.e6)+5
+    M2v = Lv[13]-5.*np.log10(np.array(cosmo.luminosity_distance(Lv[3]))*1.e6)+5
+    Mtotv = -2.5*np.log10(10**(-0.4*M1v)+10**(-0.4*M2v))
+    M1iv = Lv[7]-5.*np.log10(np.array(cosmo.luminosity_distance(Lv[3]))*1.e6)+5
+    M2iv = Lv[12]-5.*np.log10(np.array(cosmo.luminosity_distance(Lv[3]))*1.e6)+5
+    Mtotiv = -2.5*np.log10(10**(-0.4*M1iv)+10**(-0.4*M2iv))
+    colorv = Mtotv-Mtotiv
+                                                                
+    L1b = np.loadtxt('../pareconk/Pares-PAUS_W1-'+best).T                                                            
+    # L2b = np.loadtxt('../pareconk/Pares-PAUS_W2-'+best).T                                    
+    L3b = np.loadtxt('../pareconk/Pares-PAUS_W3-'+best).T
+    
+    # Lb = np.vstack((L1b.T,L2b.T,L3b.T)).T
+    Lb = np.vstack((L1b.T,L3b.T)).T
+    
+    M1b = Lb[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2b = Lb[13]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    Mtotb = -2.5*np.log10(10**(-0.4*M1b)+10**(-0.4*M2b))
+    M1ib = Lb[7]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2ib = Lb[12]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    Mtotib = -2.5*np.log10(10**(-0.4*M1ib)+10**(-0.4*M2ib))
+    
+    rpb = Lb[-2]
+    Vrb = Lb[-1]*cvel*1.e-3
+    
+    
+    colorb = Mtotb-Mtotib
+
+    label_x = '$M_{r}$'
+    label_y = '$M_{r} - M_{i}$'
+    
+    Lratio = 10.**(-0.4*(L[-3]-L[8]))
+    Lratiob = 10.**(-0.4*(Lb[-3]-Lb[8]))
+    
+    f, ax = plt.subplots(3,3, figsize=(12,6))
+    f.subplots_adjust(hspace=0)
+    
+    ax = ax.flatten()
+
+    for j in range(len(ax)):
+            ax[j].set_ylabel('$n$')
+    
+    # ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
+    ax[0].plot(-24,0.1,'w,',label='Total sample')
+    ax[0].hist(Mr,np.linspace(-24,-19.5,20),color='C7',alpha=0.5,label='PAUS galaxies',lw=2,density=True)
+    ax[0].axvline(np.median(Mr),color='C7',lw=2)
+    ax[0].hist(M1,np.linspace(-24,-19.5,20),color='k',label='Galaxy pairs',lw=2,histtype='step',density=True)
+    ax[0].hist(M1,np.linspace(-24,-19.5,20),color='C4',lw=2,histtype='step',density=True)
+    ax[0].hist(M2,np.linspace(-24,-19.5,20),color='C4',lw=2,histtype='step',density=True,ls='--')
+    ax[0].axvline(np.median(M1),color='C4',lw=2)
+    ax[0].axvline(np.median(M2),color='C4',lw=2,ls='--')
+    ax[0].legend(frameon=False,loc=2,fontsize=12)    
+    
+    ax[3].plot(-24,0.1,'w,',label='Gold sample')
+    ax[3].legend(frameon=False,loc=2,fontsize=12)    
+    ax[3].set_ylim([0,0.52])
+    ax[3].hist(Mrb,np.linspace(-24,-19.5,20),color='C7',alpha=0.5,label='Total sample',lw=2,density=True)
+    ax[3].axvline(np.median(Mrb),color='C7',lw=2)
+    ax[3].hist(M1b,np.linspace(-24,-19.5,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[3].hist(M2b,np.linspace(-24,-19.5,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True,ls='--')
+    ax[3].axvline(np.median(M1b),color='C1',lw=2)
+    ax[3].axvline(np.median(M2b),color='C1',lw=2,ls='--')
+    ax[3].set_xlabel('$M_{r}$',fontsize=11)
+
+    ax[6].plot(-24,0.1,'w,',label='Deep-z sample')
+    ax[6].legend(frameon=False,loc=2,fontsize=12)    
+    ax[6].set_ylim([0,0.52])
+    ax[6].hist(Mrv,np.linspace(-24,-19.5,20),color='C7',alpha=0.5,label='Total sample',lw=2,density=True)
+    ax[6].axvline(np.median(Mrv),color='C7',lw=2)
+    ax[6].hist(M1v,np.linspace(-24,-19.5,20),color='C2',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[6].hist(M2v,np.linspace(-24,-19.5,20),color='C2',label='Gold sample',lw=2,histtype='step',density=True,ls='--')
+    ax[6].axvline(np.median(M1v),color='C2',lw=2)
+    ax[6].axvline(np.median(M2v),color='C2',lw=2,ls='--')
+    ax[6].set_xlabel('$M_{r}$',fontsize=11)
+    
+    ax[1].axvline(np.median(M1-M1i),color='k',lw=2, label='Brightest')
+    ax[1].axvline(np.median(M2-M2i),color='k',lw=2,ls='--', label='Faintest')
+    ax[1].legend(frameon=False,loc=2,fontsize=12)    
+    ax[1].hist(colorp,np.linspace(-0.,0.6,20),color='C7',alpha=0.5,label='PAUS galaxies',lw=2,density=True)
+    ax[1].axvline(np.median(colorp),color='C7',lw=2)
+    ax[1].hist(M1-M1i,np.linspace(-0.,0.6,20),color='C4',lw=2,histtype='step',density=True)
+    ax[1].hist(M2-M2i,np.linspace(-0.,0.6,20),color='C4',lw=2,histtype='step',density=True,ls='--')
+    ax[1].axvline(np.median(M1-M1i),color='C4',lw=2)
+    ax[1].axvline(np.median(M2-M2i),color='C4',lw=2,ls='--')
+    
+    
+    ax[4].hist(colorpb,np.linspace(-0.,0.6,20),color='C7',alpha=0.5,label='Gold sample',lw=2,density=True)
+    ax[4].axvline(np.median(colorpb),color='C7',lw=2)
+    ax[4].hist(M1b-M1ib,np.linspace(-0.,0.6,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[4].hist(M2b-M2ib,np.linspace(-0.,0.6,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True,ls='--')
+    ax[4].axvline(np.median(M1b-M1ib),color='C1',lw=2)
+    ax[4].axvline(np.median(M2b-M2ib),color='C1',lw=2,ls='--')
+    ax[4].set_xlabel('$M_{r}-M_{i}$')
+
+    ax[7].hist(colorpv,np.linspace(-0.,0.6,20),color='C7',alpha=0.5,label='Gold sample',lw=2,density=True)
+    ax[7].axvline(np.median(colorpv),color='C7',lw=2)
+    ax[7].hist(M1v-M1iv,np.linspace(-0.,0.6,20),color='C2',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[7].hist(M2v-M2iv,np.linspace(-0.,0.6,20),color='C2',label='Gold sample',lw=2,histtype='step',density=True,ls='--')
+    ax[7].axvline(np.median(M1v-M1iv),color='C2',lw=2)
+    ax[7].axvline(np.median(M2v-M2iv),color='C2',lw=2,ls='--')
+    ax[7].set_xlabel('$M_{r}-M_{i}$')
+
+    ax[2].hist(zp,np.linspace(0.2,0.6,20),color='C7',label='Total sample',lw=2,alpha=0.5,density=True)
+    ax[2].axvline(np.median(zp),color='C7',lw=2)
+    ax[2].hist(L[3],np.linspace(0.2,0.6,20),color='C4',label='Total sample',lw=2,histtype='step',density=True)
+    ax[2].axvline(np.median(L[3]),color='C4',lw=2)
+
+    ax[5].hist(zpb,np.linspace(0.2,0.6,20),color='C7',label='Total sample',lw=2,alpha=0.5,density=True)
+    ax[5].axvline(np.median(zpb),color='C7',lw=2)
+    ax[5].hist(Lb[3],np.linspace(0.2,0.6,20),color='C1',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[5].axvline(np.median(Lb[3]),color='C1',lw=2)
+    ax[5].set_xlabel(r'$z$')
+
+    ax[8].hist(zpv,np.linspace(0.2,0.6,20),color='C7',label='Total sample',lw=2,alpha=0.5,density=True)
+    ax[8].axvline(np.median(zpv),color='C7',lw=2)
+    ax[8].hist(Lv[3],np.linspace(0.2,0.6,20),color='C2',label='Gold sample',lw=2,histtype='step',density=True)
+    ax[8].axvline(np.median(Lv[3]),color='C2',lw=2)
+    ax[8].set_xlabel(r'$z$')
+    
+    f.savefig('../Mdist_withdeep.pdf',bbox_inches='tight')
+
+
+    # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
+    # separate_medianas(Mtotv[colorv>0],colorv[colorv>0],label_x = label_x, label_y = label_y, out_plot = '../color_mag_withdeep.pdf')
 
 
 def color_plot():
@@ -120,10 +319,10 @@ def color_plot():
     L = np.vstack((L1.T,L3.T)).T
     
     M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-    M2 = L[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2 = L[13]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
     M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-    M2i = L[-4]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+    M2i = L[12]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
     Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
     
     rp = L[-2]
@@ -139,10 +338,10 @@ def color_plot():
     Lb = np.vstack((L1b.T,L3b.T)).T
     
     M1b = Lb[8]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
-    M2b = Lb[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2b = Lb[13]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
     Mtotb = -2.5*np.log10(10**(-0.4*M1b)+10**(-0.4*M2b))
     M1ib = Lb[7]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
-    M2ib = Lb[-4]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
+    M2ib = Lb[12]-5.*np.log10(np.array(cosmo.luminosity_distance(Lb[3]))*1.e6)+5
     Mtotib = -2.5*np.log10(10**(-0.4*M1ib)+10**(-0.4*M2ib))
     
     rpb = Lb[-2]
@@ -219,7 +418,7 @@ def color_plot():
     
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
 
-    f, ax = plt.subplots(1,3, figsize=(13,3))
+    f, ax = plt.subplots(1,3, figsize=(11,3))
     ax = ax.flatten()
     
     
@@ -247,7 +446,7 @@ def color_plot():
     ax[2].set_xlabel('$L_2/L_1$')
     ax[1].set_ylabel('$n$')
     ax[2].set_ylabel('$n$')
-    ax[2].legend(frameon=False,loc=1,fontsize=12)
+    ax[2].legend(frameon=True,loc=1,fontsize=12)
     f.tight_layout(pad=0.8)
     f.savefig('../final_plots/Lratio.pdf',bbox_inches='tight')
 

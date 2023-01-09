@@ -369,10 +369,10 @@ def main(sample,pcat,
         
         # from astropy.cosmology import WMAP9 as cosmo_lum       
         M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-        M2 = L[-2]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+        M2 = L[13]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
         Mtot = -2.5*np.log10(10**(-0.4*M1)+10**(-0.4*M2))
         M1i = L[7]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
-        M2i = L[-3]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
+        M2i = L[12]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
         Mtoti = -2.5*np.log10(10**(-0.4*M1i)+10**(-0.4*M2i))
 
         mz      = (L[3] >= z_min)*(L[3] < z_max)
@@ -420,9 +420,9 @@ def main(sample,pcat,
         # par_gal_id,ra_par,dec_par,z_par,ra_1,dec_1,z_1,i_auto_1,mr_1,ra_2,dec_2,z_2,i_auto_2,mr_2
 
         mr1 = L[8]
-        mr2 = L[-2]
+        mr2 = L[13]
         mi1 = L[7]
-        mi2 = L[-3]
+        mi2 = L[12]
         RA  = L[4]
         DEC = L[5]
         z   = L[3]
