@@ -365,7 +365,7 @@ def main(sample,pcat,
             
             L = np.vstack((L2.T,L3.T)).T
         
-        Lratio = 10.**(-0.4*(L[-2]-L[8]))
+        Lratio = 10.**(-0.4*(L[13]-L[8]))
         
         # from astropy.cosmology import WMAP9 as cosmo_lum       
         M1 = L[8]-5.*np.log10(np.array(cosmo.luminosity_distance(L[3]))*1.e6)+5
