@@ -1303,12 +1303,13 @@ def make_lum_mass_plot():
 
     # MAKE PLOTS
 
-    # fig, axall = plt.subplots(2,1, figsize=(10,10),sharex = True,gridspec_kw={'height_ratios': [3, 1]})
-    # fig.subplots_adjust(hspace=0,wspace=0)
-    fig, ax = plt.subplots(1,1, figsize=(10,7))
+    fig, axall = plt.subplots(3,1, figsize=(10,10),sharex = True,gridspec_kw={'height_ratios': [4, 1,1]})
+    fig.subplots_adjust(hspace=0,wspace=0)
+    # fig, ax = plt.subplots(1,1, figsize=(10,7))
 
-    # ax  = axall[0]
-    # axr = axall[1]
+    ax  = axall[0]
+    axrt = axall[1]
+    axrg = axall[2]
 
 
     # ax.errorbar(0,0,markersize=5,
@@ -1321,6 +1322,11 @@ def make_lum_mass_plot():
     ax.errorbar(0,0,markersize=10,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt='k',marker='o',label='Gold sample', mfc='w',mew=3)
+                     
+    axrt.plot(0,0,'w,',label='Total sample')
+    axrg.plot(0,0,'w,',label='Gold sample')
+    axrt.legend(frameon=False,loc=4)
+    axrg.legend(frameon=False,loc=4)
     # axr.errorbar(0,0,markersize=10,
                      # yerr=np.array([np.diff(lMfit[j][0])]).T,
                      # fmt='k',marker='o',label='Total sample')
@@ -1350,28 +1356,15 @@ def make_lum_mass_plot():
         
 
         # MAKE SCATTER PLOT
-
-        ax.errorbar(MM[-1],lMfit[j][0][1],markersize=15,
+        if j < 3:
+            ax.errorbar(MM[-1],lMfit[j][0][1],markersize=15,
                      yerr=np.array([np.diff(lMfit[j][0])]).T,
                      fmt=csamp[j],marker=mark[j])
-        ax.errorbar(MM_gold[-1],lMfit_gold[j][0][1],markersize=15,
+            ax.errorbar(MM_gold[-1],lMfit_gold[j][0][1],markersize=15,
                      yerr=np.array([np.diff(lMfit_gold[j][0])]).T,
                      fmt=csamp[j],marker=mark[j], mfc='w',mew=3)
                      
-        '''
-        # MAKE MICE RATIO PLOT
-
-        err = np.abs(10**(lMfit[j][0][1]-linear_viola(MM[-1],m_v,ln_v))*np.log(10.))*np.array([np.diff(lMfit[j][0])]).T
-        axr.errorbar(MM[-1],10**(-1.*lMfit[j][0][1]+linear_viola(MM[-1],m_v,ln_v)),
-                        yerr=err,markersize=10,
-                        fmt=csamp[j],marker=mark[j])
         
-        err = np.abs(10**(lMfit_gold[j][0][1]-linear_viola(MM[-1],m_v,ln_v))*np.log(10.))*np.array([np.diff(lMfit_gold[j][0])]).T
-        axr.errorbar(MM_gold[-1],10**(-1.*lMfit_gold[j][0][1]+linear_viola(MM[-1],m_v,ln_v)),
-                        yerr=err,markersize=10,
-                        fmt=csamp[j],marker=mark[j],mfc='w',mew=3)
-
-        '''
         # JUST FOR THE LABELS
 
         if j > 0:
@@ -1446,6 +1439,23 @@ def make_lum_mass_plot():
     print(m_mandel,n_mandel)
     print(em_mandel,en_mandel)
 
+    for j in np.arange(len(csamp)):
+        
+        # MAKE MICE RATIO PLOT
+
+        err = np.abs(10**(LM[j]-linear(MM[j],m,ln))*np.log(10.))*eLM[j]
+        axrt.errorbar(MM[j],10**(-1.*LM[j]+linear(MM[j],m,ln)),
+                        yerr=err.reshape(2,1),markersize=10,
+                        fmt=csamp[j],marker=mark[j])
+        
+        err = np.abs(10**(LM_gold[j]-linear(MM_gold[j],m_gold,ln_gold))*np.log(10.))*eLM_gold[j]
+        axrg.errorbar(MM_gold[j],10**(-1.*LM_gold[j]+linear(MM_gold[j],m_gold,ln_gold)),
+                        yerr=err.reshape(2,1),markersize=10,
+                        fmt=csamp[j],marker=mark[j],mfc='w',mew=3)
+    
+    axrt.plot([10.3,11.2],[1,1],'C7--')
+    axrg.plot([10.3,11.2],[1,1],'C7--')
+
 
     ax.plot(meanmag,linear_viola(meanmag,m_v,ln_v),'C8',
             # label=r'Group/Clusters, $\alpha = $'+str(np.round(m_v,2))+'$\pm$'+str(np.round(em_v,2))+r', $\beta = $'+str(np.round(n_v/dL0**m_v,2))+'$\pm$'+str(np.round(en_v/dL0**m_v,2)))
@@ -1493,13 +1503,17 @@ def make_lum_mass_plot():
     
     ax.legend(loc=4,ncol=3,fontsize=11)
     ax.set_ylabel(r'$\log (M_{200}/M_\odot h^{-1})$')
+    axrt.set_ylabel(r'$M_{200}/M_{fit}$')
+    axrg.set_ylabel(r'$M_{200}/M_{fit}$')
     ax.axis([10.3,11.2,10.4,13.4])
+    axrt.axis([10.3,11.2,-1.5,2.7])
+    axrg.axis([10.3,11.2,-1.5,2.7])
     
     # axr.plot(meanmag,np.ones(len(meanmag)),'k--')
     
     # axr.grid()
     # axr.legend(loc=2,ncol=5,fontsize=11)
-    ax.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
+    axrg.set_xlabel(r'$ \log \langle L_{TOT}/(h^{-2} L_\odot) \rangle$')
     # axr.set_ylabel(r'$M^{Viola}_{200}/M_{200}$')
     # axr.set_ylim(0,7.)
     fig.savefig('../final_plots/mass_lum.pdf',bbox_inches='tight')   
