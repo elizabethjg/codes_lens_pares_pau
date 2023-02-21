@@ -356,12 +356,13 @@ def color_plot():
     Lratiob = 10.**(-0.4*(Lb[-3]-Lb[8]))
     
     f, ax = plt.subplots(2,3, figsize=(12,6))
-    f.subplots_adjust(hspace=0)
+    f.subplots_adjust(hspace=0,wspace=0)
     
     ax = ax.flatten()
+    
 
-    for j in range(len(ax)):
-            ax[j].set_ylabel('$n$')
+    ax[0].set_ylabel('$n$')
+    ax[3].set_ylabel('$n$')
     
     # ax[0].hist(Mtot_mice,20,color='C7',label='MICE sample',lw=2,alpha=0.4,density=True)
     ax[0].plot(-24,0.1,'w,',label='Total sample')
@@ -415,10 +416,19 @@ def color_plot():
     ax[5].axvline(np.median(Lb[3]),color='C1',lw=2)
     ax[5].set_xlabel(r'$z$')
     
+    for x in ax:
+        # x.set_yticklabels([])
+        x.set_yticks([])
+    
     f.savefig('../final_plots/Mdist.pdf',bbox_inches='tight')
 
-    f, ax = plt.subplots(1,3, figsize=(11,3))
+    f, ax = plt.subplots(1,3, figsize=(13,3))
+    f.subplots_adjust(wspace=0)
     ax = ax.flatten()
+
+    for x in ax:
+        # x.set_yticklabels([])
+        x.set_yticks([])
     
     
     ax[0].hist(rp,20,color='C4',label='Total sample',lw=2,histtype='step',density=True)
@@ -443,10 +453,9 @@ def color_plot():
     ax[0].set_xlabel('$r_p [kpc]$')
     ax[1].set_xlabel('$M^{pair}_r$')
     ax[2].set_xlabel('$L_2/L_1$')
-    ax[1].set_ylabel('$n$')
-    ax[2].set_ylabel('$n$')
+    ax[0].set_ylabel('$n$')
     ax[2].legend(frameon=True,loc=1,fontsize=12)
-    f.tight_layout(pad=0.8)
+
     f.savefig('../final_plots/Lratio.pdf',bbox_inches='tight')
 
     # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
