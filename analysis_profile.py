@@ -349,8 +349,6 @@ def color_plot():
     
     colorb = Mtotb-Mtotib
 
-    label_x = '$M_{r}$'
-    label_y = '$M_{r} - M_{i}$'
     
     Lratio = 10.**(-0.4*(L[-3]-L[8]))
     Lratiob = 10.**(-0.4*(Lb[-3]-Lb[8]))
@@ -451,12 +449,15 @@ def color_plot():
     ax[2].axvline(np.median(Lratio),color='C4',lw=2)
     ax[2].axvline(np.median(Lratiob),color='C1',lw=2)
     ax[0].set_xlabel('$r_p [kpc]$')
-    ax[1].set_xlabel('$M^{pair}_r$')
+    ax[1].set_xlabel('$M^\mathrm{pair}_r$')
     ax[2].set_xlabel('$L_2/L_1$')
     ax[0].set_ylabel('$n$')
     ax[2].legend(frameon=True,loc=1,fontsize=12)
 
     f.savefig('../final_plots/Lratio.pdf',bbox_inches='tight')
+
+    label_x = r'$M^\mathrm{pair}_{r}$'
+    label_y = r'$M^\mathrm{pair}_{r} - M^\mathrm{pair}_{i}$'
 
     # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
     separate_medianas(Mtot[color>0],color[color>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag.pdf')
@@ -683,8 +684,8 @@ def plt_profile_fit_2h(samp,lsamp,
     if plot:
         
         ds1h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='1h')    
-        # ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
-        ds2h   = ds1h
+        ds2h   = Delta_Sigma_NFW_2h(rplot,zmean,M200 = 10**fitpar['lM200'],c200=fitpar['c200'],cosmo_params=params,terms='2h')    
+        #ds2h   = ds1h
         
         
         ds = ds1h+ds2h
@@ -713,12 +714,12 @@ def plt_profile_fit_2h(samp,lsamp,
         axDS.xaxis.set_ticks([0.1,1,10])
         axDS.set_xticklabels([0.1,1,10])
         axDS.axvline(RIN/1000.,color='C7',alpha=0.5,ls='--')
-        axDS.legend(frameon=False,loc=1,fontsize=12)
+        axDS.legend(frameon=False,loc=1,fontsize=10)
         
     return [fmass,Mmean,lgM[2500:]]
 
 
-def plt_mcmc(samp,lsamp,axC = plt,
+def plt_mcmc(samp,lsamp,axC = plt,axC2 = plt,
              RIN=300,ROUT=10000, fytpe = '',
             ylabel = True, legend=True,
             lw=1,chist = 'C0'):
@@ -731,7 +732,7 @@ def plt_mcmc(samp,lsamp,axC = plt,
     fitpar = fitted[0].header
     lgM   = fitted[1].data.logM
     
-    
+    axC2.plot(lgM,chist,label=lsamp,lw=lw,alpha=0.2)
     axC.hist(lgM[2500:],np.linspace(10.7,13.5,50),histtype='step',color=chist,label=lsamp,lw=lw)
     axC.axvline(np.median(lgM[2500:]),alpha=1.,color=chist)
     # axC.axvline(np.percentile(lgM[2500:], [16,50,84])[0],ls='--',color=chist)
@@ -740,10 +741,14 @@ def plt_mcmc(samp,lsamp,axC = plt,
     axC.axvspan(np.percentile(lgM[2500:], [16,50,84])[0],np.percentile(lgM[2500:], [16,50,84])[2],alpha=0.1,color=chist)
     
     axC.set_xlabel('$\log M_{200}$')
+    
+    axC2.set_xlabel('$N$')
     if legend:
         axC.legend(loc=2,fontsize=12)
+        axC2.legend(loc=2,fontsize=12)
     if ylabel:
         axC.set_ylabel('$P(\log M_{200})$')   
+        axC2.set_ylabel('$\log M_{200}$')
 
 
 def dilution(samp):
@@ -804,16 +809,21 @@ def make_plot_profile():
     
     fC, axC = plt.subplots(5,2, figsize=(6,12),sharex = True,sharey = True)
     fC.subplots_adjust(hspace=0,wspace=0)
+    fC2, axC2 = plt.subplots(5,2, figsize=(14,12),sharex = True,sharey = True)
+    fC2.subplots_adjust(hspace=0,wspace=0)
     
     axC[0,1].axis('off')
+    axC2[0,1].axis('off')
     axDS[0,2].axis('off')
     axDS[0,3].axis('off')
     
     axDS = axDS.flatten()
     axC = axC.flatten()
+    axC2 = axC2.flatten()
     
     axDS = np.append(axDS[:2],axDS[4:])
     axC  = np.append(axC[:1],axC[2:])
+    axC2 = np.append(axC2[:1],axC2[2:])
     
     
             
@@ -830,8 +840,8 @@ def make_plot_profile():
     lsamp1 = ['Total sample','Gold sample']*len(samp)
     
     lsamp2 = ['all pairs','all pairs', 
-              '$M^{pair}_r < -22.5$','$M^{pair}_r < -22.5$', 
-              '$M^{pair}_r \geq -22.5$','$M^{pair}_r \geq -22.5$', 
+              r'$M^\mathrm{pair}_r < -22.5$',r'$M^\mathrm{pair}_r < -22.5$', 
+              r'$M^\mathrm{pair}_r \geq -22.5$',r'$M^\mathrm{pair}_r \geq -22.5$', 
               '$z < 0.4$','$z < 0.4$', 
               '$z \geq 0.4$','$z \geq 0.4$',
               '$L_2/L_1 < 0.5$','$L_2/L_1 < 0.5$',
@@ -850,11 +860,11 @@ def make_plot_profile():
     
     for j in range(len(samp)):
         print
-        lMfit += [plt_profile_fit_2h(samp[j],
-                lsamp1[j]+' - '+lsamp2[j],axDS[j],
-                fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
+        # lMfit += [plt_profile_fit_2h(samp[j],
+                # lsamp1[j]+' - '+lsamp2[j],axDS[j],
+                # fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
                 
-        plt_mcmc(samp[j],lsamp[j],axC[ind[j]],
+        plt_mcmc(samp[j],lsamp[j],axC[ind[j]], axC2[ind[j]],
                 fytpe = ftype, ylabel=ylabel[j],
                 legend=legend[j],chist=chist[j],lw=lw[j])
         # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
@@ -862,7 +872,8 @@ def make_plot_profile():
     
     axC[0].set_ylim(0,1200)
     axC[0].set_xlim(10.7,13.5)
-    # fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
+    axC2[0].set_ylim(10.7,13.5)
+    fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
     fC.savefig('../final_plots/chains2'+pcat+ftype+'.pdf',bbox_inches='tight')
 
 
@@ -888,8 +899,8 @@ def make_fcl_plot():
             'palevioletred','palevioletred',]
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.5$',
-            '$M^{pair}_r \geq -22.5$',
+            r'$M^\mathrm{pair}_r < -22.5$',
+            r'$M^\mathrm{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -901,7 +912,7 @@ def make_fcl_plot():
 
     f, ax = plt.subplots(2,1, figsize=(6,8),sharex = True,sharey = True)
     f.subplots_adjust(hspace=0,wspace=0)
-    
+
     ax[0].text(0.13,1.27,'Total sample') 
     ax[1].text(0.13,1.27,'Gold sample') 
     ax[1].legend(frameon=False,loc=1)
@@ -910,7 +921,8 @@ def make_fcl_plot():
     
     ax[0].legend(frameon=False,ncol=2,loc=1,fontsize=11)
     ax[0].set_ylim([0.97,1.3])
-    
+    ax[0].grid(True, linestyle=":", color='C7')
+    ax[1].grid(True, linestyle=":", color='C7')
     f.savefig('../final_plots/contamination.pdf',bbox_inches='tight')
 
 def make_mag_mass_plot():
@@ -964,8 +976,8 @@ def make_mag_mass_plot():
             'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.5$',
-            '$M^{pair}_r \geq -22.5$',
+            r'$M^{pair}_r < -22.5$',
+            r'$M^\mathrm{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -1288,8 +1300,8 @@ def make_lum_mass_plot():
             'palevioletred','palevioletred']
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.5$',
-            '$M^{pair}_r \geq -22.5$',
+            r'$M^\mathrm{pair}_r < -22.5$',
+            r'$M^\mathrm{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',
@@ -1875,8 +1887,8 @@ def make_lum_mass_plot_wiso():
             'k','k']
     
     lsamp = ['all pairs',
-            '$M^{pair}_r < -22.5$',
-            '$M^{pair}_r \geq -22.5$',
+            r'$M^\mathrm{pair}_r < -22.5$',
+            r'$M^\mathrm{pair}_r \geq -22.5$',
             '$z < 0.4$',
             '$z \geq 0.4$',
             '$L_2/L_1 < 0.5$',

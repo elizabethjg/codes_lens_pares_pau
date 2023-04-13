@@ -43,7 +43,7 @@ parser.add_argument('-file', action='store', dest='file_name', default='profile.
 parser.add_argument('-ncores', action='store', dest='ncores', default=2)
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
 parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000)
-parser.add_argument('-nit', action='store', dest='nit', default=400)
+parser.add_argument('-nit', action='store', dest='nit', default=1000)
 args = parser.parse_args()
 
 
@@ -58,7 +58,7 @@ RIN       = float(args.RIN)
 ROUT      = float(args.ROUT)
 
 
-outfile     = 'fitresults_boost_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+file_name
+outfile     = 'fitresults2_boost_'+str(int(RIN))+'_'+str(int(ROUT))+'_'+file_name
 
 
 
@@ -98,7 +98,7 @@ def log_likelihood(logM, R, DS, eDS):
     
     c200 = concentration.concentration(10**logM, '200c', zmean, model = cmodel)
     
-    ds   = Delta_Sigma_NFW_2h(R,zmean,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h+2h')    
+    ds   = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)    
     
     sigma2 = eDS**2
     return -0.5 * np.sum((DS - ds)**2 / sigma2 + np.log(2.*np.pi*sigma2))
@@ -128,13 +128,16 @@ p  = p[maskr]
 t1 = time.time()
 
 
-pool = Pool(processes=(ncores))    
+# pool = Pool(processes=(ncores))    
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                                args=(p.Rp,p.DSigma_T,p.error_DSigma_T),
-                                pool = pool)
+                                args=(p.Rp,p.DSigma_T,p.error_DSigma_T))
+
+state = sampler.run_mcmc(pos, 100, progress=True)
+sampler.reset()
+sampler.run_mcmc(state, nit, progress=True)
 				
-sampler.run_mcmc(pos, nit, progress=True)
-pool.terminate()
+# sampler.run_mcmc(pos, nit, progress=True)
+# pool.terminate()
     
     
 print('TOTAL TIME FIT')    
