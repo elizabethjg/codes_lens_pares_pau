@@ -5,8 +5,6 @@ from astropy.cosmology import LambdaCDM
 sys.path.append('/home/elizabeth/lens_codes_v3.7')
 from models_profiles import *
 from fit_profiles_curvefit import *
-from fit_profiles_curvefit import Delta_Sigma_fit
-from models_profiles import *
 from matplotlib import rc
 from matplotlib import cbook
 import pandas as pd
@@ -236,10 +234,6 @@ def color_plot_vane():
     f.savefig('../Mdist_withdeep.pdf',bbox_inches='tight')
 
 
-    # separate_medianas(Mtotb[colorb>0],colorb[colorb>0],label_x = label_x, label_y = label_y, out_plot = '../final_plots/color_mag_gold.pdf')
-    # separate_medianas(Mtotv[colorv>0],colorv[colorv>0],label_x = label_x, label_y = label_y, out_plot = '../color_mag_withdeep.pdf')
-
-
 def color_plot():
     
     from medianas import separate_medianas
@@ -306,6 +300,8 @@ def color_plot():
     Lratio_mice = 10.**(-0.4*(M2_mice-M1_mice))
     color_mice  = Mtot_mice - Mtot_i_mice
     
+    # LOAD PAIRS CATALOGS
+    
     L1 = np.loadtxt('../pareconk/Pares-PAUS_W1-'+pcat).T                                                            
     # L2 = np.loadtxt('../pareconk/Pares-PAUS_W2-'+pcat).T                                    
     L3 = np.loadtxt('../pareconk/Pares-PAUS_W3-'+pcat).T
@@ -352,6 +348,8 @@ def color_plot():
     
     Lratio = 10.**(-0.4*(L[-3]-L[8]))
     Lratiob = 10.**(-0.4*(Lb[-3]-Lb[8]))
+    
+    # MAKE THE PLOT
     
     f, ax = plt.subplots(2,3, figsize=(12,6))
     f.subplots_adjust(hspace=0,wspace=0)
