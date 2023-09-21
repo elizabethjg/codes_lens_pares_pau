@@ -29,7 +29,7 @@ elM200_p1  = np.array([0.22447506, 0.29605648])
 pcat = 'Total'
 best = 'Gold'
 vane = '_vane'
-ftype = '_boost'
+ftype = '2_boost'
 
 def compute_density(ra,dec):
     
@@ -859,10 +859,9 @@ def make_plot_profile():
     legend = [True,True]+[True,False,True,False]*4
     
     for j in range(len(samp)):
-        print
-        # lMfit += [plt_profile_fit_2h(samp[j],
-                # lsamp1[j]+' - '+lsamp2[j],axDS[j],
-                # fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
+        lMfit += [plt_profile_fit_2h(samp[j],
+                  lsamp1[j]+' - '+lsamp2[j],axDS[j],
+                  fytpe = ftype, ylabel=ylabel[j],chist=chist[j])]
                 
         plt_mcmc(samp[j],lsamp[j],axC[ind[j]], axC2[ind[j]],
                 fytpe = ftype, ylabel=ylabel[j],
@@ -870,7 +869,7 @@ def make_plot_profile():
         # lMfit += [plt_profile_fit_2h(samp[j],lsamp[j],plot=False,fytpe = ftype)]
     
     
-    axC[0].set_ylim(0,1200)
+    axC[0].set_ylim(0,4500)
     axC[0].set_xlim(10.7,13.5)
     axC2[0].set_ylim(10.7,13.5)
     fDS.savefig('../final_plots/profile.pdf',bbox_inches='tight')
@@ -1491,7 +1490,7 @@ def make_lum_mass_plot():
                     color='C8',alpha=0.3)
     
     ax.plot(meanmag,linear(meanmag,m,ln),'C4',
-            label=r'Total sample, $\alpha = $'+str(np.round(m,2))+r'$^{+'+str(np.round(em[0],2))+r'}_{-'+str(np.round(em[1],2))+'}$'+r'$, \beta = $'+str(np.round(ln,2))+r'$^{+'+str(np.round(eln[0],2))+r'}_{-'+str(np.round(eln[1],2))+'}$')
+            label=r'Total sample, $\alpha = $'+str(np.round(m,1))+r'$^{+'+str(np.round(em[0],1))+r'}_{-'+str(np.round(em[1],1))+'}$'+r'$, \beta = $'+str(np.round(ln,2))+r'$^{+'+str(np.round(eln[0],2))+r'}_{-'+str(np.round(eln[1],2))+'}$')
 
             
     ax.fill_between(meanmag, 
@@ -1501,7 +1500,7 @@ def make_lum_mass_plot():
                     color='C4',alpha=0.3)
 
     ax.plot(meanmag,linear(meanmag,m_gold,ln_gold),'C1',
-            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,2))+r'$^{+'+str(np.round(em_gold[0],2))+r'}_{-'+str(np.round(em_gold[1],2))+'}$'+r', $\beta = $'+str(np.round(ln_gold,2))+r'$^{+'+str(np.round(eln_gold[0],2))+r'}_{-'+str(np.round(eln_gold[1],2))+'}$')
+            label=r'Gold sample, $\alpha = $'+str(np.round(m_gold,1))+r'$^{+'+str(np.round(em_gold[0],1))+r'}_{-'+str(np.round(em_gold[1],1))+'}$'+r', $\beta = $'+str(np.round(ln_gold,2))+r'$^{+'+str(np.round(eln_gold[0],2))+r'}_{-'+str(np.round(eln_gold[1],2))+'}$')
             
     ax.fill_between(meanmag, 
                     linear(meanmag,m_gold+max(em_gold),ln_gold+max(eln_gold)), 
